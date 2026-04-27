@@ -1,0 +1,9 @@
+{
+  "id": "personal-finance-dashboard",
+  "name": "Personal Finance Dashboard",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "A personal finance dashboard for tracking assets, income, expenses, and dividends.",
+  "author": "wynnezheng",
+  "isDesktopOnly": false
+}

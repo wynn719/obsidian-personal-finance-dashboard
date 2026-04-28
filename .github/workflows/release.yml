@@ -28,6 +28,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Create zip package
+        run: |
+          cd dist
+          zip -r obsidian-personal-finance-dashboard.zip main.js manifest.json styles.css
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -35,6 +40,7 @@ jobs:
             dist/main.js
             dist/manifest.json
             dist/styles.css
+            dist/obsidian-personal-finance-dashboard.zip
           draft: false
           prerelease: false
         env:

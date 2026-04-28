@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "78a9941da2ed4f8d",
+        "id": "4cad925e027f7dc1",
         "type": "tabs",
         "children": [
           {
-            "id": "1d10e482fd0f421c",
+            "id": "7b8964726682d99b",
             "type": "leaf",
             "state": {
-              "type": "finance-dashboard-view",
+              "type": "empty",
               "state": {},
-              "icon": "wallet",
-              "title": "财务仪表盘"
+              "icon": "lucide-file",
+              "title": "新标签页"
             }
           }
         ]
@@ -179,6 +179,6 @@
       "personal-finance-dashboard:打开财务仪表盘": false
     }
   },
-  "active": "1d10e482fd0f421c",
+  "active": "7b8964726682d99b",
   "lastOpenFiles": []
 }

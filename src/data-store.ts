@@ -123,7 +123,15 @@ export class DataStore {
   // ============================================================
 
   async load(): Promise<void> {
+    // Load current year first
     await this.loadYear(this.currentYear);
+    // Also pre-load all available years so that getDividendsByYear etc. work synchronously
+    const years = await this.getAvailableYears();
+    for (const y of years) {
+      if (y !== this.currentYear) {
+        await this.loadYear(y);
+      }
+    }
   }
 
   async loadYear(year: string): Promise<void> {
@@ -374,10 +382,13 @@ export class DataStore {
     if (year === this.currentYear) {
       return this.getData().dividendRecords;
     }
-    // Otherwise filter by year prefix (for cross-year queries)
-    return this.getData().dividendRecords.filter((r) =>
-      r.date.startsWith(year),
-    );
+    // Load data for the requested year (may be different from currentYear)
+    const data = this.dataByYear.get(year);
+    if (data) {
+      return data.dividendRecords;
+    }
+    // Fallback: year not loaded yet, return empty
+    return [];
   }
 
   async addDividend(record: DividendRecord): Promise<void> {

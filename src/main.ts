@@ -4,6 +4,7 @@ import {
   DEFAULT_SETTINGS,
   CashFlowRecord,
   DividendRecord,
+  AssetSnapshot,
 } from "./models";
 import { DataStore } from "./data-store";
 import { FinanceCalculator } from "./calculator";
@@ -47,6 +48,8 @@ export default class FinanceDashboardPlugin extends Plugin {
       view.onAddSnapshot = () => this.openAssetSnapshotModal();
       view.onAddCashFlow = () => this.openCashFlowModal();
       view.onAddDividend = () => this.openDividendModal();
+      view.onEditSnapshot = (snapshot: AssetSnapshot) =>
+        this.openAssetSnapshotModal(snapshot);
       view.onEditCashFlow = (record: CashFlowRecord) =>
         this.openCashFlowModal(record);
       view.onEditDividend = (record: DividendRecord) =>
@@ -160,8 +163,8 @@ export default class FinanceDashboardPlugin extends Plugin {
   // Modal openers
   // ============================================================
 
-  private openAssetSnapshotModal(): void {
-    new AssetSnapshotModal(this.app, this.dataStore, this.settings).open();
+  private openAssetSnapshotModal(existingSnapshot?: AssetSnapshot): void {
+    new AssetSnapshotModal(this.app, this.dataStore, this.settings, existingSnapshot).open();
   }
 
   private openCashFlowModal(existingRecord?: CashFlowRecord): void {

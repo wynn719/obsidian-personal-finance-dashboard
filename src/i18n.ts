@@ -7,6 +7,7 @@ interface TranslationStrings {
   "dashboard.btn.addCashFlow": string;
   "dashboard.btn.addDividend": string;
   "dashboard.btn.refresh": string;
+  "dashboard.btn.maskNumbers": string;
 
   // Metric cards
   "metrics.totalAssets": string;
@@ -165,6 +166,7 @@ const en: TranslationStrings = {
   "dashboard.btn.addCashFlow": "Add Income/Expense",
   "dashboard.btn.addDividend": "Add Dividend",
   "dashboard.btn.refresh": "Refresh",
+  "dashboard.btn.maskNumbers": "Mask",
 
   // Metric cards
   "metrics.totalAssets": "Total Assets",
@@ -329,6 +331,7 @@ const zh: TranslationStrings = {
   "dashboard.btn.addCashFlow": "添加收支记录",
   "dashboard.btn.addDividend": "添加股息记录",
   "dashboard.btn.refresh": "刷新",
+  "dashboard.btn.maskNumbers": "隐藏金额",
 
   // Metric cards
   "metrics.totalAssets": "总资产",

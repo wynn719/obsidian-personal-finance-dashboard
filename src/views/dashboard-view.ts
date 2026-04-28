@@ -1,7 +1,7 @@
 import { ItemView, WorkspaceLeaf, Menu, setIcon } from "obsidian";
 import { DataStore } from "../data-store";
 import { FinanceCalculator } from "../calculator";
-import { FinanceSettings, CashFlowRecord, DividendRecord } from "../models";
+import { FinanceSettings, CashFlowRecord, DividendRecord, AssetSnapshot } from "../models";
 import {
   formatCurrency,
   formatPercent,
@@ -23,11 +23,13 @@ export class FinanceDashboardView extends ItemView {
   private unsubscribe: (() => void) | null = null;
   private pieChart: Chart | null = null;
   private barChart: Chart | null = null;
+  private maskNumbers: boolean = false;
 
   // Callbacks for opening modals (injected from main plugin)
   public onAddSnapshot: (() => void) | null = null;
   public onAddCashFlow: (() => void) | null = null;
   public onAddDividend: (() => void) | null = null;
+  public onEditSnapshot: ((snapshot: AssetSnapshot) => void) | null = null;
   public onEditCashFlow: ((record: CashFlowRecord) => void) | null = null;
   public onEditDividend: ((record: DividendRecord) => void) | null = null;
   public onRefreshData: (() => Promise<void>) | null = null;
@@ -75,6 +77,13 @@ export class FinanceDashboardView extends ItemView {
       this.barChart.destroy();
       this.barChart = null;
     }
+  }
+
+  /**
+   * Mask sensitive number values when maskNumbers is enabled
+   */
+  private maskValue(value: string): string {
+    return this.maskNumbers ? "***" : value;
   }
 
   // ============================================================
@@ -154,6 +163,17 @@ export class FinanceDashboardView extends ItemView {
 
     const actions = header.createDiv({ cls: "finance-actions" });
 
+    // Mask numbers toggle button
+    const btnMask = actions.createEl("button", {
+      cls: `finance-btn ${this.maskNumbers ? "finance-btn-active" : ""}`,
+    });
+    const btnMaskIcon = btnMask.createSpan({ cls: "finance-icon" });
+    setIcon(btnMaskIcon, this.maskNumbers ? "eye-off" : "eye");
+    btnMask.addEventListener("click", () => {
+      this.maskNumbers = !this.maskNumbers;
+      this.render();
+    });
+
     const btnSnapshot = actions.createEl("button", { cls: "finance-btn" });
     const btnSnapshotIcon = btnSnapshot.createSpan({ cls: "finance-icon" });
     setIcon(btnSnapshotIcon, "bar-chart-3");
@@ -192,39 +212,39 @@ export class FinanceDashboardView extends ItemView {
     this.createMetricCard(
       grid,
       t("metrics.totalAssets"),
-      formatCurrency(metrics.totalAssets),
+      this.maskValue(formatCurrency(metrics.totalAssets)),
       t("metrics.unit"),
     );
     this.createMetricCard(
       grid,
       t("metrics.momChange"),
-      `${formatChange(metrics.momChange)}`,
-      formatPercent(metrics.momPercent),
+      this.maskValue(`${formatChange(metrics.momChange)}`),
+      this.maskValue(formatPercent(metrics.momPercent)),
       metrics.momChange >= 0 ? "positive" : "negative",
     );
     this.createMetricCard(
       grid,
       t("metrics.monthlyIncome"),
-      formatCurrency(metrics.monthlyIncome),
+      this.maskValue(formatCurrency(metrics.monthlyIncome)),
       t("metrics.unit"),
     );
     this.createMetricCard(
       grid,
       t("metrics.monthlyExpense"),
-      formatCurrency(metrics.monthlyExpense),
+      this.maskValue(formatCurrency(metrics.monthlyExpense)),
       t("metrics.unit"),
     );
     this.createMetricCard(
       grid,
       t("metrics.monthlySurplus"),
-      formatCurrency(metrics.monthlySurplus),
+      this.maskValue(formatCurrency(metrics.monthlySurplus)),
       t("metrics.unit"),
       metrics.monthlySurplus >= 0 ? "positive" : "negative",
     );
     this.createMetricCard(
       grid,
       t("metrics.yearlyDividends"),
-      formatCurrency(metrics.yearlyDividends),
+      this.maskValue(formatCurrency(metrics.yearlyDividends)),
       t("metrics.unit"),
     );
   }
@@ -291,7 +311,7 @@ export class FinanceDashboardView extends ItemView {
 
       tr.createEl("td", { text: row.category });
       tr.createEl("td", {
-        text: formatCurrency(row.amount),
+        text: this.maskValue(formatCurrency(row.amount)),
         cls: "finance-number",
       });
       tr.createEl("td", {
@@ -319,7 +339,7 @@ export class FinanceDashboardView extends ItemView {
     const totalRow = tbody.createEl("tr", { cls: "finance-total-row" });
     totalRow.createEl("td", { text: t("allocation.total") });
     totalRow.createEl("td", {
-      text: formatCurrency(totalAmount),
+      text: this.maskValue(formatCurrency(totalAmount)),
       cls: "finance-number",
     });
     totalRow.createEl("td", { text: "100.00%", cls: "finance-number" });
@@ -358,8 +378,6 @@ export class FinanceDashboardView extends ItemView {
     }
 
     const canvas = section.createEl("canvas");
-    canvas.width = 350;
-    canvas.height = 350;
 
     // Professional finance palette - accessible and distinguishable
     const chartColors = [
@@ -391,7 +409,8 @@ export class FinanceDashboardView extends ItemView {
         ],
       },
       options: {
-        responsive: false,
+        responsive: true,
+        maintainAspectRatio: false,
         cutout: "55%",
         plugins: {
           tooltip: {
@@ -404,6 +423,9 @@ export class FinanceDashboardView extends ItemView {
             padding: 10,
             callbacks: {
               label: (ctx) => {
+                if (this.maskNumbers) {
+                  return ` ${ctx.label}: ***`;
+                }
                 const total = snapshot.totalAssets;
                 const value = ctx.parsed;
                 const pct =
@@ -437,8 +459,6 @@ export class FinanceDashboardView extends ItemView {
     }
 
     const canvas = section.createEl("canvas");
-    canvas.width = 450;
-    canvas.height = 350;
 
     this.barChart = new Chart(canvas, {
       type: "bar",
@@ -479,7 +499,8 @@ export class FinanceDashboardView extends ItemView {
         ],
       },
       options: {
-        responsive: false,
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             backgroundColor: "rgba(15, 23, 42, 0.9)",
@@ -491,7 +512,9 @@ export class FinanceDashboardView extends ItemView {
             padding: 10,
             callbacks: {
               label: (ctx) =>
-                ` ${ctx.dataset.label}: ¥${formatCurrency(ctx.parsed.y ?? 0)}`,
+                this.maskNumbers
+                  ? ` ${ctx.dataset.label}: ***`
+                  : ` ${ctx.dataset.label}: ¥${formatCurrency(ctx.parsed.y ?? 0)}`,
             },
           },
           legend: {
@@ -516,7 +539,8 @@ export class FinanceDashboardView extends ItemView {
               color: "rgba(148, 163, 184, 0.1)",
             },
             ticks: {
-              callback: (value) => "¥" + formatCurrency(value as number),
+              callback: (value) =>
+                this.maskNumbers ? "***" : "¥" + formatCurrency(value as number),
             },
           },
         },
@@ -571,23 +595,23 @@ export class FinanceDashboardView extends ItemView {
       const tr = tbody.createEl("tr");
       tr.createEl("td", { text: row.month });
       tr.createEl("td", {
-        text: formatCurrency(row.salaryIncome),
+        text: this.maskValue(formatCurrency(row.salaryIncome)),
         cls: "finance-number",
       });
       tr.createEl("td", {
-        text: formatCurrency(row.otherIncome),
+        text: this.maskValue(formatCurrency(row.otherIncome)),
         cls: "finance-number",
       });
 
       allCategories.forEach((cat) => {
         tr.createEl("td", {
-          text: formatCurrency(row.categoryAmounts[cat] ?? 0),
+          text: this.maskValue(formatCurrency(row.categoryAmounts[cat] ?? 0)),
           cls: "finance-number",
         });
       });
 
       tr.createEl("td", {
-        text: formatCurrency(row.totalAssets),
+        text: this.maskValue(formatCurrency(row.totalAssets)),
         cls: "finance-number",
       });
 
@@ -601,7 +625,7 @@ export class FinanceDashboardView extends ItemView {
 
       const irTd = tr.createEl("td", { cls: "finance-number" });
       if (row.investmentReturn !== null) {
-        irTd.textContent = formatCurrency(row.investmentReturn);
+        irTd.textContent = this.maskValue(formatCurrency(row.investmentReturn));
         irTd.addClass(row.investmentReturn >= 0 ? "positive" : "negative");
       } else {
         irTd.textContent = "-";
@@ -609,8 +633,22 @@ export class FinanceDashboardView extends ItemView {
 
       tr.createEl("td", { text: row.note, cls: "finance-note" });
 
-      // Actions column with delete button
+      // Actions column with edit and delete buttons
       const actionsTd = tr.createEl("td");
+      
+      // Edit button
+      const editBtn = actionsTd.createEl("button", {
+        cls: "finance-btn-small",
+      });
+      setIcon(editBtn, "pencil");
+      editBtn.addEventListener("click", () => {
+        const snapshot = this.store.getSnapshotByMonth(row.month);
+        if (snapshot) {
+          this.onEditSnapshot?.(snapshot);
+        }
+      });
+
+      // Delete button
       const deleteBtn = actionsTd.createEl("button", {
         cls: "finance-btn-small",
       });
@@ -658,11 +696,11 @@ export class FinanceDashboardView extends ItemView {
       const tr = tbody.createEl("tr");
       tr.createEl("td", { text: row.stockName });
       tr.createEl("td", {
-        text: row.amounts.map((a) => formatCurrency(a)).join(" + "),
+        text: this.maskValue(row.amounts.map((a) => formatCurrency(a)).join(" + ")),
         cls: "finance-number",
       });
       tr.createEl("td", {
-        text: formatCurrency(row.total),
+        text: this.maskValue(formatCurrency(row.total)),
         cls: "finance-number finance-bold",
       });
     });
@@ -672,7 +710,7 @@ export class FinanceDashboardView extends ItemView {
     totalRow.createEl("td", { text: t("dividend.grandTotal") });
     totalRow.createEl("td", { text: "" });
     totalRow.createEl("td", {
-      text: formatCurrency(grandTotal),
+      text: this.maskValue(formatCurrency(grandTotal)),
       cls: "finance-number finance-bold",
     });
   }
@@ -748,7 +786,7 @@ export class FinanceDashboardView extends ItemView {
         });
         tr.createEl("td", { text: record.category });
         const amountTd = tr.createEl("td", {
-          text: formatCurrency(record.amount),
+          text: this.maskValue(formatCurrency(record.amount)),
           cls: "finance-number",
         });
         amountTd.addClass(record.type === "income" ? "positive" : "negative");

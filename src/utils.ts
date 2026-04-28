@@ -2,6 +2,8 @@
  * Utility functions for the Finance Dashboard plugin.
  */
 
+import { getLocale } from "./i18n";
+
 /** Generate a unique ID */
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
@@ -13,6 +15,41 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
+}
+
+/**
+ * Format currency in compact mode for large amounts.
+ * - Chinese (zh): amounts >= 100000 displayed as "xx万"
+ * - English (en): amounts >= 100000 displayed as "xxk"
+ * @param amount - The amount to format
+ * @param threshold - The threshold for compact display (default: 100000)
+ * @returns Formatted string
+ */
+export function formatCurrencyCompact(
+  amount: number,
+  threshold: number = 100000,
+): string {
+  const locale = getLocale();
+  const absAmount = Math.abs(amount);
+  const sign = amount < 0 ? "-" : "";
+
+  if (absAmount >= threshold) {
+    if (locale === "zh") {
+      // Chinese: display as "xx万" (10000 units)
+      const wan = absAmount / 10000;
+      // Use 2 decimal places if needed, otherwise show integer
+      const formatted = wan % 1 === 0 ? wan.toFixed(0) : wan.toFixed(2);
+      return `${sign}${formatted}万`;
+    } else {
+      // English: display as "xxk" (1000 units)
+      const k = absAmount / 1000;
+      const formatted = k % 1 === 0 ? k.toFixed(0) : k.toFixed(1);
+      return `${sign}${formatted}k`;
+    }
+  }
+
+  // Below threshold, use standard formatting
+  return formatCurrency(amount);
 }
 
 /** Format percentage with sign */

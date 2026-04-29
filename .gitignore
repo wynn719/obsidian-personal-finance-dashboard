@@ -5,3 +5,4 @@ dist/
 .DS_Store
 .codebuddy/
 .fixture/.obsidian/plugins/
+.fixture/.obsidian/workspace.json

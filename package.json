@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production && npm run copy-dist",
-    "copy-dist": "rm -rf dist && mkdir -p dist && cp main.js manifest.json styles.css dist/"
+    "copy-dist": "rm -rf dist && mkdir -p dist && cp main.js manifest.json styles.css dist/",
+    "setup-fixture": "bash scripts/setup-fixture.sh"
   },
   "keywords": [
     "obsidian",

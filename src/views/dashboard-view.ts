@@ -128,10 +128,6 @@ export class FinanceDashboardView extends ItemView {
   private renderHeader(container: HTMLElement, currentYear: string): void {
     const header = container.createDiv({ cls: "finance-header" });
     const titleRow = header.createDiv({ cls: "finance-header-title-row" });
-    const titleEl = titleRow.createEl("h1");
-    const titleIcon = titleEl.createSpan({ cls: "finance-icon" });
-    setIcon(titleIcon, "wallet");
-    titleEl.createSpan({ text: " " + t("dashboard.title") });
 
     // Year selector
     const yearSelector = titleRow.createDiv({ cls: "finance-year-selector" });
@@ -140,9 +136,12 @@ export class FinanceDashboardView extends ItemView {
     setIcon(yearLabelIcon, "calendar");
     yearLabel.createSpan({ text: " " + t("dashboard.yearSelector") });
 
-    const yearSelect = yearSelector.createEl("select", {
+    const yearSelectWrapper = yearSelector.createDiv({ cls: "finance-year-select-wrapper" });
+    const yearSelect = yearSelectWrapper.createEl("select", {
       cls: "finance-year-select",
     });
+    const yearSelectIcon = yearSelectWrapper.createSpan({ cls: "finance-year-select-icon" });
+    setIcon(yearSelectIcon, "chevron-down");
 
     // Populate year options asynchronously
     this.store.getAvailableYears().then((years) => {
@@ -572,8 +571,9 @@ export class FinanceDashboardView extends ItemView {
     // Collect all categories for dynamic columns
     const allCategories = this.calculator.getAllCategories();
 
-    const table = section.createEl("table", {
-      cls: "finance-table finance-table-scroll",
+    const tableWrapper = section.createDiv({ cls: "finance-table-wrapper" });
+    const table = tableWrapper.createEl("table", {
+      cls: "finance-table finance-table-has-actions",
     });
     const thead = table.createEl("thead");
     const headerRow = thead.createEl("tr");
@@ -635,7 +635,7 @@ export class FinanceDashboardView extends ItemView {
       tr.createEl("td", { text: row.note, cls: "finance-note" });
 
       // Actions column with edit and delete buttons
-      const actionsTd = tr.createEl("td");
+      const actionsTd = tr.createEl("td", { cls: "finance-table-actions-cell" });
       
       // Edit button
       const editBtn = actionsTd.createEl("button", {
@@ -744,16 +744,17 @@ export class FinanceDashboardView extends ItemView {
     let currentFilter: string = "all";
 
     const renderTable = () => {
-      // Remove existing table if any
-      const existingTable = section.querySelector(".finance-table");
-      if (existingTable) existingTable.remove();
+      // Remove existing table wrapper if any
+      const existingWrapper = section.querySelector(".finance-table-wrapper");
+      if (existingWrapper) existingWrapper.remove();
 
       const filtered =
         currentFilter === "all"
           ? records
           : records.filter((r) => r.type === currentFilter);
 
-      const table = section.createEl("table", { cls: "finance-table" });
+      const tableWrapper = section.createDiv({ cls: "finance-table-wrapper" });
+      const table = tableWrapper.createEl("table", { cls: "finance-table finance-table-has-actions" });
       const thead = table.createEl("thead");
       const headerRow = thead.createEl("tr");
       [
@@ -793,7 +794,7 @@ export class FinanceDashboardView extends ItemView {
         amountTd.addClass(record.type === "income" ? "positive" : "negative");
         tr.createEl("td", { text: record.note ?? "", cls: "finance-note" });
 
-        const actionsTd = tr.createEl("td");
+        const actionsTd = tr.createEl("td", { cls: "finance-table-actions-cell" });
         const editBtn = actionsTd.createEl("button", {
           cls: "finance-btn-small",
         });

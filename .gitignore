@@ -4,5 +4,7 @@ data.json
 dist/
 .DS_Store
 .codebuddy/
-.fixture/.obsidian/plugins/
-.fixture/.obsidian/workspace.json
+fixture/.obsidian/plugins/personal-finance-dashboard/main.js
+fixture/.obsidian/plugins/personal-finance-dashboard/manifest.json
+fixture/.obsidian/plugins/personal-finance-dashboard/styles.css
+fixture/.obsidian/workspace.json

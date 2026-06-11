@@ -20,7 +20,9 @@ export interface AllocationRow {
   amount: number;
   currentPercent: number;
   targetPercent: number | null;
+  targetAmount: number | null;
   deviation: number | null;
+  rebalanceAmount: number | null;
 }
 
 export interface MonthlyOverviewRow {
@@ -39,6 +41,11 @@ export interface MonthlyCashFlowRow {
   income: number;
   expense: number;
   netCashFlow: number;
+}
+
+export interface MonthlyTotalAssetsRow {
+  month: string;
+  totalAssets: number;
 }
 
 export interface DividendSummaryRow {
@@ -113,15 +120,21 @@ export class FinanceCalculator {
     return snapshot.categories.map((cat) => {
       const currentPercent = total > 0 ? (cat.amount / total) * 100 : 0;
       const targetPercent = targetMap.get(cat.category) ?? null;
+      const targetAmount =
+        targetPercent !== null ? total * (targetPercent / 100) : null;
       const deviation =
         targetPercent !== null ? currentPercent - targetPercent : null;
+      const rebalanceAmount =
+        targetAmount !== null ? targetAmount - cat.amount : null;
 
       return {
         category: cat.category,
         amount: cat.amount,
         currentPercent,
         targetPercent,
+        targetAmount,
         deviation,
+        rebalanceAmount,
       };
     });
   }
@@ -150,13 +163,19 @@ export class FinanceCalculator {
       const prevSnapshot = idx > 0 ? snapshots[idx - 1] : null;
       const prevTotal = prevSnapshot?.totalAssets ?? null;
 
+      const totalExpense = cashFlows
+        .filter((r) => r.type === "expense")
+        .reduce((sum, r) => sum + r.amount, 0);
+      const netCashFlow = salaryIncome + otherIncome - totalExpense;
+
       let momPercent: number | null = null;
       let investmentReturn: number | null = null;
 
       if (prevTotal !== null && prevTotal !== 0) {
         momPercent = ((snapshot.totalAssets - prevTotal) / prevTotal) * 100;
+        // 投资收益 = 总资产变化 - 净现金流（收入 - 支出）
         investmentReturn =
-          snapshot.totalAssets - prevTotal - salaryIncome - otherIncome;
+          snapshot.totalAssets - prevTotal - netCashFlow;
       }
 
       const categoryAmounts: Record<string, number> = {};
@@ -178,17 +197,15 @@ export class FinanceCalculator {
   }
 
   // ----------------------------------------------------------
-  // Monthly cash flow for chart (last N months)
+  // Monthly cash flow for chart (from January of current year)
   // ----------------------------------------------------------
 
-  getMonthlyCashFlow(months: number = 6): MonthlyCashFlowRow[] {
-    // First, try the latest N months from current date
-    const now = new Date();
+  getMonthlyCashFlow(): MonthlyCashFlowRow[] {
+    const year = new Date().getFullYear();
     let result: MonthlyCashFlowRow[] = [];
 
-    for (let i = months - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    for (let m = 1; m <= 12; m++) {
+      const month = `${year}-${String(m).padStart(2, "0")}`;
       const records = this.store.getCashFlowByMonth(month);
 
       const income = records
@@ -201,28 +218,29 @@ export class FinanceCalculator {
       result.push({ month, income, expense, netCashFlow: income - expense });
     }
 
-    // If all recent months are empty, fall back to months that actually have data
-    if (result.every((d) => d.income === 0 && d.expense === 0)) {
+    // Remove trailing months with no data (future months)
+    while (
+      result.length > 0 &&
+      result[result.length - 1].income === 0 &&
+      result[result.length - 1].expense === 0
+    ) {
+      result.pop();
+    }
+
+    // If still empty, fall back to all months that have data
+    if (result.length === 0) {
       const allRecords = this.store.getCashFlowRecords();
       if (allRecords.length > 0) {
-        // Collect unique months from actual records
         const monthSet = new Set<string>();
-        allRecords.forEach((r) => {
-          const m = r.date.substring(0, 7); // YYYY-MM
-          monthSet.add(m);
-        });
+        allRecords.forEach((r) => monthSet.add(r.date.substring(0, 7)));
         const sortedMonths = Array.from(monthSet).sort();
-
-        // Take the last N months that have data, and fill gaps between them
         const firstMonth = sortedMonths[0];
         const lastMonth = sortedMonths[sortedMonths.length - 1];
 
-        // Generate continuous month range from first to last
         const rangeMonths: string[] = [];
         const [startY, startM] = firstMonth.split("-").map(Number);
         const [endY, endM] = lastMonth.split("-").map(Number);
-        let cy = startY,
-          cm = startM;
+        let cy = startY, cm = startM;
         while (cy < endY || (cy === endY && cm <= endM)) {
           rangeMonths.push(`${cy}-${String(cm).padStart(2, "0")}`);
           cm++;
@@ -232,10 +250,7 @@ export class FinanceCalculator {
           }
         }
 
-        // Take last N months from the range
-        const displayMonths = rangeMonths.slice(-months);
-
-        result = displayMonths.map((month) => {
+        result = rangeMonths.map((month) => {
           const records = this.store.getCashFlowByMonth(month);
           const income = records
             .filter((r) => r.type === "income")
@@ -246,6 +261,54 @@ export class FinanceCalculator {
           return { month, income, expense, netCashFlow: income - expense };
         });
       }
+    }
+
+    return result;
+  }
+
+  // ----------------------------------------------------------
+  // Monthly total assets for chart (from January of current year)
+  // ----------------------------------------------------------
+
+  getMonthlyTotalAssets(): MonthlyTotalAssetsRow[] {
+    const snapshots = this.store.getSnapshots();
+    const snapshotsMap = new Map(snapshots.map((s) => [s.month, s.totalAssets]));
+    const year = new Date().getFullYear();
+    let result: MonthlyTotalAssetsRow[] = [];
+
+    for (let m = 1; m <= 12; m++) {
+      const month = `${year}-${String(m).padStart(2, "0")}`;
+      result.push({ month, totalAssets: snapshotsMap.get(month) ?? 0 });
+    }
+
+    // Remove trailing months with no data (future months)
+    while (result.length > 0 && result[result.length - 1].totalAssets === 0) {
+      result.pop();
+    }
+
+    // If still empty, fall back to all months that have data
+    if (result.length === 0 && snapshots.length > 0) {
+      const sortedMonths = snapshots.map((s) => s.month).sort();
+      const firstMonth = sortedMonths[0];
+      const lastMonth = sortedMonths[sortedMonths.length - 1];
+
+      const rangeMonths: string[] = [];
+      const [startY, startM] = firstMonth.split("-").map(Number);
+      const [endY, endM] = lastMonth.split("-").map(Number);
+      let cy = startY, cm = startM;
+      while (cy < endY || (cy === endY && cm <= endM)) {
+        rangeMonths.push(`${cy}-${String(cm).padStart(2, "0")}`);
+        cm++;
+        if (cm > 12) {
+          cm = 1;
+          cy++;
+        }
+      }
+
+      result = rangeMonths.map((month) => ({
+        month,
+        totalAssets: snapshotsMap.get(month) ?? 0,
+      }));
     }
 
     return result;

@@ -26,6 +26,10 @@ interface TranslationStrings {
   "allocation.col.currentPercent": string;
   "allocation.col.targetPercent": string;
   "allocation.col.deviation": string;
+  "allocation.col.rebalance": string;
+  "allocation.rebalance.buy": string;
+  "allocation.rebalance.sell": string;
+  "allocation.rebalance.hold": string;
   "allocation.total": string;
 
   // Charts
@@ -35,6 +39,7 @@ interface TranslationStrings {
   "chart.income": string;
   "chart.expense": string;
   "chart.netCashFlow": string;
+  "chart.monthlyTotalAssets": string;
 
   // Monthly overview
   "overview.title": string;
@@ -186,6 +191,10 @@ const en: TranslationStrings = {
   "allocation.col.currentPercent": "Current %",
   "allocation.col.targetPercent": "Target %",
   "allocation.col.deviation": "Deviation",
+  "allocation.col.rebalance": "Rebalance",
+  "allocation.rebalance.buy": "Buy {amount}",
+  "allocation.rebalance.sell": "Sell {amount}",
+  "allocation.rebalance.hold": "Hold",
   "allocation.total": "Total",
 
   // Charts
@@ -195,6 +204,7 @@ const en: TranslationStrings = {
   "chart.income": "Income",
   "chart.expense": "Expense",
   "chart.netCashFlow": "Net Cash Flow",
+  "chart.monthlyTotalAssets": "Monthly Total Assets",
 
   // Monthly overview
   "overview.title": "Monthly Overview",
@@ -350,6 +360,10 @@ const zh: TranslationStrings = {
   "allocation.col.currentPercent": "当前占比",
   "allocation.col.targetPercent": "目标占比",
   "allocation.col.deviation": "偏差",
+  "allocation.col.rebalance": "调仓建议",
+  "allocation.rebalance.buy": "买入 {amount}",
+  "allocation.rebalance.sell": "卖出 {amount}",
+  "allocation.rebalance.hold": "持有",
   "allocation.total": "合计",
 
   // Charts
@@ -359,6 +373,7 @@ const zh: TranslationStrings = {
   "chart.income": "收入",
   "chart.expense": "支出",
   "chart.netCashFlow": "净现金流",
+  "chart.monthlyTotalAssets": "月度总资产对比",
 
   // Monthly overview
   "overview.title": "月度总览",

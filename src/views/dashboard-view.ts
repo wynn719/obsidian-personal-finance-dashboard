@@ -110,15 +110,17 @@ export class FinanceDashboardView extends ItemView {
     this.renderMetricCards(container, currentMonth);
 
     // Middle: Asset allocation + charts
-    this.renderAssetAllocation(container, currentMonth);
-    this.renderCharts(container, currentMonth);
+    const analysisGrid = container.createDiv({ cls: "finance-analysis-grid" });
+    this.renderAssetAllocation(analysisGrid, currentMonth);
+    this.renderCharts(analysisGrid, currentMonth);
 
     // Monthly overview table
     this.renderMonthlyOverview(container);
 
     // Bottom: Dividend summary + Cash flow details
-    this.renderDividendSummary(container, currentYear);
-    this.renderCashFlowDetails(container);
+    const activityGrid = container.createDiv({ cls: "finance-activity-grid" });
+    this.renderDividendSummary(activityGrid, currentYear);
+    this.renderCashFlowDetails(activityGrid);
   }
 
   // ============================================================
@@ -298,6 +300,7 @@ export class FinanceDashboardView extends ItemView {
       t("allocation.col.currentPercent"),
       t("allocation.col.targetPercent"),
       t("allocation.col.deviation"),
+      t("allocation.col.rebalance"),
     ].forEach((h) => headerRow.createEl("th", { text: h }));
 
     const tbody = table.createEl("tbody");
@@ -332,6 +335,28 @@ export class FinanceDashboardView extends ItemView {
         devTd.textContent = "-";
       }
 
+      const rebalanceTd = tr.createEl("td", { cls: "finance-number" });
+      if (row.rebalanceAmount === null) {
+        rebalanceTd.textContent = "-";
+      } else if (Math.abs(row.rebalanceAmount) < 1) {
+        rebalanceTd.textContent = t("allocation.rebalance.hold");
+        rebalanceTd.addClass("finance-rebalance-hold");
+      } else if (row.rebalanceAmount > 0) {
+        rebalanceTd.textContent = this.maskValue(
+          t("allocation.rebalance.buy", {
+            amount: formatCurrencyCompact(row.rebalanceAmount),
+          }),
+        );
+        rebalanceTd.addClass("positive");
+      } else {
+        rebalanceTd.textContent = this.maskValue(
+          t("allocation.rebalance.sell", {
+            amount: formatCurrencyCompact(Math.abs(row.rebalanceAmount)),
+          }),
+        );
+        rebalanceTd.addClass("negative");
+      }
+
       totalAmount += row.amount;
     });
 
@@ -344,6 +369,7 @@ export class FinanceDashboardView extends ItemView {
     });
     totalRow.createEl("td", { text: "100.00%", cls: "finance-number" });
     totalRow.createEl("td", { text: "100.00%", cls: "finance-number" });
+    totalRow.createEl("td", { text: "" });
     totalRow.createEl("td", { text: "" });
   }
 
@@ -359,11 +385,14 @@ export class FinanceDashboardView extends ItemView {
 
     // Bar chart - Monthly income vs expense
     this.renderBarChart(chartsRow);
+
+    // Line chart - Monthly total assets
+    this.renderTotalAssetsChart(chartsRow);
   }
 
   private renderPieChart(parent: HTMLElement, month: string): void {
     const section = parent.createDiv({ cls: "finance-chart-container" });
-    section.createEl("h3", { text: t("chart.assetDistribution") });
+    this.createChartTitle(section, "pie-chart", t("chart.assetDistribution"));
 
     const snapshot = this.store.getSnapshotByMonth(month);
     if (!snapshot) {
@@ -450,9 +479,13 @@ export class FinanceDashboardView extends ItemView {
 
   private renderBarChart(parent: HTMLElement): void {
     const section = parent.createDiv({ cls: "finance-chart-container" });
-    section.createEl("h3", { text: t("chart.monthlyIncomeVsExpense") });
+    this.createChartTitle(
+      section,
+      "bar-chart-3",
+      t("chart.monthlyIncomeVsExpense"),
+    );
 
-    const data = this.calculator.getMonthlyCashFlow(6);
+    const data = this.calculator.getMonthlyCashFlow();
     if (data.every((d) => d.income === 0 && d.expense === 0)) {
       section.createEl("p", { text: t("chart.noData"), cls: "finance-empty" });
       return;
@@ -463,7 +496,7 @@ export class FinanceDashboardView extends ItemView {
     this.barChart = new Chart(canvas, {
       type: "bar",
       data: {
-        labels: data.map((d) => d.month),
+        labels: data.map((d) => d.month.substring(5)),
         datasets: [
           {
             label: t("chart.income"),
@@ -548,6 +581,100 @@ export class FinanceDashboardView extends ItemView {
     });
   }
 
+  private renderTotalAssetsChart(parent: HTMLElement): void {
+    const section = parent.createDiv({ cls: "finance-chart-container" });
+    this.createChartTitle(section, "line-chart", t("chart.monthlyTotalAssets"));
+
+    const data = this.calculator.getMonthlyTotalAssets();
+    if (data.every((d) => d.totalAssets === 0)) {
+      section.createEl("p", { text: t("chart.noData"), cls: "finance-empty" });
+      return;
+    }
+
+    const canvas = section.createEl("canvas");
+
+    new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: data.map((d) => d.month.substring(5)),
+        datasets: [
+          {
+            label: t("chart.monthlyTotalAssets"),
+            data: data.map((d) => d.totalAssets),
+            borderColor: "#3b82f6",
+            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointBackgroundColor: "#3b82f6",
+            pointBorderColor: "#ffffff",
+            pointBorderWidth: 2,
+            pointHoverRadius: 6,
+            tension: 0.3,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            titleColor: "#f8fafc",
+            bodyColor: "#e2e8f0",
+            borderColor: "rgba(255, 255, 255, 0.1)",
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 10,
+            callbacks: {
+              label: (ctx) =>
+                this.maskNumbers
+                  ? ` ${ctx.dataset.label}: ***`
+                  : ` ${ctx.dataset.label}: ¥${formatCurrencyCompact(ctx.parsed.y ?? 0)}`,
+            },
+          },
+          legend: {
+            position: "bottom",
+            labels: {
+              padding: 16,
+              usePointStyle: true,
+              pointStyle: "circle",
+              font: { size: 12 },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+          },
+          y: {
+            beginAtZero: false,
+            grid: {
+              color: "rgba(148, 163, 184, 0.1)",
+            },
+            ticks: {
+              callback: (value) =>
+                this.maskNumbers ? "***" : "¥" + formatCurrencyCompact(value as number),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  private createChartTitle(
+    section: HTMLElement,
+    iconName: string,
+    title: string,
+  ): void {
+    const chartTitle = section.createEl("h2", { cls: "finance-chart-title" });
+    const chartIcon = chartTitle.createSpan({ cls: "finance-icon" });
+    setIcon(chartIcon, iconName);
+    chartTitle.createSpan({ text: " " + title });
+  }
+
   // ============================================================
   // Monthly Overview Table
   // ============================================================
@@ -594,7 +721,7 @@ export class FinanceDashboardView extends ItemView {
     const tbody = table.createEl("tbody");
     rows.forEach((row) => {
       const tr = tbody.createEl("tr");
-      tr.createEl("td", { text: row.month });
+      tr.createEl("td", { text: row.month.substring(5) });
       tr.createEl("td", {
         text: this.maskValue(formatCurrencyCompact(row.salaryIncome)),
         cls: "finance-number",
@@ -772,7 +899,7 @@ export class FinanceDashboardView extends ItemView {
 
       displayRecords.forEach((record) => {
         const tr = tbody.createEl("tr");
-        tr.createEl("td", { text: record.date });
+        tr.createEl("td", { text: record.date.substring(5) });
         const typeTd = tr.createEl("td");
         const typeIcon = typeTd.createSpan({ cls: "finance-icon" });
         setIcon(

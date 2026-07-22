@@ -8,6 +8,8 @@
     "allowJs": true,
     "noImplicitAny": false,
     "moduleResolution": "node",
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
     "importHelpers": true,
     "isolatedModules": true,
     "strictNullChecks": true,
@@ -17,5 +19,5 @@
       "src/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

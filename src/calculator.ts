@@ -200,12 +200,12 @@ export class FinanceCalculator {
   // Monthly cash flow for chart (from January of current year)
   // ----------------------------------------------------------
 
-  getMonthlyCashFlow(): MonthlyCashFlowRow[] {
-    const year = new Date().getFullYear();
+  getMonthlyCashFlow(year?: string): MonthlyCashFlowRow[] {
+    const yearStr = year ?? this.store.getCurrentYear();
     let result: MonthlyCashFlowRow[] = [];
 
     for (let m = 1; m <= 12; m++) {
-      const month = `${year}-${String(m).padStart(2, "0")}`;
+      const month = `${yearStr}-${String(m).padStart(2, "0")}`;
       const records = this.store.getCashFlowByMonth(month);
 
       const income = records
@@ -270,14 +270,14 @@ export class FinanceCalculator {
   // Monthly total assets for chart (from January of current year)
   // ----------------------------------------------------------
 
-  getMonthlyTotalAssets(): MonthlyTotalAssetsRow[] {
+  getMonthlyTotalAssets(year?: string): MonthlyTotalAssetsRow[] {
     const snapshots = this.store.getSnapshots();
     const snapshotsMap = new Map(snapshots.map((s) => [s.month, s.totalAssets]));
-    const year = new Date().getFullYear();
+    const yearStr = year ?? this.store.getCurrentYear();
     let result: MonthlyTotalAssetsRow[] = [];
 
     for (let m = 1; m <= 12; m++) {
-      const month = `${year}-${String(m).padStart(2, "0")}`;
+      const month = `${yearStr}-${String(m).padStart(2, "0")}`;
       result.push({ month, totalAssets: snapshotsMap.get(month) ?? 0 });
     }
 

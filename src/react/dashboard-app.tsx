@@ -90,22 +90,31 @@ export function FinanceApp({
 
       <MetricCards metrics={metrics} maskNumbers={maskNumbers} />
 
-      <div className="finance-analysis-grid">
+      {/* 资产配置 + 股息汇总 同一行 */}
+      <div className="finance-summary-grid">
         <AssetAllocationTable rows={allocRows} maskNumbers={maskNumbers} />
-        <div className="finance-charts-row">
-          <ChartContainer icon="pie-chart" title={t("chart.assetDistribution")}>
-            <PieChart snapshot={snapshot} maskNumbers={maskNumbers} />
-          </ChartContainer>
-          <ChartContainer
-            icon="bar-chart-3"
-            title={t("chart.monthlyIncomeVsExpense")}
-          >
-            <BarChart data={cashFlowData} maskNumbers={maskNumbers} />
-          </ChartContainer>
-          <ChartContainer icon="line-chart" title={t("chart.monthlyTotalAssets")}>
-            <TotalAssetsChart data={totalAssetsData} maskNumbers={maskNumbers} />
-          </ChartContainer>
-        </div>
+        <DividendSummaryTable
+          year={currentYear}
+          rows={dividendRows}
+          grandTotal={grandTotal}
+          maskNumbers={maskNumbers}
+        />
+      </div>
+
+      {/* 三个图表放在表格下方 */}
+      <div className="finance-charts-row">
+        <ChartContainer icon="pie-chart" title={t("chart.assetDistribution")}>
+          <PieChart snapshot={snapshot} maskNumbers={maskNumbers} />
+        </ChartContainer>
+        <ChartContainer
+          icon="bar-chart-3"
+          title={t("chart.monthlyIncomeVsExpense")}
+        >
+          <BarChart data={cashFlowData} maskNumbers={maskNumbers} />
+        </ChartContainer>
+        <ChartContainer icon="line-chart" title={t("chart.monthlyTotalAssets")}>
+          <TotalAssetsChart data={totalAssetsData} maskNumbers={maskNumbers} />
+        </ChartContainer>
       </div>
 
       <MonthlyOverviewTable
@@ -116,20 +125,12 @@ export function FinanceApp({
         onDeleteMonth={handleDeleteMonth}
       />
 
-      <div className="finance-activity-grid">
-        <DividendSummaryTable
-          year={currentYear}
-          rows={dividendRows}
-          grandTotal={grandTotal}
-          maskNumbers={maskNumbers}
-        />
-        <CashFlowDetailsTable
-          records={cashFlowRecords}
-          maskNumbers={maskNumbers}
-          onEdit={(record) => onEditCashFlow?.(record)}
-          onDelete={handleDeleteCashFlow}
-        />
-      </div>
+      <CashFlowDetailsTable
+        records={cashFlowRecords}
+        maskNumbers={maskNumbers}
+        onEdit={(record) => onEditCashFlow?.(record)}
+        onDelete={handleDeleteCashFlow}
+      />
     </>
   );
 }

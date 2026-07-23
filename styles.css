@@ -324,28 +324,18 @@
 }
 
 /* ── Large Screen Data Layout ──────────────────────────────── */
-.finance-analysis-grid,
-.finance-activity-grid {
+/* 资产配置 + 股息汇总 并排显示 */
+.finance-summary-grid {
   display: grid;
-  grid-template-columns: minmax(380px, 0.9fr) minmax(0, 1.45fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--fd-space-4);
   align-items: start;
   margin-bottom: var(--fd-space-4);
 }
 
-.finance-analysis-grid > .finance-section,
-.finance-analysis-grid > .finance-charts-row {
+.finance-summary-grid > .finance-section {
   min-width: 0;
   margin-bottom: 0;
-}
-
-.finance-activity-grid {
-  grid-template-columns: 1fr;
-  gap: var(--fd-space-4);
-}
-
-.finance-analysis-grid > .finance-section,
-.finance-activity-grid > .finance-section {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-md);
@@ -511,7 +501,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--fd-space-3);
-  margin-bottom: 0;
+  margin-bottom: var(--fd-space-4);
 }
 
 .finance-chart-container {
@@ -720,18 +710,13 @@
 }
 
 @media (min-width: 1100px) and (max-width: 1499px) {
-  .finance-analysis-grid {
-    grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.35fr);
-  }
-
   .finance-charts-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 1099px) {
-  .finance-analysis-grid,
-  .finance-activity-grid {
+  .finance-summary-grid {
     grid-template-columns: 1fr;
     gap: var(--fd-space-3);
   }

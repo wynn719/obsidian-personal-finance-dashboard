@@ -17,6 +17,8 @@ import type {
 
 // ===== 顶层注入 =====
 export interface FinanceAppProps {
+  /** 仪表盘根容器节点（Obsidian contentEl），供 LayoutProvider 测量并下发 data-layout。 */
+  container: HTMLElement;
   store: DataStore;
   calculator: FinanceCalculator;
   settings: FinanceSettings;

@@ -63,6 +63,7 @@ export class FinanceDashboardView extends ItemView {
     this.root = createRoot(this.contentEl);
     this.root.render(
       <FinanceApp
+        container={this.contentEl}
         store={this.store}
         calculator={this.calculator}
         settings={this.settings}

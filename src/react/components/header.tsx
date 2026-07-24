@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { Icon } from "../icon";
+import { useLayout } from "../responsive";
 import type { HeaderProps } from "../types";
 
 function YearSelector({
@@ -50,9 +51,14 @@ function ActionButton({
   label: string;
   onClick: () => void;
 }) {
+  // 消费顶层下发的布局模式：mobile 时仅显示图标，隐藏文字说明
+  const { layout } = useLayout();
   return (
     <button className="finance-btn" onClick={onClick}>
-      <Icon name={icon} /> {label}
+      <Icon name={icon} />
+      {layout !== "mobile" && (
+        <span className="finance-btn-label">{label}</span>
+      )}
     </button>
   );
 }

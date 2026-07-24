@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useFinanceData } from "./use-finance-data";
 import { Icon } from "./icon";
 import { PieChart, BarChart, TotalAssetsChart } from "./chart";
+import { LayoutProvider } from "./responsive";
 import { Header } from "./components/header";
 import { MetricCards } from "./components/metric-cards";
 import { AssetAllocationTable } from "./components/asset-allocation";
@@ -31,6 +32,7 @@ function ChartContainer({
 }
 
 export function FinanceApp({
+  container,
   store,
   calculator,
   settings,
@@ -75,7 +77,7 @@ export function FinanceApp({
   };
 
   return (
-    <>
+    <LayoutProvider container={container}>
       <Header
         store={store}
         currentYear={currentYear}
@@ -131,6 +133,6 @@ export function FinanceApp({
         onEdit={(record) => onEditCashFlow?.(record)}
         onDelete={handleDeleteCashFlow}
       />
-    </>
+    </LayoutProvider>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { formatCurrencyCompact } from "../../utils";
 import { t } from "../../i18n";
 import { Icon } from "../icon";
+import { DataTable, type Column } from "./data-table";
+import type { CashFlowRecord } from "../../models";
 import type { CashFlowDetailsTableProps } from "../types";
 
 type Filter = "all" | "income" | "expense";
@@ -31,6 +33,64 @@ export function CashFlowDetailsTable({
     expense: t("cashFlow.filter.expense"),
   };
 
+  const columns: Column<CashFlowRecord>[] = [
+    {
+      key: "date",
+      header: t("cashFlow.col.date"),
+      cell: (r) => r.date.substring(5),
+      excludeFromCard: true,
+    },
+    {
+      key: "type",
+      header: t("cashFlow.col.type"),
+      cell: (r) => (
+        <>
+          <Icon name={r.type === "income" ? "trending-up" : "trending-down"} />{" "}
+          {r.type === "income" ? t("cashFlow.type.income") : t("cashFlow.type.expense")}
+        </>
+      ),
+      excludeFromCard: true,
+    },
+    { key: "category", header: t("cashFlow.col.category"), cell: (r) => r.category },
+    {
+      key: "amount",
+      header: t("cashFlow.col.amount"),
+      cell: (r) => (
+        <span className={r.type === "income" ? "positive" : "negative"}>
+          {mask(formatCurrencyCompact(r.amount))}
+        </span>
+      ),
+      numeric: true,
+    },
+    {
+      key: "note",
+      header: t("cashFlow.col.note"),
+      cell: (r) => r.note ?? "",
+      className: "finance-note",
+    },
+  ];
+
+  const renderCardHead = (r: CashFlowRecord) => (
+    <>
+      <span className="finance-dt-card-date">{r.date.substring(5)}</span>
+      <span className={`finance-dt-card-type ${r.type}`}>
+        <Icon name={r.type === "income" ? "trending-up" : "trending-down"} />
+        {r.type === "income" ? t("cashFlow.type.income") : t("cashFlow.type.expense")}
+      </span>
+    </>
+  );
+
+  const actions = (r: CashFlowRecord) => (
+    <>
+      <button className="finance-btn-small" onClick={() => onEdit(r)}>
+        <Icon name="pencil" />
+      </button>
+      <button className="finance-btn-small" onClick={() => handleDelete(r.id)}>
+        <Icon name="trash-2" />
+      </button>
+    </>
+  );
+
   return (
     <div className="finance-section">
       <h2>
@@ -51,58 +111,17 @@ export function CashFlowDetailsTable({
               </button>
             ))}
           </div>
-          <div className="finance-table-wrapper">
-            <table className="finance-table finance-table-has-actions">
-              <thead>
-                <tr>
-                  <th>{t("cashFlow.col.date")}</th>
-                  <th>{t("cashFlow.col.type")}</th>
-                  <th>{t("cashFlow.col.category")}</th>
-                  <th>{t("cashFlow.col.amount")}</th>
-                  <th>{t("cashFlow.col.note")}</th>
-                  <th>{t("cashFlow.col.actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {display.map((record) => (
-                  <tr key={record.id}>
-                    <td>{record.date.substring(5)}</td>
-                    <td>
-                      <Icon
-                        name={record.type === "income" ? "trending-up" : "trending-down"}
-                      />{" "}
-                      {record.type === "income"
-                        ? t("cashFlow.type.income")
-                        : t("cashFlow.type.expense")}
-                    </td>
-                    <td>{record.category}</td>
-                    <td
-                      className={`finance-number ${
-                        record.type === "income" ? "positive" : "negative"
-                      }`}
-                    >
-                      {mask(formatCurrencyCompact(record.amount))}
-                    </td>
-                    <td className="finance-note">{record.note ?? ""}</td>
-                    <td className="finance-table-actions-cell">
-                      <button
-                        className="finance-btn-small"
-                        onClick={() => onEdit(record)}
-                      >
-                        <Icon name="pencil" />
-                      </button>
-                      <button
-                        className="finance-btn-small"
-                        onClick={() => handleDelete(record.id)}
-                      >
-                        <Icon name="trash-2" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={columns}
+            rows={display}
+            rowKey={(r) => r.id}
+            mobileMode="card"
+            stickyLabel={false}
+            renderCardHead={renderCardHead}
+            actions={actions}
+            actionsHeader={t("cashFlow.col.actions")}
+            emptyText={t("cashFlow.empty")}
+          />
           {filtered.length > 50 && (
             <p className="finance-pagination-info">
               {t("cashFlow.showingRecords", { count: filtered.length })}

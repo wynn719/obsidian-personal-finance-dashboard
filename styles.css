@@ -213,7 +213,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 6px;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  padding: 4px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -296,8 +299,7 @@
   margin-bottom: var(--fd-space-3);
 }
 
-.finance-section h2,
-.finance-chart-title {
+.finance-section h2 {
   margin: 0 0 var(--fd-space-3);
   font-size: 1em;
   font-weight: 600;
@@ -305,6 +307,7 @@
   display: flex;
   align-items: center;
   gap: var(--fd-space-2);
+  flex-shrink: 0;
 }
 
 .finance-empty {
@@ -516,14 +519,12 @@
   transition: box-shadow var(--fd-transition-normal);
   display: flex;
   flex-direction: column;
+  /* 抵消 .finance-section 的 margin-bottom：图表在 grid 内，间距由 gap 提供 */
+  margin-bottom: 0;
 }
 
 .finance-chart-container:hover {
   box-shadow: var(--fd-shadow-sm);
-}
-
-.finance-chart-title {
-  flex-shrink: 0;
 }
 
 .finance-chart-container canvas {
@@ -600,8 +601,7 @@
   height: 14px;
 }
 
-.finance-section h2 .finance-icon svg,
-.finance-chart-title .finance-icon svg {
+.finance-section h2 .finance-icon svg {
   width: 1.1em;
   height: 1.1em;
   color: var(--text-muted);
@@ -823,6 +823,12 @@
   /* gap 沿用桌面 base(--fd-space-3)，保持块间距与 PC 一致 */
 }
 
+/* mobile 单列时两表间距 + 与下方模块间距收紧 */
+[data-layout="mobile"] .finance-summary-grid {
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
+}
+
 [data-layout="compact"] .finance-metrics-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -839,15 +845,18 @@
 }
 
 [data-layout="mobile"] .finance-btn {
-  /* 内容自适应宽度，不铺满；保留触控 min-height */
+  /* mobile 下按钮纯图标，做成正方形触控按钮 */
   font-size: 0.72em;
-  padding: 5px 6px;
+  padding: 5px;
+  min-width: 28px;
   min-height: 28px;
+  justify-content: center;
 }
 
 [data-layout="mobile"] .finance-metrics-grid {
   grid-template-columns: repeat(2, 1fr);
-  /* gap / margin-bottom 沿用桌面 base，保持块间距与 PC 一致 */
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
 }
 
 [data-layout="mobile"] .finance-metric-card {
@@ -868,15 +877,22 @@
 
 [data-layout="mobile"] .finance-charts-row {
   grid-template-columns: 1fr;
-  /* gap / margin-bottom 沿用桌面 base，保持块间距与 PC 一致 */
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
 }
 
-[data-layout="mobile"] .finance-chart-container {
+/* mobile 下所有 section 卡片(图表 + 各表格)统一收紧 padding，与 dashboard 根 padding、metric card 一致 */
+[data-layout="mobile"] .finance-section {
   padding: var(--fd-space-2);
 }
 
-[data-layout="mobile"] .finance-section h2,
-[data-layout="mobile"] .finance-chart-title {
+/* mobile 下 dashboard 直系 section(月度概览/现金流明细)之间间距收紧；
+   用 > 直系选择器避免误伤 summary-grid 内已被 margin-bottom:0 抵消的 section */
+.finance-dashboard[data-layout="mobile"] > .finance-section {
+  margin-bottom: var(--fd-space-2);
+}
+
+[data-layout="mobile"] .finance-section h2 {
   font-size: 0.95em;
   margin-bottom: var(--fd-space-2);
   padding-bottom: var(--fd-space-1);
@@ -910,10 +926,11 @@
 }
 
 [data-layout="mobile"] .finance-btn-small {
-  padding: 2px 4px;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  padding: 2px;
   font-size: 0.68em;
-  min-height: 22px;
-  min-width: 22px;
 }
 
 [data-layout="mobile"] .finance-btn-small + .finance-btn-small {

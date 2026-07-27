@@ -22,8 +22,8 @@ function ChartContainer({
   children: ReactNode;
 }) {
   return (
-    <div className="finance-chart-container">
-      <h2 className="finance-chart-title">
+    <div className="finance-section finance-chart-container">
+      <h2>
         <Icon name={icon} /> {title}
       </h2>
       {children}

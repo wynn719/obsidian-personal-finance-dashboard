@@ -2,19 +2,20 @@ import { Chart, registerables, type ChartConfiguration } from "chart.js";
 import { TreemapController, TreemapElement } from "chartjs-chart-treemap";
 import { useMemo } from "react";
 import { formatCurrencyCompact } from "../utils";
-import type { StockHolding } from "../models";
+import type { HoldingCurrency, StockHolding } from "../models";
 import { ChartCanvas, EmptyState, CHART_COLORS, getBgSecondary } from "./chart";
-import { holdingValue } from "./components/holdings-table";
+import { toDisplayCurrency } from "./components/holdings-table";
 import type { HoldingsTreemapChartProps } from "./types";
 
 // Treemap controller must be explicitly registered (not part of registerables)
 Chart.register(...registerables, TreemapController, TreemapElement);
 
-/** Treemap of stock holdings — rectangle area ∝ market value, click to edit */
+/** Treemap of stock holdings — rectangle area ∝ value in display currency, click to edit */
 export function HoldingsTreemapChart({
   holdings,
   total,
   maskNumbers,
+  displayCurrency = "CNY",
   onEditHolding,
 }: HoldingsTreemapChartProps) {
   const config = useMemo<ChartConfiguration>(() => {
@@ -23,10 +24,10 @@ export function HoldingsTreemapChart({
       data: {
         datasets: [
           {
-            data: holdings.map((h) => holdingValue(h)),
+            data: holdings.map((h) => toDisplayCurrency(h, displayCurrency)),
             tree: holdings.map((h) => ({
               name: h.name,
-              value: holdingValue(h),
+              value: toDisplayCurrency(h, displayCurrency),
             })),
             key: "value",
             groups: ["name"],
@@ -92,7 +93,7 @@ export function HoldingsTreemapChart({
         },
       },
     };
-  }, [holdings, total, maskNumbers, onEditHolding]);
+  }, [holdings, total, maskNumbers, displayCurrency, onEditHolding]);
 
   if (holdings.length === 0) return <EmptyState />;
   return <ChartCanvas config={config} />;

@@ -5,9 +5,10 @@ import { fetchQuotes } from "../../quote-service";
 import { t } from "../../i18n";
 
 /**
- * 手动刷新行情：批量拉取所有持仓的实时价格，
- * 写回 store（name/price/changePercent/quoteTime/amount）后触发全 UI 刷新，
- * Misc.md 中持仓金额随每次刷新更新。首期不做轮询，仅由按钮触发。
+ * 手动刷新行情：一次批量请求拉取所有持仓的实时价格 + 汇率，
+ * 写回 store（name/price/changePercent/currency/fxRate/quoteTime/amount）
+ * 后触发全 UI 刷新，Misc.md 中持仓金额随每次刷新更新。
+ * 首期不做轮询，仅由按钮触发。
  */
 export function useQuoteRefresh(store: DataStore) {
   const [refreshing, setRefreshing] = useState(false);
@@ -18,15 +19,20 @@ export function useQuoteRefresh(store: DataStore) {
 
     setRefreshing(true);
     try {
-      const quotes = await fetchQuotes(holdings);
+      const { quotes } = await fetchQuotes(holdings);
       const updates = holdings
         .filter((h) => h.symbol && quotes.has(h.symbol))
-        .map((h) => ({
-          id: h.id,
-          name: quotes.get(h.symbol!)!.name,
-          price: quotes.get(h.symbol!)!.price,
-          changePercent: quotes.get(h.symbol!)!.changePercent,
-        }));
+        .map((h) => {
+          const q = quotes.get(h.symbol!)!;
+          return {
+            id: h.id,
+            name: q.name,
+            price: q.price,
+            changePercent: q.changePercent,
+            currency: q.currency,
+            fxRate: q.fxRate,
+          };
+        });
 
       if (updates.length > 0) {
         await store.updateHoldingQuotes(updates);

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Notice } from "obsidian";
-import { StockHolding } from "../../models";
+import { StockHolding, HoldingCurrency } from "../../models";
 import { generateId } from "../../utils";
 import { DataStore } from "../../data-store";
-import { fetchQuoteName } from "../../quote-service";
+import { fetchQuoteName, resolveSymbol } from "../../quote-service";
 import { t } from "../../i18n";
 import type { HoldingFormProps } from "../types";
 
@@ -23,6 +23,9 @@ export function HoldingForm({
   );
   // Existing holding: show persisted name; new entry: filled after lookup
   const [name, setName] = useState(existingHolding?.name ?? "");
+  const [currency, setCurrency] = useState<HoldingCurrency | null>(
+    existingHolding?.currency ?? null,
+  );
   const [checking, setChecking] = useState(false);
   const [lookedUp, setLookedUp] = useState(Boolean(existingHolding?.name));
 
@@ -33,10 +36,12 @@ export function HoldingForm({
     try {
       const fetched = await fetchQuoteName(code);
       if (fetched) {
-        setName(fetched);
+        setName(fetched.name);
+        setCurrency(fetched.currency);
         setLookedUp(true);
       } else {
         setName("");
+        setCurrency(null);
         setLookedUp(false);
       }
     } finally {
@@ -56,10 +61,17 @@ export function HoldingForm({
       new Notice(t("modal.holding.invalidShares"));
       return;
     }
-    if (!name.trim()) {
+    if (!name.trim() || !currency) {
       new Notice(t("modal.holding.symbolNotFound"));
       return;
     }
+
+    // Currency follows the symbol; fxRate falls back to a sensible default
+    // (resolveSymbol determines market; actual rate comes with quote refresh)
+    const resolved = resolveSymbol(symbolCode);
+    const finalCurrency: HoldingCurrency = currency;
+    const defaultFx =
+      finalCurrency === "CNY" ? 1 : existingHolding?.currency === finalCurrency ? (existingHolding.fxRate ?? 1) : 1;
 
     // Keep previous quote data when symbol/shares are unchanged
     const symbolUnchanged = existingHolding?.symbol === symbolCode;
@@ -70,6 +82,8 @@ export function HoldingForm({
       name: name.trim(),
       symbol: symbolCode,
       shares: sharesNum,
+      currency: finalCurrency,
+      fxRate: symbolUnchanged ? (existingHolding?.fxRate ?? defaultFx) : defaultFx,
       amount:
         symbolUnchanged && sharesUnchanged && existingHolding
           ? existingHolding.amount
@@ -123,13 +137,20 @@ export function HoldingForm({
 
       <label className="finance-field">
         <span className="finance-field-label">{t("modal.holding.name")}</span>
-        <input
-          type="text"
-          className="finance-input-readonly"
-          placeholder={checking ? t("modal.holding.checking") : ""}
-          value={name}
-          readOnly
-        />
+        <div className="finance-name-currency-row">
+          <input
+            type="text"
+            className="finance-input-readonly"
+            placeholder={checking ? t("modal.holding.checking") : ""}
+            value={name}
+            readOnly
+          />
+          {currency ? (
+            <span className="finance-holding-symbol" title={t("modal.holding.currency")}>
+              {currency}
+            </span>
+          ) : null}
+        </div>
         {lookedUp ? null : (
           <span className="finance-field-hint">
             {t("modal.holding.nameAutoHint")}

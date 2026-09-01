@@ -154,6 +154,7 @@ interface TranslationStrings {
   "holdings.quoteUpdated": string;
   "holdings.quoteUpdatedAt": string;
   "holdings.quoteFailed": string;
+  "holdings.currency": string;
 
   // Holding modal
   "modal.holding.titleAdd": string;
@@ -164,6 +165,7 @@ interface TranslationStrings {
   "modal.holding.symbolPlaceholder": string;
   "modal.holding.symbolHint": string;
   "modal.holding.checking": string;
+  "modal.holding.currency": string;
   "modal.holding.nameAutoHint": string;
   "modal.holding.shares": string;
   "modal.holding.sharesPlaceholder": string;
@@ -367,6 +369,7 @@ const en: TranslationStrings = {
   "holdings.quoteUpdated": "Quotes updated ({success}/{total})",
   "holdings.quoteUpdatedAt": "Updated {time}",
   "holdings.quoteFailed": "Failed to fetch quotes",
+  "holdings.currency": "Display currency",
 
   // Holding modal
   "modal.holding.titleAdd": "Add Stock Holding",
@@ -377,6 +380,7 @@ const en: TranslationStrings = {
   "modal.holding.symbolPlaceholder": "e.g. 600036 / 00700 / AAPL",
   "modal.holding.symbolHint": "Name is fetched from the quote API after entering the code",
   "modal.holding.checking": "Looking up…",
+  "modal.holding.currency": "Trading currency",
   "modal.holding.nameAutoHint": "Enter a valid stock code, the name fills in automatically",
   "modal.holding.shares": "Shares",
   "modal.holding.sharesPlaceholder": "Number of shares",
@@ -583,6 +587,7 @@ const zh: TranslationStrings = {
   "holdings.quoteUpdated": "行情已更新（{success}/{total}）",
   "holdings.quoteUpdatedAt": "更新于 {time}",
   "holdings.quoteFailed": "行情获取失败",
+  "holdings.currency": "计价币种",
 
   // Holding modal
   "modal.holding.titleAdd": "添加股票持仓",
@@ -593,6 +598,7 @@ const zh: TranslationStrings = {
   "modal.holding.symbolPlaceholder": "如：600036 / 00700 / AAPL",
   "modal.holding.symbolHint": "填写代码后自动获取股票名称",
   "modal.holding.checking": "查询中…",
+  "modal.holding.currency": "交易币种",
   "modal.holding.nameAutoHint": "输入有效代码后自动填充名称",
   "modal.holding.shares": "持股数",
   "modal.holding.sharesPlaceholder": "持有股数",

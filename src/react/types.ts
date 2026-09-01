@@ -6,6 +6,7 @@ import type {
   CashFlowRecord,
   DividendRecord,
   StockHolding,
+  HoldingCurrency,
 } from "../models";
 import type {
   DashboardMetrics,
@@ -122,14 +123,20 @@ export interface DividendFormProps {
 // ===== Holdings 模块（股票持仓占比，内嵌于主仪表盘） =====
 export interface HoldingsTreemapChartProps {
   holdings: StockHolding[];
+  /** Total in the display currency */
   total: number;
   maskNumbers: boolean;
+  /** Currency used for treemap areas (defaults to CNY) */
+  displayCurrency?: HoldingCurrency;
   onEditHolding: ((holding: StockHolding) => void) | null;
 }
 export interface HoldingsTableProps {
   holdings: StockHolding[];
+  /** Total market value in displayCurrency */
   total: number;
   maskNumbers: boolean;
+  /** Currency used for value/share columns */
+  displayCurrency: HoldingCurrency;
   onEdit: (holding: StockHolding) => void;
   onDelete: (id: string) => Promise<void>;
   /** 弹窗内使用：去掉外层 section 卡片壳（h2/边框） */

@@ -11,8 +11,12 @@ import { AssetAllocationTable } from "./components/asset-allocation";
 import { MonthlyOverviewTable } from "./components/monthly-overview";
 import { DividendSummaryTable } from "./components/dividend-summary";
 import { CashFlowDetailsTable } from "./components/cash-flow-details";
+import { toDisplayCurrency } from "./components/holdings-table";
 import { t } from "../i18n";
+import type { HoldingCurrency } from "../models";
 import type { FinanceAppProps } from "./types";
+
+const CURRENCIES: HoldingCurrency[] = ["CNY", "HKD", "USD"];
 
 function ChartContainer({
   icon,
@@ -50,6 +54,7 @@ export function FinanceApp({
 }: FinanceAppProps) {
   const { currentMonth, currentYear } = useFinanceData(store);
   const [maskNumbers, setMaskNumbers] = useState(false);
+  const [displayCurrency, setDisplayCurrency] = useState<HoldingCurrency>("CNY");
   const { refreshing, refreshQuotes } = useQuoteRefresh(store);
 
   // 派生数据（每次 store 变化触发重渲染时重算）
@@ -69,9 +74,9 @@ export function FinanceApp({
     b.date.localeCompare(a.date),
   );
 
-  // 持仓数据（非年度，Misc.md）
+  // 持仓数据（非年度，Misc.md），市值按所选币种换算
   const holdings = store.getHoldings();
-  const holdingsTotal = store.getTotalHoldingsAmount();
+  const holdingsTotal = store.getTotalHoldingsAmount(displayCurrency);
 
   const handleEditMonth = (month: string) => {
     const snap = store.getSnapshotByMonth(month);
@@ -117,16 +122,34 @@ export function FinanceApp({
               <Icon name="pie-chart" /> {t("holdings.chartTitle")}
             </span>
             {holdings.length > 0 ? (
-              <button
-                className={`finance-btn-small${
-                  refreshing ? " finance-btn-spinning" : ""
-                }`}
-                onClick={refreshQuotes}
-                disabled={refreshing}
-                title={t("holdings.btn.refreshQuotes")}
-              >
-                <Icon name="refresh-cw" />
-              </button>
+              <span className="finance-holdings-title-actions">
+                <span
+                  className="finance-currency-switch"
+                  title={t("holdings.currency")}
+                >
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c}
+                      className={`finance-currency-btn${
+                        displayCurrency === c ? " finance-currency-btn-active" : ""
+                      }`}
+                      onClick={() => setDisplayCurrency(c)}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </span>
+                <button
+                  className={`finance-btn-small${
+                    refreshing ? " finance-btn-spinning" : ""
+                  }`}
+                  onClick={refreshQuotes}
+                  disabled={refreshing}
+                  title={t("holdings.btn.refreshQuotes")}
+                >
+                  <Icon name="refresh-cw" />
+                </button>
+              </span>
             ) : null}
           </h2>
           {holdings.length > 0 ? (
@@ -134,6 +157,7 @@ export function FinanceApp({
               holdings={holdings}
               total={holdingsTotal}
               maskNumbers={maskNumbers}
+              displayCurrency={displayCurrency}
               onEditHolding={onEditHolding}
             />
           ) : (

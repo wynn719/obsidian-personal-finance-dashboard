@@ -65,16 +65,23 @@ export interface DividendRecord {
 // Stock Holdings (Misc Data)
 // ============================================================
 
+/** Holding display/valuation currency codes */
+export type HoldingCurrency = "CNY" | "HKD" | "USD";
+
 export interface StockHolding {
   id: string;
   /** Stock name, e.g. "五粮液", "腾讯控股" — auto-filled from the quote API */
   name: string;
-  /** Holding market value = shares × price, written back on every quote refresh */
+  /** Holding market value in native currency = shares × price (written back on refresh) */
   amount: number;
   /** Stock code for live quotes, e.g. "600036" (A-share), "00700" (HK), "AAPL" (US) */
   symbol: string;
   /** Number of shares held */
   shares: number;
+  /** Native trading currency of the symbol, derived from the market */
+  currency: HoldingCurrency;
+  /** FX rate to CNY at last refresh (CNY per 1 unit of currency); 1 for A-shares */
+  fxRate: number;
   /** Last fetched price (per share, in native currency) */
   price?: number;
   /** Day change percent from last quote fetch, e.g. 1.84 means +1.84% */

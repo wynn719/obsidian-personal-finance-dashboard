@@ -2,11 +2,11 @@ import { formatCurrencyCompact, formatPercent } from "../../utils";
 import { t } from "../../i18n";
 import { Icon } from "../icon";
 import { DataTable, type Column } from "./data-table";
-import type { StockHolding } from "../../models";
+import type { HoldingCurrency, StockHolding } from "../../models";
 import type { HoldingsTableProps } from "../types";
 
-/** Effective market value: shares × latest price (falls back to stored amount) */
-export function holdingValue(h: StockHolding): number {
+/** Native market value: shares × price (falls back to stored amount) */
+export function nativeValue(h: StockHolding): number {
   return (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
     ? h.shares * (h.price ?? 0)
     : h.amount;
@@ -18,10 +18,24 @@ function formatChange(pct: number): string {
   return `${sign}${pct.toFixed(2)}%`;
 }
 
+/** Convert native amount to display currency via the CNY fxRate */
+export function toDisplayCurrency(
+  h: StockHolding,
+  display: HoldingCurrency,
+): number {
+  const native = nativeValue(h);
+  const from = h.currency ?? "CNY";
+  const rate = h.fxRate ?? 1;
+  if (from === display) return native;
+  const inCny = from === "CNY" ? native : native * rate;
+  return display === "CNY" ? inCny : inCny / rate;
+}
+
 export function HoldingsTable({
   holdings,
   total,
   maskNumbers,
+  displayCurrency,
   onEdit,
   onDelete,
   bare = false,
@@ -49,7 +63,10 @@ export function HoldingsTable({
     {
       key: "price",
       header: t("holdings.col.price"),
-      cell: (h) => (h.price ? mask(h.price.toFixed(2)) : "—"),
+      cell: (h) =>
+        h.price
+          ? mask(`${h.price.toFixed(2)} ${h.currency ?? ""}`)
+          : "—",
       numeric: true,
       hideOnMobile: true,
     },
@@ -71,15 +88,22 @@ export function HoldingsTable({
     },
     {
       key: "amount",
-      header: t("holdings.col.amount"),
-      cell: (h) => mask(formatCurrencyCompact(holdingValue(h))),
+      header: `${t("holdings.col.amount")} (${displayCurrency})`,
+      cell: (h) =>
+        mask(formatCurrencyCompact(toDisplayCurrency(h, displayCurrency))),
       numeric: true,
     },
     {
       key: "share",
       header: t("holdings.col.share"),
       cell: (h) =>
-        total > 0 ? mask(formatPercent((holdingValue(h) / total) * 100)) : "—",
+        total > 0
+          ? mask(
+              formatPercent(
+                (toDisplayCurrency(h, displayCurrency) / total) * 100,
+              ),
+            )
+          : "—",
       numeric: true,
     },
   ];

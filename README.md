@@ -51,6 +51,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
   - **Share count**: number of shares held
   - The stock name is fetched automatically from the quote API
 - Click **🔄 Refresh Quotes** (manage modal top-right or the holdings card header) to fetch live prices — market value = shares × price, written back to `Misc.md` on every refresh, with day change shown red-up/green-down (A-share convention)
+- Multi-currency holdings (A-share / HK / US): the quote request automatically includes live FX rates (USD/HKD → CNY); switch the top-right **CNY / HKD / USD** toggle to convert market values, while the price column always shows the native currency
 - Click any treemap block (or the ✏️ button in the details table) to edit; 🗑️ to delete
 - Quotes come from Tencent's public quote API (qt.gtimg.cn), no API key required
 
@@ -160,10 +161,10 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 ```markdown
 # Stock Holdings
 
-| Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |
-|------|--------|--------|--------|-------|---------|-----------|
-| 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | 2026-09-01T16:00:00+08:00 |
-| 腾讯控股 | 189300 | 00700 | 430 | 441.4 | -2.56 | 2026-09-01T16:00:00+08:00 |
+| Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt |
+|------|--------|--------|--------|-------|---------|----------|--------|-----------|
+| 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | CNY | 1 | 2026-09-01T16:00:00+08:00 |
+| 腾讯控股 | 189802 | 00700 | 430 | 441.4 | -2.56 | HKD | 0.857 | 2026-09-01T16:00:00+08:00 |
 ```
 
 Share percentages are computed at runtime from the total amount — nothing to maintain by hand.

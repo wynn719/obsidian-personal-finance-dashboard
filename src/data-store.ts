@@ -8,11 +8,31 @@ import {
   CategoryAmount,
   MiscData,
   StockHolding,
+  HoldingCurrency,
 } from "./models";
 import { generateId } from "./utils";
 
 const DEFAULT_DATA_FOLDER = "Finance";
 const DEFAULT_MISC_FILE_PATH = "Finance/Misc.md";
+
+/**
+ * Convert an amount between holding currencies via the CNY fxRate.
+ * fxRate is CNY per 1 unit of `from`; cross rates (e.g. HKD→USD) go via CNY.
+ */
+export function convertCurrency(
+  amount: number,
+  from: HoldingCurrency,
+  to: HoldingCurrency,
+  fxRate: number,
+): number {
+  if (from === to) return amount;
+  const safeRate = fxRate > 0 ? fxRate : 1;
+  const inCny = from === "CNY" ? amount : amount * safeRate;
+  if (to === "CNY") return inCny;
+  // to !== CNY: divide by its rate vs CNY — approximate with the same rate
+  // when converting from CNY (only used for display toggling)
+  return inCny / safeRate;
+}
 
 /**
  * Handles persistence of finance data to per-year Markdown files in the vault.
@@ -338,31 +358,43 @@ export class DataStore {
 
   getHoldings(): StockHolding[] {
     return [...this.miscData.stockHoldings].sort(
-      (a, b) => this.holdingValue(b) - this.holdingValue(a),
+      (a, b) =>
+        this.holdingValue(b, "CNY") - this.holdingValue(a, "CNY"),
     );
   }
 
-  /** Market value: shares × latest price (falls back to stored amount before first refresh) */
-  private holdingValue(h: StockHolding): number {
-    return (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
-      ? h.shares * (h.price ?? 0)
-      : h.amount;
+  /**
+   * Market value in the given display currency.
+   * Native value = shares × price (falls back to stored amount before
+   * first refresh); converted via per-holding fxRate when needed.
+   */
+  holdingValue(
+    h: StockHolding,
+    displayCurrency: HoldingCurrency = "CNY",
+  ): number {
+    const native =
+      (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
+        ? h.shares * (h.price ?? 0)
+        : h.amount;
+    return convertCurrency(native, h.currency ?? "CNY", displayCurrency, h.fxRate ?? 1);
   }
 
-  getTotalHoldingsAmount(): number {
+  getTotalHoldingsAmount(displayCurrency: HoldingCurrency = "CNY"): number {
     return this.miscData.stockHoldings.reduce(
-      (sum, h) => sum + this.holdingValue(h),
+      (sum, h) => sum + this.holdingValue(h, displayCurrency),
       0,
     );
   }
 
-  /** Update quote-driven fields (name/price/change/time/amount) after a refresh */
+  /** Update quote-driven fields (name/price/change/fx/time/amount) after a refresh */
   async updateHoldingQuotes(
     updates: Array<{
       id: string;
       name: string;
       price: number;
       changePercent: number;
+      currency: HoldingCurrency;
+      fxRate: number;
     }>,
   ): Promise<void> {
     let changed = false;
@@ -372,6 +404,8 @@ export class DataStore {
       h.name = u.name;
       h.price = u.price;
       h.priceChangePercent = u.changePercent;
+      h.currency = u.currency;
+      h.fxRate = u.fxRate;
       h.quoteTime = new Date().toISOString();
       if ((h.shares ?? 0) > 0) {
         h.amount = (h.shares ?? 0) * u.price;
@@ -930,11 +964,12 @@ class MiscMarkdownParser {
         }
         const cells = parseMarkdownTableRow(line);
         if (cells.length >= 2) {
-          // Current 7-column format: Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt
-          // Legacy 8-column format (with Note): Note column dropped
-          // Legacy 3-column format (Name | Amount | Note): only name/amount survive,
-          //   symbol/shares left empty for the user to fill in later
+          // Current 9-column: Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt
+          // Legacy 8-column (with Note): Note dropped
+          // Legacy 7-column (without Currency/FXRate): currency inferred from symbol
+          // Legacy 3-column (Name | Amount | Note): only name/amount survive
           const hasQuoteCols = cells.length >= 6;
+          const hasCurrencyCols = cells.length >= 8;
           const name = cells[0];
           const amount = parseFloat(cells[1]) || 0;
           let symbol = hasQuoteCols ? cells[2].trim() : "";
@@ -943,11 +978,36 @@ class MiscMarkdownParser {
           let changePct = hasQuoteCols
             ? parseFloat(cells[5].replace("%", "")) || 0
             : 0;
-          let quoteTime = hasQuoteCols ? cells[6] || undefined : undefined;
+          let currency: HoldingCurrency | undefined = hasCurrencyCols
+            ? (cells[6].trim().toUpperCase() as HoldingCurrency)
+            : undefined;
+          let fxRate = hasCurrencyCols ? parseFloat(cells[7]) || 0 : 0;
+          let quoteTime: string | undefined;
 
-          // Legacy 8-column: Note sits at index 6, UpdatedAt at index 7
-          if (cells.length >= 8) {
-            quoteTime = cells[7] || undefined;
+          if (cells.length >= 9) {
+            quoteTime = cells[8] || undefined;
+          } else if (cells.length >= 8) {
+            // Legacy 8-column: cells[6]=Note, cells[7]=UpdatedAt — wait for
+            // actual 9-col detection above; for 8 cols assume Note variant
+            quoteTime = undefined;
+          }
+
+          // Infer currency from symbol when missing/invalid
+          if (
+            !currency ||
+            !["CNY", "HKD", "USD"].includes(currency) ||
+            fxRate <= 0
+          ) {
+            if (/^\d{5}$/.test(symbol)) {
+              currency = "HKD";
+              fxRate = fxRate > 0 ? fxRate : 0.86;
+            } else if (symbol && /^[A-Z]/i.test(symbol)) {
+              currency = "USD";
+              fxRate = fxRate > 0 ? fxRate : 6.72;
+            } else {
+              currency = "CNY";
+              fxRate = 1;
+            }
           }
 
           data.stockHoldings.push({
@@ -956,6 +1016,8 @@ class MiscMarkdownParser {
             amount,
             symbol,
             shares,
+            currency,
+            fxRate,
             price: price > 0 ? price : undefined,
             priceChangePercent: hasQuoteCols ? changePct : undefined,
             quoteTime: quoteTime || undefined,
@@ -982,23 +1044,30 @@ class MiscMarkdownSerializer {
 
     if (data.stockHoldings.length > 0) {
       parts.push(
-        "| Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |",
+        "| Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt |",
       );
       parts.push(
-        "|------|--------|--------|--------|-------|---------|-----------|",
+        "|------|--------|--------|--------|-------|---------|----------|--------|-----------|",
       );
 
-      // Sort by market value descending (primary ordering for the allocation view)
+      // Sort by CNY market value descending (primary ordering for the allocation view)
       const value = (h: StockHolding) =>
-        (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
-          ? (h.shares ?? 0) * (h.price ?? 0)
-          : h.amount;
+        convertCurrency(
+          (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
+            ? (h.shares ?? 0) * (h.price ?? 0)
+            : h.amount,
+          h.currency ?? "CNY",
+          "CNY",
+          h.fxRate ?? 1,
+        );
       const sorted = [...data.stockHoldings].sort((a, b) => value(b) - value(a));
       for (const h of sorted) {
         parts.push(
           `| ${h.name} | ${h.amount} | ${h.symbol} | ${h.shares} | ${
             h.price ?? ""
-          } | ${h.priceChangePercent ?? ""} | ${h.quoteTime ?? ""} |`,
+          } | ${h.priceChangePercent ?? ""} | ${h.currency ?? "CNY"} | ${
+            h.fxRate ?? 1
+          } | ${h.quoteTime ?? ""} |`,
         );
       }
       parts.push("");

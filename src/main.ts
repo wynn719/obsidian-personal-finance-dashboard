@@ -5,6 +5,7 @@ import {
   CashFlowRecord,
   DividendRecord,
   AssetSnapshot,
+  StockHolding,
 } from "./models";
 import { DataStore } from "./data-store";
 import { FinanceCalculator } from "./calculator";
@@ -15,6 +16,8 @@ import {
 import { AssetSnapshotModal } from "./modals/asset-snapshot-modal";
 import { CashFlowModal } from "./modals/cash-flow-modal";
 import { DividendModal } from "./modals/dividend-modal";
+import { HoldingModal } from "./modals/holding-modal";
+import { HoldingsManageModal } from "./modals/holdings-manage-modal";
 import { FinanceSettingTab } from "./settings";
 import { setLocale, t } from "./i18n";
 
@@ -28,14 +31,18 @@ export default class FinanceDashboardPlugin extends Plugin {
     await this.loadSettings();
 
     // Initialize data store & start watching for external changes
-    this.dataStore = new DataStore(this, this.settings.dataFolderPath);
+    this.dataStore = new DataStore(
+      this,
+      this.settings.dataFolderPath,
+      this.settings.miscDataFilePath,
+    );
     await this.dataStore.load();
     this.dataStore.startWatching();
 
     // Initialize calculator
     this.calculator = new FinanceCalculator(this.dataStore);
 
-    // Register the dashboard view
+    // Register the dashboard view (stock holdings module included)
     this.registerView(VIEW_TYPE_FINANCE, (leaf) => {
       const view = new FinanceDashboardView(
         leaf,
@@ -48,13 +55,19 @@ export default class FinanceDashboardPlugin extends Plugin {
       view.onAddSnapshot = () => this.openAssetSnapshotModal();
       view.onAddCashFlow = () => this.openCashFlowModal();
       view.onAddDividend = () => this.openDividendModal();
+      view.onEditHoldings = () => this.openHoldingsManageModal();
       view.onEditSnapshot = (snapshot: AssetSnapshot) =>
         this.openAssetSnapshotModal(snapshot);
       view.onEditCashFlow = (record: CashFlowRecord) =>
         this.openCashFlowModal(record);
       view.onEditDividend = (record: DividendRecord) =>
         this.openDividendModal(record);
-      view.onRefreshData = () => this.dataStore.reload();
+      view.onEditHolding = (holding: StockHolding) =>
+        this.openHoldingModal(holding);
+      view.onRefreshData = async () => {
+        await this.dataStore.reload();
+        await this.dataStore.reloadMisc();
+      };
 
       return view;
     });
@@ -90,10 +103,17 @@ export default class FinanceDashboardPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "add-stock-holding",
+      name: t("command.addHolding"),
+      callback: () => this.openHoldingModal(),
+    });
+
+    this.addCommand({
       id: "refresh-finance-data",
       name: t("command.refreshData"),
       callback: async () => {
         await this.dataStore.reload();
+        await this.dataStore.reloadMisc();
       },
     });
 
@@ -179,5 +199,15 @@ export default class FinanceDashboardPlugin extends Plugin {
 
   private openDividendModal(existingRecord?: DividendRecord): void {
     new DividendModal(this.app, this.dataStore, existingRecord).open();
+  }
+
+  private openHoldingModal(existingHolding?: StockHolding): void {
+    new HoldingModal(this.app, this.dataStore, existingHolding).open();
+  }
+
+  private openHoldingsManageModal(): void {
+    new HoldingsManageModal(this.app, this.dataStore, (holding) =>
+      this.openHoldingModal(holding),
+    ).open();
   }
 }

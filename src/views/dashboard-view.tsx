@@ -7,6 +7,7 @@ import {
   CashFlowRecord,
   DividendRecord,
   AssetSnapshot,
+  StockHolding,
 } from "../models";
 import { FinanceApp } from "../react/dashboard-app";
 import { t } from "../i18n";
@@ -23,9 +24,11 @@ export class FinanceDashboardView extends ItemView {
   public onAddSnapshot: (() => void) | null = null;
   public onAddCashFlow: (() => void) | null = null;
   public onAddDividend: (() => void) | null = null;
+  public onEditHoldings: (() => void) | null = null;
   public onEditSnapshot: ((snapshot: AssetSnapshot) => void) | null = null;
   public onEditCashFlow: ((record: CashFlowRecord) => void) | null = null;
   public onEditDividend: ((record: DividendRecord) => void) | null = null;
+  public onEditHolding: ((holding: StockHolding) => void) | null = null;
   public onRefreshData: (() => Promise<void>) | null = null;
 
   constructor(
@@ -70,9 +73,11 @@ export class FinanceDashboardView extends ItemView {
         onAddSnapshot={this.onAddSnapshot}
         onAddCashFlow={this.onAddCashFlow}
         onAddDividend={this.onAddDividend}
+        onEditHoldings={this.onEditHoldings}
         onEditSnapshot={this.onEditSnapshot}
         onEditCashFlow={this.onEditCashFlow}
         onEditDividend={this.onEditDividend}
+        onEditHolding={this.onEditHolding}
         onRefreshData={this.onRefreshData}
       />,
     );

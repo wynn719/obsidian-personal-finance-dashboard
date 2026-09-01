@@ -30,7 +30,7 @@ function getBgSecondary(): string {
 }
 
 /** 通用 Chart.js 容器：config 变化时销毁旧实例并重建。 */
-function ChartCanvas({ config }: { config: ChartConfiguration }) {
+export function ChartCanvas({ config }: { config: ChartConfiguration }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
   useEffect(() => {
@@ -44,9 +44,11 @@ function ChartCanvas({ config }: { config: ChartConfiguration }) {
   return <canvas ref={canvasRef} />;
 }
 
-function EmptyState() {
+export function EmptyState() {
   return <p className="finance-empty">{t("chart.noData")}</p>;
 }
+
+export { CHART_COLORS, getBgSecondary };
 
 // ============================================================
 // Pie — 资产分布环形图

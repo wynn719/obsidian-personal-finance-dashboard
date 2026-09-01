@@ -328,7 +328,7 @@
 /* 资产配置 + 股息汇总 并排显示 */
 .finance-summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--fd-space-3);
   align-items: start;
   margin-bottom: var(--fd-space-3);
@@ -1006,4 +1006,50 @@
     max-width: 100%;
     padding: 0;
   }
+}
+
+/* ── Holdings 模块（股票持仓占比 Treemap，位于 summary grid 第三列）───────── */
+.finance-holdings-chart canvas {
+  min-height: 240px;
+  max-height: 280px;
+}
+
+/* compact/mobile 单列时给 Treemap 更高空间 */
+[data-layout="compact"] .finance-holdings-chart canvas,
+[data-layout="mobile"] .finance-holdings-chart canvas {
+  min-height: 260px;
+  max-height: 320px;
+}
+
+/* 管理弹窗（宽） */
+.finance-modal-wide {
+  width: min(760px, 92vw);
+}
+
+.finance-modal-holdings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-3);
+  flex-wrap: wrap;
+}
+
+.finance-modal-holdings-header h2 {
+  margin: 0;
+}
+
+.finance-modal-holdings-header .finance-actions {
+  display: flex;
+  gap: var(--fd-space-2);
+}
+
+.finance-modal-holdings-header .finance-btn-cta {
+  margin-top: 0;
+  align-self: auto;
+}
+
+/* bare 模式：弹窗内无卡片壳 */
+.finance-holdings-bare {
+  min-width: 0;
 }

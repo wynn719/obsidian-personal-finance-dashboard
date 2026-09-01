@@ -62,6 +62,28 @@ export interface DividendRecord {
 }
 
 // ============================================================
+// Stock Holdings (Misc Data)
+// ============================================================
+
+export interface StockHolding {
+  id: string;
+  /** Stock name, e.g. "五粮液", "腾讯控股" */
+  name: string;
+  /** Holding market value (in account currency) */
+  amount: number;
+  note?: string;
+}
+
+/** Container for the standalone Misc data file (extensible: one `#` section per data type) */
+export interface MiscData {
+  stockHoldings: StockHolding[];
+}
+
+export const EMPTY_MISC_DATA: MiscData = {
+  stockHoldings: [],
+};
+
+// ============================================================
 // Target Allocation
 // ============================================================
 
@@ -80,6 +102,8 @@ export interface FinanceSettings {
   locale: import("./i18n").Locale;
   /** Path to the folder that stores yearly Markdown data files (relative to vault root) */
   dataFolderPath: string;
+  /** Full path to the standalone Markdown file storing non-yearly data (relative to vault root, includes file name) */
+  miscDataFilePath: string;
   /** Target asset allocation percentages */
   targetAllocations: TargetAllocation[];
   /** Asset categories */
@@ -93,6 +117,7 @@ export interface FinanceSettings {
 export const DEFAULT_SETTINGS: FinanceSettings = {
   locale: "zh",
   dataFolderPath: "Finance",
+  miscDataFilePath: "Finance/Misc.md",
   targetAllocations: [
     { category: "货币短债", percentage: 25 },
     { category: "中长债", percentage: 20 },

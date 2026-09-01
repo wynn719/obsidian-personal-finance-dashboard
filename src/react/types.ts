@@ -5,6 +5,7 @@ import type {
   AssetSnapshot,
   CashFlowRecord,
   DividendRecord,
+  StockHolding,
 } from "../models";
 import type {
   DashboardMetrics,
@@ -25,9 +26,11 @@ export interface FinanceAppProps {
   onAddSnapshot: (() => void) | null;
   onAddCashFlow: (() => void) | null;
   onAddDividend: (() => void) | null;
+  onEditHoldings: (() => void) | null;
   onEditSnapshot: ((s: AssetSnapshot) => void) | null;
   onEditCashFlow: ((r: CashFlowRecord) => void) | null;
   onEditDividend: ((r: DividendRecord) => void) | null;
+  onEditHolding: ((h: StockHolding) => void) | null;
   onRefreshData: (() => Promise<void>) | null;
 }
 
@@ -41,6 +44,7 @@ export interface HeaderProps {
   onAddSnapshot: () => void;
   onAddCashFlow: () => void;
   onAddDividend: () => void;
+  onEditHoldings: () => void;
   onRefresh: () => void;
 }
 
@@ -112,5 +116,32 @@ export interface CashFlowFormProps {
 export interface DividendFormProps {
   store: DataStore;
   existingRecord?: DividendRecord;
+  onClose: () => void;
+}
+
+// ===== Holdings 模块（股票持仓占比，内嵌于主仪表盘） =====
+export interface HoldingsTreemapChartProps {
+  holdings: StockHolding[];
+  total: number;
+  maskNumbers: boolean;
+  onEditHolding: ((holding: StockHolding) => void) | null;
+}
+export interface HoldingsTableProps {
+  holdings: StockHolding[];
+  total: number;
+  maskNumbers: boolean;
+  onEdit: (holding: StockHolding) => void;
+  onDelete: (id: string) => Promise<void>;
+  /** 弹窗内使用：去掉外层 section 卡片壳（h2/边框） */
+  bare?: boolean;
+}
+export interface HoldingsManageProps {
+  store: DataStore;
+  onAddHolding: () => void;
+  onEditHolding: (holding: StockHolding) => void;
+}
+export interface HoldingFormProps {
+  store: DataStore;
+  existingHolding?: StockHolding;
   onClose: () => void;
 }

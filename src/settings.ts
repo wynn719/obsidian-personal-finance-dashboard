@@ -63,6 +63,33 @@ export class FinanceSettingTab extends PluginSettingTab {
       });
 
     // ============================================================
+    // Misc Data File Path (standalone non-yearly data, e.g. stock holdings)
+    // ============================================================
+    new Setting(containerEl)
+      .setName(t("settings.miscDataFilePath"))
+      .setDesc(t("settings.miscDataFilePathDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("Finance/Misc.md")
+          .setValue(settings.miscDataFilePath)
+          .onChange(async (value) => {
+            const trimmed = value.trim();
+            if (trimmed.length > 0) {
+              // Guard against colliding with a per-year data file
+              if (/(\d{4})\.md$/.test(trimmed)) {
+                new Notice(t("settings.miscDataFilePathInvalid"));
+                return;
+              }
+              settings.miscDataFilePath = trimmed;
+              this.plugin.dataStore.setMiscDataFilePath(trimmed);
+              await this.plugin.saveSettings();
+              await this.plugin.dataStore.reloadMisc();
+            }
+          });
+        text.inputEl.style.width = "300px";
+      });
+
+    // ============================================================
     // Target Allocations
     // ============================================================
     containerEl.createEl("h3", { text: t("settings.targetAllocation") });

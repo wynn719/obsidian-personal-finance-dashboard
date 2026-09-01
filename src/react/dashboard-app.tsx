@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useFinanceData } from "./use-finance-data";
 import { Icon } from "./icon";
 import { PieChart, BarChart, TotalAssetsChart } from "./chart";
+import { HoldingsTreemapChart } from "./holdings-chart";
 import { LayoutProvider } from "./responsive";
 import { Header } from "./components/header";
 import { MetricCards } from "./components/metric-cards";
@@ -39,9 +40,11 @@ export function FinanceApp({
   onAddSnapshot,
   onAddCashFlow,
   onAddDividend,
+  onEditHoldings,
   onEditSnapshot,
   onEditCashFlow,
   onEditDividend,
+  onEditHolding,
   onRefreshData,
 }: FinanceAppProps) {
   const { currentMonth, currentYear } = useFinanceData(store);
@@ -63,6 +66,10 @@ export function FinanceApp({
   const cashFlowRecords = [...store.getCashFlowRecords()].sort((a, b) =>
     b.date.localeCompare(a.date),
   );
+
+  // 持仓数据（非年度，Misc.md）
+  const holdings = store.getHoldings();
+  const holdingsTotal = store.getTotalHoldingsAmount();
 
   const handleEditMonth = (month: string) => {
     const snap = store.getSnapshotByMonth(month);
@@ -87,12 +94,13 @@ export function FinanceApp({
         onAddSnapshot={() => onAddSnapshot?.()}
         onAddCashFlow={() => onAddCashFlow?.()}
         onAddDividend={() => onAddDividend?.()}
+        onEditHoldings={() => onEditHoldings?.()}
         onRefresh={() => onRefreshData?.()}
       />
 
       <MetricCards metrics={metrics} maskNumbers={maskNumbers} />
 
-      {/* 资产配置 + 股息汇总 同一行 */}
+      {/* 资产配置 + 股息汇总 + 股票持仓 Treemap 同一行 */}
       <div className="finance-summary-grid">
         <AssetAllocationTable rows={allocRows} maskNumbers={maskNumbers} />
         <DividendSummaryTable
@@ -101,6 +109,32 @@ export function FinanceApp({
           grandTotal={grandTotal}
           maskNumbers={maskNumbers}
         />
+        <div className="finance-section finance-chart-container finance-holdings-chart">
+          <h2>
+            <Icon name="pie-chart" /> {t("holdings.chartTitle")}
+          </h2>
+          {holdings.length > 0 ? (
+            <HoldingsTreemapChart
+              holdings={holdings}
+              total={holdingsTotal}
+              maskNumbers={maskNumbers}
+              onEditHolding={onEditHolding}
+            />
+          ) : (
+            <>
+              <p className="finance-empty">{t("holdings.empty")}</p>
+              <button
+                className="finance-btn finance-btn-cta"
+                onClick={() => onEditHoldings?.()}
+              >
+                <Icon name="plus" />
+                <span className="finance-btn-label">
+                  {t("holdings.btn.addHolding")}
+                </span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* 三个图表放在表格下方 */}

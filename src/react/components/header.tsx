@@ -72,6 +72,7 @@ export function Header({
   onAddSnapshot,
   onAddCashFlow,
   onAddDividend,
+  onEditHoldings,
   onRefresh,
 }: HeaderProps) {
   return (
@@ -104,6 +105,11 @@ export function Header({
           icon="target"
           label={t("dashboard.btn.addDividend")}
           onClick={onAddDividend}
+        />
+        <ActionButton
+          icon="pie-chart"
+          label={t("dashboard.btn.editHoldings")}
+          onClick={onEditHoldings}
         />
         <ActionButton
           icon="refresh-cw"

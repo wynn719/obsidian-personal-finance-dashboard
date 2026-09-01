@@ -6,6 +6,7 @@ interface TranslationStrings {
   "dashboard.btn.addSnapshot": string;
   "dashboard.btn.addCashFlow": string;
   "dashboard.btn.addDividend": string;
+  "dashboard.btn.editHoldings": string;
   "dashboard.btn.refresh": string;
   "dashboard.btn.maskNumbers": string;
 
@@ -134,12 +135,44 @@ interface TranslationStrings {
   "modal.dividend.invalidAmount": string;
   "modal.dividend.saved": string;
 
+  // Holdings module (stock allocation, embedded in dashboard)
+  "holdings.totalValue": string;
+  "holdings.holdingCount": string;
+  "holdings.chartTitle": string;
+  "holdings.tableTitle": string;
+  "holdings.col.name": string;
+  "holdings.col.amount": string;
+  "holdings.col.share": string;
+  "holdings.col.note": string;
+  "holdings.col.actions": string;
+  "holdings.empty": string;
+  "holdings.deleteConfirm": string;
+  "holdings.btn.addHolding": string;
+
+  // Holding modal
+  "modal.holding.titleAdd": string;
+  "modal.holding.titleEdit": string;
+  "modal.holding.name": string;
+  "modal.holding.namePlaceholder": string;
+  "modal.holding.amount": string;
+  "modal.holding.amountPlaceholder": string;
+  "modal.holding.note": string;
+  "modal.holding.notePlaceholder": string;
+  "modal.holding.save": string;
+  "modal.holding.invalidName": string;
+  "modal.holding.invalidAmount": string;
+  "modal.holding.saved": string;
+
+  // Holdings manage modal
+  "modal.holdingsManage.title": string;
+
   // Commands & Ribbon
   "command.openDashboard": string;
   "command.addSnapshot": string;
   "command.addIncomeExpense": string;
   "command.addDividend": string;
   "command.refreshData": string;
+  "command.addHolding": string;
   "ribbon.openDashboard": string;
 
   // Year selector
@@ -155,6 +188,9 @@ interface TranslationStrings {
   "settings.targetWarning": string;
   "settings.dataFolderPath": string;
   "settings.dataFolderPathDesc": string;
+  "settings.miscDataFilePath": string;
+  "settings.miscDataFilePathDesc": string;
+  "settings.miscDataFilePathInvalid": string;
   "settings.assetCategories": string;
   "settings.categories": string;
   "settings.categoriesDesc.asset": string;
@@ -170,6 +206,7 @@ const en: TranslationStrings = {
   "dashboard.btn.addSnapshot": "Add Snapshot",
   "dashboard.btn.addCashFlow": "Add Income/Expense",
   "dashboard.btn.addDividend": "Add Dividend",
+  "dashboard.btn.editHoldings": "Edit Holdings",
   "dashboard.btn.refresh": "Refresh",
   "dashboard.btn.maskNumbers": "Mask",
 
@@ -301,12 +338,44 @@ const en: TranslationStrings = {
   "modal.dividend.invalidAmount": "Please enter a valid positive amount",
   "modal.dividend.saved": "Dividend record saved!",
 
+  // Holdings view (stock allocation)
+  "holdings.totalValue": "Total Holdings Value",
+  "holdings.holdingCount": "{count} holdings",
+  "holdings.chartTitle": "Stock Holdings Treemap",
+  "holdings.tableTitle": "Holdings Details",
+  "holdings.col.name": "Name",
+  "holdings.col.amount": "Amount",
+  "holdings.col.share": "Share",
+  "holdings.col.note": "Note",
+  "holdings.col.actions": "Actions",
+  "holdings.empty": "No holdings yet. Click \"Add Holding\" to create one.",
+  "holdings.deleteConfirm": "Delete this holding?",
+  "holdings.btn.addHolding": "Add Holding",
+
+  // Holding modal
+  "modal.holding.titleAdd": "Add Stock Holding",
+  "modal.holding.titleEdit": "Edit Stock Holding",
+  "modal.holding.name": "Stock Name",
+  "modal.holding.namePlaceholder": "e.g. 五粮液",
+  "modal.holding.amount": "Amount",
+  "modal.holding.amountPlaceholder": "Holding market value",
+  "modal.holding.note": "Note",
+  "modal.holding.notePlaceholder": "Optional note",
+  "modal.holding.save": "Save",
+  "modal.holding.invalidName": "Please enter a stock name",
+  "modal.holding.invalidAmount": "Please enter a valid positive amount",
+  "modal.holding.saved": "Holding saved!",
+
+  // Holdings manage modal
+  "modal.holdingsManage.title": "Stock Holdings Details",
+
   // Commands & Ribbon
   "command.openDashboard": "Open Finance Dashboard",
   "command.addSnapshot": "Add Asset Snapshot",
   "command.addIncomeExpense": "Add Income/Expense",
   "command.addDividend": "Add Dividend",
   "command.refreshData": "Refresh Finance Data",
+  "command.addHolding": "Add Stock Holding",
   "ribbon.openDashboard": "Open Finance Dashboard",
 
   // Year selector
@@ -324,6 +393,11 @@ const en: TranslationStrings = {
   "settings.dataFolderPath": "Data Folder Path",
   "settings.dataFolderPathDesc":
     "Path to the folder that stores yearly Markdown data files (relative to vault root, e.g. Finance)",
+  "settings.miscDataFilePath": "Misc Data File Path",
+  "settings.miscDataFilePathDesc":
+    "Path to the Markdown file storing non-yearly data such as stock holdings (relative to vault root, e.g. Finance/Misc.md)",
+  "settings.miscDataFilePathInvalid":
+    "Misc data file path must not be a year-style file (e.g. Finance/2025.md) – it would collide with yearly data files.",
   "settings.assetCategories": "Asset Categories",
   "settings.categories": "Categories",
   "settings.categoriesDesc.asset": "Comma-separated list of asset categories",
@@ -340,6 +414,7 @@ const zh: TranslationStrings = {
   "dashboard.btn.addSnapshot": "添加资产快照",
   "dashboard.btn.addCashFlow": "添加收支记录",
   "dashboard.btn.addDividend": "添加股息记录",
+  "dashboard.btn.editHoldings": "编辑股票持仓",
   "dashboard.btn.refresh": "刷新",
   "dashboard.btn.maskNumbers": "隐藏金额",
 
@@ -469,12 +544,44 @@ const zh: TranslationStrings = {
   "modal.dividend.invalidAmount": "请输入有效的正数金额",
   "modal.dividend.saved": "股息记录已保存！",
 
+  // Holdings view (stock allocation)
+  "holdings.totalValue": "持仓总市值",
+  "holdings.holdingCount": "{count} 条持仓",
+  "holdings.chartTitle": "股票持仓占比",
+  "holdings.tableTitle": "持仓明细",
+  "holdings.col.name": "名称",
+  "holdings.col.amount": "金额",
+  "holdings.col.share": "占比",
+  "holdings.col.note": "备注",
+  "holdings.col.actions": "操作",
+  "holdings.empty": "暂无持仓数据，点击「添加持仓」开始记录。",
+  "holdings.deleteConfirm": "确定删除这条持仓吗？",
+  "holdings.btn.addHolding": "添加持仓",
+
+  // Holding modal
+  "modal.holding.titleAdd": "添加股票持仓",
+  "modal.holding.titleEdit": "编辑股票持仓",
+  "modal.holding.name": "股票名称",
+  "modal.holding.namePlaceholder": "如：五粮液",
+  "modal.holding.amount": "持仓金额",
+  "modal.holding.amountPlaceholder": "持仓市值",
+  "modal.holding.note": "备注",
+  "modal.holding.notePlaceholder": "可选备注",
+  "modal.holding.save": "保存",
+  "modal.holding.invalidName": "请输入股票名称",
+  "modal.holding.invalidAmount": "请输入有效的正数金额",
+  "modal.holding.saved": "持仓已保存！",
+
+  // Holdings manage modal
+  "modal.holdingsManage.title": "股票持仓占比明细",
+
   // Commands & Ribbon
   "command.openDashboard": "打开财务仪表盘",
   "command.addSnapshot": "添加资产快照",
   "command.addIncomeExpense": "添加收支记录",
   "command.addDividend": "添加股息记录",
   "command.refreshData": "刷新财务数据",
+  "command.addHolding": "添加股票持仓",
   "ribbon.openDashboard": "打开财务仪表盘",
 
   // Year selector
@@ -492,6 +599,11 @@ const zh: TranslationStrings = {
   "settings.dataFolderPath": "数据文件夹路径",
   "settings.dataFolderPathDesc":
     "存储年度 Markdown 数据文件的文件夹路径（相对于 Vault 根目录，如 Finance）",
+  "settings.miscDataFilePath": "杂项数据文件路径",
+  "settings.miscDataFilePathDesc":
+    "存储非年度数据（如股票持仓）的 Markdown 文件路径（相对于 Vault 根目录，如 Finance/Misc.md）",
+  "settings.miscDataFilePathInvalid":
+    "杂项数据文件路径不能是年份样式文件（如 Finance/2025.md），会与年度数据文件冲突。",
   "settings.assetCategories": "资产类别",
   "settings.categories": "类别",
   "settings.categoriesDesc.asset": "以逗号分隔的资产类别列表",

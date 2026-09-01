@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "chart.js": "^4.4.1",
+    "chartjs-chart-treemap": "^4.2.0",
     "preact": "^10.29.7"
   },
   "volta": {

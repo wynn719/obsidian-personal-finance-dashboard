@@ -6,10 +6,13 @@ import {
   CashFlowRecord,
   DividendRecord,
   CategoryAmount,
+  MiscData,
+  StockHolding,
 } from "./models";
 import { generateId } from "./utils";
 
 const DEFAULT_DATA_FOLDER = "Finance";
+const DEFAULT_MISC_FILE_PATH = "Finance/Misc.md";
 
 /**
  * Handles persistence of finance data to per-year Markdown files in the vault.
@@ -44,12 +47,33 @@ export class DataStore {
   private dataFolderPath: string;
   private listeners: Array<() => void> = [];
   private fileChangeRef: EventRef | null = null;
+  private miscRenameRef: EventRef | null = null;
   private isSaving = false;
 
-  constructor(plugin: Plugin, dataFolderPath?: string) {
+  // Standalone misc data (non-yearly), persisted to a single Markdown file
+  private miscData: MiscData = { stockHoldings: [] };
+  private miscDataFilePath: string;
+
+  constructor(plugin: Plugin, dataFolderPath?: string, miscDataFilePath?: string) {
     this.plugin = plugin;
     this.dataFolderPath = dataFolderPath ?? DEFAULT_DATA_FOLDER;
+    this.miscDataFilePath = miscDataFilePath ?? DEFAULT_MISC_FILE_PATH;
     this.currentYear = String(new Date().getFullYear());
+  }
+
+  /** Update the misc data file path (called when settings change) */
+  setMiscDataFilePath(path: string): void {
+    this.miscDataFilePath = path;
+  }
+
+  getMiscDataFilePath(): string {
+    return this.miscDataFilePath;
+  }
+
+  /** The misc file may live outside dataFolderPath – extract its parent folder */
+  private getMiscParentFolder(): string {
+    const lastSlash = this.miscDataFilePath.lastIndexOf("/");
+    return lastSlash > 0 ? this.miscDataFilePath.substring(0, lastSlash) : "";
   }
 
   /** Update the data folder path (called when settings change) */
@@ -132,6 +156,8 @@ export class DataStore {
         await this.loadYear(y);
       }
     }
+    // Load standalone misc data
+    await this.loadMisc();
   }
 
   async loadYear(year: string): Promise<void> {
@@ -187,10 +213,21 @@ export class DataStore {
     this.fileChangeRef = this.plugin.app.vault.on(
       "modify",
       async (file: TFile) => {
+        if (this.isSaving) return;
+
+        // Misc data file: exact path match (not matched by the year regex below)
+        if (file.path === this.miscDataFilePath) {
+          console.log(
+            "Finance Dashboard: External change detected for misc data, reloading…",
+          );
+          await this.loadMisc();
+          this.notifyChange();
+          return;
+        }
+
         if (
           file.path.startsWith(this.dataFolderPath + "/") &&
-          file.path.endsWith(".md") &&
-          !this.isSaving
+          file.path.endsWith(".md")
         ) {
           const match = file.path.match(/(\d{4})\.md$/);
           if (match) {
@@ -207,13 +244,32 @@ export class DataStore {
       },
     );
 
+    // If the misc file is moved/renamed externally, reload from its configured path
+    this.miscRenameRef = this.plugin.app.vault.on(
+      "rename",
+      async (file: TFile, oldPath: string) => {
+        if (oldPath === this.miscDataFilePath && !this.isSaving) {
+          console.log(
+            "Finance Dashboard: Misc data file moved/renamed, reloading…",
+          );
+          await this.loadMisc();
+          this.notifyChange();
+        }
+      },
+    );
+
     this.plugin.registerEvent(this.fileChangeRef);
+    this.plugin.registerEvent(this.miscRenameRef);
   }
 
   stopWatching(): void {
     if (this.fileChangeRef) {
       this.plugin.app.vault.offref(this.fileChangeRef);
       this.fileChangeRef = null;
+    }
+    if (this.miscRenameRef) {
+      this.plugin.app.vault.offref(this.miscRenameRef);
+      this.miscRenameRef = null;
     }
   }
 
@@ -233,6 +289,83 @@ export class DataStore {
    */
   async reload(): Promise<void> {
     await this.loadYear(this.currentYear);
+    this.notifyChange();
+  }
+
+  // ============================================================
+  // Misc data (standalone file, non-yearly)
+  // ============================================================
+
+  async loadMisc(): Promise<void> {
+    try {
+      const adapter = this.plugin.app.vault.adapter;
+      if (await adapter.exists(this.miscDataFilePath)) {
+        const raw = await adapter.read(this.miscDataFilePath);
+        this.miscData = MiscMarkdownParser.parse(raw);
+      } else {
+        this.miscData = { stockHoldings: [] };
+      }
+    } catch (e) {
+      console.error("Finance Dashboard: Failed to load misc data", e);
+      this.miscData = { stockHoldings: [] };
+    }
+  }
+
+  async saveMisc(): Promise<void> {
+    this.isSaving = true;
+    try {
+      const adapter = this.plugin.app.vault.adapter;
+      const parent = this.getMiscParentFolder();
+      if (parent && !(await adapter.exists(parent))) {
+        await adapter.mkdir(parent);
+      }
+      await adapter.write(
+        this.miscDataFilePath,
+        MiscMarkdownSerializer.serialize(this.miscData),
+      );
+    } finally {
+      setTimeout(() => {
+        this.isSaving = false;
+      }, 500);
+    }
+  }
+
+  /** Force reload misc data from disk and notify listeners */
+  async reloadMisc(): Promise<void> {
+    await this.loadMisc();
+    this.notifyChange();
+  }
+
+  getHoldings(): StockHolding[] {
+    return [...this.miscData.stockHoldings].sort((a, b) => b.amount - a.amount);
+  }
+
+  getTotalHoldingsAmount(): number {
+    return this.miscData.stockHoldings.reduce((sum, h) => sum + h.amount, 0);
+  }
+
+  async addHolding(holding: StockHolding): Promise<void> {
+    this.miscData.stockHoldings.push(holding);
+    await this.saveMisc();
+    this.notifyChange();
+  }
+
+  async updateHolding(holding: StockHolding): Promise<void> {
+    const idx = this.miscData.stockHoldings.findIndex(
+      (h) => h.id === holding.id,
+    );
+    if (idx >= 0) {
+      this.miscData.stockHoldings[idx] = holding;
+      await this.saveMisc();
+      this.notifyChange();
+    }
+  }
+
+  async deleteHolding(id: string): Promise<void> {
+    this.miscData.stockHoldings = this.miscData.stockHoldings.filter(
+      (h) => h.id !== id,
+    );
+    await this.saveMisc();
     this.notifyChange();
   }
 
@@ -434,6 +567,14 @@ export class DataStore {
 // Markdown Parser – reads Markdown into FinanceData
 // ============================================================
 
+/** Parse a markdown table row into cell values (shared by both parsers) */
+function parseMarkdownTableRow(line: string): string[] {
+  return line
+    .split("|")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0);
+}
+
 class MarkdownParser {
   static parse(markdown: string): FinanceData {
     const data: FinanceData = {
@@ -530,7 +671,7 @@ class MarkdownParser {
             continue; // Skip separator row (|---|---|---|)
           }
 
-          const cells = this.parseTableRow(line);
+          const cells = parseMarkdownTableRow(line);
           if (cells.length >= 2) {
             const category = cells[0];
             const amount = parseInt(cells[1], 10) || 0;
@@ -559,7 +700,7 @@ class MarkdownParser {
             continue; // Skip separator row
           }
 
-          const cells = this.parseTableRow(line);
+          const cells = parseMarkdownTableRow(line);
           if (cells.length >= 4) {
             const record: CashFlowRecord = {
               id: generateId(),
@@ -592,7 +733,7 @@ class MarkdownParser {
             continue; // Skip separator row
           }
 
-          const cells = this.parseTableRow(line);
+          const cells = parseMarkdownTableRow(line);
           if (cells.length >= 3) {
             const record: DividendRecord = {
               id: generateId(),
@@ -623,10 +764,7 @@ class MarkdownParser {
 
   /** Parse a markdown table row into cell values */
   private static parseTableRow(line: string): string[] {
-    return line
-      .split("|")
-      .map((cell) => cell.trim())
-      .filter((cell) => cell.length > 0);
+    return parseMarkdownTableRow(line);
   }
 }
 
@@ -703,6 +841,94 @@ class MarkdownSerializer {
       }
       parts.push("");
     }
+
+    return parts.join("\n");
+  }
+}
+
+// ============================================================
+// Misc Markdown Parser / Serializer – standalone non-yearly data file
+//
+// File structure:
+//   Finance/Misc.md
+//
+//   # Stock Holdings
+//   | Name | Amount | Note |
+//   |------|--------|------|
+//   | 五粮液 | 257800 | 白酒龙头 |
+// ============================================================
+
+class MiscMarkdownParser {
+  static parse(markdown: string): MiscData {
+    const data: MiscData = { stockHoldings: [] };
+    const lines = markdown.split("\n");
+    let inHoldings = false;
+    let inTable = false;
+    let headerParsed = false;
+
+    for (const raw of lines) {
+      const line = raw.trim();
+
+      // Top-level heading switches section
+      if (/^#\s+/.test(line) && !/^##\s+/.test(line)) {
+        inHoldings = line.includes("Stock Holdings") || line.includes("股票持仓");
+        inTable = false;
+        headerParsed = false;
+        continue;
+      }
+      if (!inHoldings) continue;
+
+      if (line.startsWith("|")) {
+        if (!inTable) {
+          inTable = true;
+          headerParsed = false;
+          continue; // Skip header row
+        }
+        if (!headerParsed) {
+          headerParsed = true;
+          continue; // Skip separator row (|---|---|---|)
+        }
+        const cells = parseMarkdownTableRow(line);
+        if (cells.length >= 2) {
+          data.stockHoldings.push({
+            id: generateId(),
+            name: cells[0],
+            amount: parseFloat(cells[1]) || 0,
+            note: cells[2] || undefined,
+          });
+        }
+        continue;
+      }
+
+      if (line === "") {
+        inTable = false;
+        headerParsed = false;
+      }
+    }
+
+    return data;
+  }
+}
+
+class MiscMarkdownSerializer {
+  static serialize(data: MiscData): string {
+    const parts: string[] = [];
+
+    parts.push("# Stock Holdings\n");
+
+    if (data.stockHoldings.length > 0) {
+      parts.push("| Name | Amount | Note |");
+      parts.push("|------|--------|------|");
+
+      // Sort by amount descending (primary ordering for the allocation view)
+      const sorted = [...data.stockHoldings].sort((a, b) => b.amount - a.amount);
+      for (const h of sorted) {
+        parts.push(`| ${h.name} | ${h.amount} | ${h.note ?? ""} |`);
+      }
+      parts.push("");
+    }
+
+    // Future non-yearly sections append here
 
     return parts.join("\n");
   }

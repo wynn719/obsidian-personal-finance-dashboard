@@ -16,6 +16,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 - 📅 **Monthly Overview Table** — Track each month's category amounts, MoM% changes, salary income, and investment returns
 - 💸 **Cash Flow Management** — Record income and expenses with categories, filterable and paginated
 - 🏦 **Dividend Tracking** — Log dividend income by stock, with autocomplete and yearly summaries
+- 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; percentages auto-computed from the total, click any block to edit (stored in a standalone `Misc.md` file)
 - 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
@@ -39,8 +40,14 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 
 ### Opening the Dashboard
 
-- Click the **📊 chart icon** in the left sidebar ribbon
+- Click the **📊 wallet icon** in the left sidebar ribbon
 - Or use the Command Palette: `Open Finance Dashboard`
+
+### Stock Holdings Module
+
+- The "Stock Holdings Treemap" section inside the dashboard — no view switching needed
+- Use the **Add Holding** button in the dashboard header to record each stock's market value; the treemap and share percentages update automatically
+- Click any treemap block (or the ✏️ button in the details table) to edit; 🗑️ to delete
 
 ### Recording Data
 
@@ -70,6 +77,7 @@ Open **Settings** → **Personal Finance Dashboard** to configure:
 |---------|-------------|---------|
 | **Language** | Display language (English / 中文) | 中文 |
 | **Data Folder** | Vault-relative path for data files | `Finance` |
+| **Misc Data File Path** | Vault-relative path of the standalone file for non-yearly data (e.g. stock holdings) | `Finance/Misc.md` |
 | **Asset Categories** | Comma-separated asset category names | 货币短债, 中长债, 黄金, 高股息, 港美A |
 | **Income Categories** | Comma-separated income category names | 工资, 副业, 投资收益, 其他收入 |
 | **Expense Categories** | Comma-separated expense category names | 房租, 餐饮, 交通, 娱乐, 其他支出 |
@@ -88,7 +96,8 @@ your-vault/
 └── Finance/
     ├── 2024.md
     ├── 2025.md
-    └── 2026.md
+    ├── 2026.md
+    └── Misc.md      ← non-yearly data (stock holdings)
 ```
 
 ### Markdown Format
@@ -138,6 +147,22 @@ Each file contains three sections:
 | 2025-06-15 | 中国神华 | 12500 | 年度分红 |
 | 2025-07-20 | 招商银行 | 8600 | 中期分红 |
 ```
+
+#### Stock Holdings (Misc.md)
+
+Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#` section holds one data type — currently stock holdings:
+
+```markdown
+# Stock Holdings
+
+| Name | Amount | Note |
+|------|--------|------|
+| 五粮液 | 257800 | 白酒龙头 |
+| 腾讯控股 | 189300 | 港股通 |
+| 中国神华 | 95200 | 高股息 |
+```
+
+Share percentages are computed at runtime from the total amount — nothing to maintain by hand.
 
 > 💡 **Tip**: Since data is plain Markdown, you can edit it directly in Obsidian or any text editor. The plugin will auto-detect changes and refresh.
 

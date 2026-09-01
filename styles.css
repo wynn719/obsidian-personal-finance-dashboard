@@ -1139,39 +1139,6 @@
   background: var(--background-modifier-hover, rgba(128, 128, 128, 0.08));
 }
 
-/* ── 币种切换（CNY/HKD/USD 分段按钮组）────────────────────────────── */
-.finance-currency-switch {
-  display: inline-flex;
-  border: 1px solid var(--background-modifier-border, #ddd);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.finance-currency-btn {
-  padding: 2px 8px;
-  font-size: 0.75em;
-  font-family: inherit;
-  background: transparent;
-  color: var(--text-muted, #888);
-  border: none;
-  cursor: pointer;
-}
-
-.finance-currency-btn + .finance-currency-btn {
-  border-left: 1px solid var(--background-modifier-border, #ddd);
-}
-
-.finance-currency-btn-active {
-  background: var(--interactive-accent, #7c3aed);
-  color: var(--text-on-accent, #fff);
-}
-
-/* 持仓卡片标题右侧操作区（币种切换 + 刷新） */
-.finance-holdings-title-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
 
 /* 表单：名称 + 币种徽标同行 */
 .finance-name-currency-row {

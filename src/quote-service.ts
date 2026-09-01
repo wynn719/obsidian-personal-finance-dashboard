@@ -118,30 +118,41 @@ export async function fetchQuotes(
   if (text === null) return { quotes };
 
   // Response lines: v_sh600036="1~招商银行~600036~40.86~..."; v_whUSDCNY="310~美元人民币~USDCNY~6.7220~...";
+  // FX lines have only ~22 fields, stock lines ~80 — handle FX before the
+  // stock-specific length guard.
   const lineRe = /v_([a-zA-Z0-9]+)="([^"]*)"/g;
   let match: RegExpExecArray | null;
+  const stockLines: Array<{ code: string; fields: string[] }> = [];
   while ((match = lineRe.exec(text)) !== null) {
     const code = match[1];
     const fields = match[2].split("~");
-    if (fields.length < 33) continue;
+    if (fields.length < 4) continue;
 
     const name = fields[1]?.trim() ?? "";
     const price = parseFloat(fields[3]);
-    const changePercent = parseFloat(fields[32]);
     if (!name || isNaN(price) || price <= 0) continue;
 
-    // FX line → record rate and skip
+    // FX line → record rate immediately (short line, ~22 fields)
     const fxCurrency = fxCodeToCurrency.get(code);
     if (fxCurrency) {
       fxRates.set(fxCurrency, price);
       continue;
     }
 
+    stockLines.push({ code, fields });
+  }
+
+  // Stock lines: parse after all FX rates are known
+  for (const { code, fields } of stockLines) {
+    if (fields.length < 33) continue;
+    const price = parseFloat(fields[3]);
+    const changePercent = parseFloat(fields[32]);
+
     const entry = resolvedByCode.get(code);
     if (entry) {
       quotes.set(entry.symbol, {
         code,
-        name,
+        name: fields[1]?.trim() ?? "",
         price,
         changePercent: isNaN(changePercent) ? 0 : changePercent,
         currency: entry.res.currency,
@@ -153,6 +164,7 @@ export async function fetchQuotes(
       });
     }
   }
+
 
   return { quotes };
 }

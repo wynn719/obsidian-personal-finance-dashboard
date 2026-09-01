@@ -3,6 +3,7 @@ import { useFinanceData } from "./use-finance-data";
 import { Icon } from "./icon";
 import { PieChart, BarChart, TotalAssetsChart } from "./chart";
 import { HoldingsTreemapChart } from "./holdings-chart";
+import { useQuoteRefresh } from "./hooks/use-quote-refresh";
 import { LayoutProvider } from "./responsive";
 import { Header } from "./components/header";
 import { MetricCards } from "./components/metric-cards";
@@ -49,6 +50,7 @@ export function FinanceApp({
 }: FinanceAppProps) {
   const { currentMonth, currentYear } = useFinanceData(store);
   const [maskNumbers, setMaskNumbers] = useState(false);
+  const { refreshing, refreshQuotes } = useQuoteRefresh(store);
 
   // 派生数据（每次 store 变化触发重渲染时重算）
   const metrics = calculator.getDashboardMetrics(currentMonth);
@@ -110,8 +112,22 @@ export function FinanceApp({
           maskNumbers={maskNumbers}
         />
         <div className="finance-section finance-chart-container finance-holdings-chart">
-          <h2>
-            <Icon name="pie-chart" /> {t("holdings.chartTitle")}
+          <h2 className="finance-holdings-title">
+            <span>
+              <Icon name="pie-chart" /> {t("holdings.chartTitle")}
+            </span>
+            {holdings.length > 0 ? (
+              <button
+                className={`finance-btn-small${
+                  refreshing ? " finance-btn-spinning" : ""
+                }`}
+                onClick={refreshQuotes}
+                disabled={refreshing}
+                title={t("holdings.btn.refreshQuotes")}
+              >
+                <Icon name="refresh-cw" />
+              </button>
+            ) : null}
           </h2>
           {holdings.length > 0 ? (
             <HoldingsTreemapChart

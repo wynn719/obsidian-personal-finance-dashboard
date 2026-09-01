@@ -1053,3 +1053,88 @@
 .finance-holdings-bare {
   min-width: 0;
 }
+
+/* ── 持仓行情（实时价格）────────────────────────────────────────────── */
+
+/* 卡片标题行：标题 + 刷新按钮 两端对齐 */
+.finance-holdings-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
+}
+
+.finance-holdings-title span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-1);
+}
+
+/* 名称旁的股票代码徽标 */
+.finance-holding-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-1);
+  min-width: 0;
+}
+
+.finance-holding-symbol {
+  font-size: 0.75em;
+  opacity: 0.6;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--background-modifier-hover, rgba(128, 128, 128, 0.12));
+  white-space: nowrap;
+}
+
+/* 涨跌色（A股习惯：涨红跌绿） */
+.finance-up {
+  color: var(--color-red, #e74c3c);
+}
+
+.finance-down {
+  color: var(--color-green, #1abc9c);
+}
+
+/* 行情刷新按钮旋转动画 */
+.finance-btn-spinning svg {
+  animation: finance-spin 1s linear infinite;
+}
+
+@keyframes finance-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finance-btn-spinning svg {
+    animation: none;
+  }
+}
+
+/* 最近刷新时间 */
+.finance-quote-time {
+  font-size: 0.8em;
+  opacity: 0.6;
+  align-self: center;
+  white-space: nowrap;
+}
+
+/* 表单字段提示文字 */
+.finance-field-hint {
+  display: block;
+  font-size: 0.78em;
+  opacity: 0.55;
+  margin-top: 2px;
+}
+
+/* 只读输入框（股票名称自动填充展示） */
+.finance-input-readonly {
+  opacity: 0.75;
+  cursor: default;
+  background: var(--background-modifier-hover, rgba(128, 128, 128, 0.08));
+}

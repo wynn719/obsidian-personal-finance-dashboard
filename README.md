@@ -16,7 +16,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 - 📅 **Monthly Overview Table** — Track each month's category amounts, MoM% changes, salary income, and investment returns
 - 💸 **Cash Flow Management** — Record income and expenses with categories, filterable and paginated
 - 🏦 **Dividend Tracking** — Log dividend income by stock, with autocomplete and yearly summaries
-- 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; percentages auto-computed from the total, click any block to edit (stored in a standalone `Misc.md` file)
+- 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; just enter a stock code (A-share / HK / US) + share count — names auto-fetch, one-click quote refresh computes and persists market value (stored in a standalone `Misc.md` file)
 - 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
@@ -46,8 +46,13 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 ### Stock Holdings Module
 
 - The "Stock Holdings Treemap" section inside the dashboard — no view switching needed
-- Use the **Add Holding** button in the dashboard header to record each stock's market value; the treemap and share percentages update automatically
+- Use the **Edit Holdings** button in the dashboard header to open the manage modal; adding a holding only needs:
+  - **Stock code**: A-share `600036` / HK `00700` / US `AAPL`
+  - **Share count**: number of shares held
+  - The stock name is fetched automatically from the quote API
+- Click **🔄 Refresh Quotes** (manage modal top-right or the holdings card header) to fetch live prices — market value = shares × price, written back to `Misc.md` on every refresh, with day change shown red-up/green-down (A-share convention)
 - Click any treemap block (or the ✏️ button in the details table) to edit; 🗑️ to delete
+- Quotes come from Tencent's public quote API (qt.gtimg.cn), no API key required
 
 ### Recording Data
 
@@ -155,11 +160,10 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 ```markdown
 # Stock Holdings
 
-| Name | Amount | Note |
-|------|--------|------|
-| 五粮液 | 257800 | 白酒龙头 |
-| 腾讯控股 | 189300 | 港股通 |
-| 中国神华 | 95200 | 高股息 |
+| Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |
+|------|--------|--------|--------|-------|---------|-----------|
+| 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | 2026-09-01T16:00:00+08:00 |
+| 腾讯控股 | 189300 | 00700 | 430 | 441.4 | -2.56 | 2026-09-01T16:00:00+08:00 |
 ```
 
 Share percentages are computed at runtime from the total amount — nothing to maintain by hand.

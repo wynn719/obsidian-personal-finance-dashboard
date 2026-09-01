@@ -67,11 +67,20 @@ export interface DividendRecord {
 
 export interface StockHolding {
   id: string;
-  /** Stock name, e.g. "五粮液", "腾讯控股" */
+  /** Stock name, e.g. "五粮液", "腾讯控股" — auto-filled from the quote API */
   name: string;
-  /** Holding market value (in account currency) */
+  /** Holding market value = shares × price, written back on every quote refresh */
   amount: number;
-  note?: string;
+  /** Stock code for live quotes, e.g. "600036" (A-share), "00700" (HK), "AAPL" (US) */
+  symbol: string;
+  /** Number of shares held */
+  shares: number;
+  /** Last fetched price (per share, in native currency) */
+  price?: number;
+  /** Day change percent from last quote fetch, e.g. 1.84 means +1.84% */
+  priceChangePercent?: number;
+  /** Timestamp (ISO string) of the last successful quote refresh */
+  quoteTime?: string;
 }
 
 /** Container for the standalone Misc data file (extensible: one `#` section per data type) */

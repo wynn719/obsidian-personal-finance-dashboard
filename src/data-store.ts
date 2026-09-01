@@ -337,11 +337,51 @@ export class DataStore {
   }
 
   getHoldings(): StockHolding[] {
-    return [...this.miscData.stockHoldings].sort((a, b) => b.amount - a.amount);
+    return [...this.miscData.stockHoldings].sort(
+      (a, b) => this.holdingValue(b) - this.holdingValue(a),
+    );
+  }
+
+  /** Market value: shares × latest price (falls back to stored amount before first refresh) */
+  private holdingValue(h: StockHolding): number {
+    return (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
+      ? h.shares * (h.price ?? 0)
+      : h.amount;
   }
 
   getTotalHoldingsAmount(): number {
-    return this.miscData.stockHoldings.reduce((sum, h) => sum + h.amount, 0);
+    return this.miscData.stockHoldings.reduce(
+      (sum, h) => sum + this.holdingValue(h),
+      0,
+    );
+  }
+
+  /** Update quote-driven fields (name/price/change/time/amount) after a refresh */
+  async updateHoldingQuotes(
+    updates: Array<{
+      id: string;
+      name: string;
+      price: number;
+      changePercent: number;
+    }>,
+  ): Promise<void> {
+    let changed = false;
+    for (const u of updates) {
+      const h = this.miscData.stockHoldings.find((x) => x.id === u.id);
+      if (!h) continue;
+      h.name = u.name;
+      h.price = u.price;
+      h.priceChangePercent = u.changePercent;
+      h.quoteTime = new Date().toISOString();
+      if ((h.shares ?? 0) > 0) {
+        h.amount = (h.shares ?? 0) * u.price;
+      }
+      changed = true;
+    }
+    if (changed) {
+      await this.saveMisc();
+      this.notifyChange();
+    }
   }
 
   async addHolding(holding: StockHolding): Promise<void> {
@@ -853,9 +893,9 @@ class MarkdownSerializer {
 //   Finance/Misc.md
 //
 //   # Stock Holdings
-//   | Name | Amount | Note |
-//   |------|--------|------|
-//   | 五粮液 | 257800 | 白酒龙头 |
+//   | Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |
+//   |------|--------|--------|--------|-------|---------|-----------|
+//   | 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | 2026-09-01T16:00:00+08:00 |
 // ============================================================
 
 class MiscMarkdownParser {
@@ -890,11 +930,35 @@ class MiscMarkdownParser {
         }
         const cells = parseMarkdownTableRow(line);
         if (cells.length >= 2) {
+          // Current 7-column format: Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt
+          // Legacy 8-column format (with Note): Note column dropped
+          // Legacy 3-column format (Name | Amount | Note): only name/amount survive,
+          //   symbol/shares left empty for the user to fill in later
+          const hasQuoteCols = cells.length >= 6;
+          const name = cells[0];
+          const amount = parseFloat(cells[1]) || 0;
+          let symbol = hasQuoteCols ? cells[2].trim() : "";
+          let shares = hasQuoteCols ? parseFloat(cells[3]) || 0 : 0;
+          let price = hasQuoteCols ? parseFloat(cells[4]) || 0 : 0;
+          let changePct = hasQuoteCols
+            ? parseFloat(cells[5].replace("%", "")) || 0
+            : 0;
+          let quoteTime = hasQuoteCols ? cells[6] || undefined : undefined;
+
+          // Legacy 8-column: Note sits at index 6, UpdatedAt at index 7
+          if (cells.length >= 8) {
+            quoteTime = cells[7] || undefined;
+          }
+
           data.stockHoldings.push({
             id: generateId(),
-            name: cells[0],
-            amount: parseFloat(cells[1]) || 0,
-            note: cells[2] || undefined,
+            name,
+            amount,
+            symbol,
+            shares,
+            price: price > 0 ? price : undefined,
+            priceChangePercent: hasQuoteCols ? changePct : undefined,
+            quoteTime: quoteTime || undefined,
           });
         }
         continue;
@@ -917,13 +981,25 @@ class MiscMarkdownSerializer {
     parts.push("# Stock Holdings\n");
 
     if (data.stockHoldings.length > 0) {
-      parts.push("| Name | Amount | Note |");
-      parts.push("|------|--------|------|");
+      parts.push(
+        "| Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |",
+      );
+      parts.push(
+        "|------|--------|--------|--------|-------|---------|-----------|",
+      );
 
-      // Sort by amount descending (primary ordering for the allocation view)
-      const sorted = [...data.stockHoldings].sort((a, b) => b.amount - a.amount);
+      // Sort by market value descending (primary ordering for the allocation view)
+      const value = (h: StockHolding) =>
+        (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
+          ? (h.shares ?? 0) * (h.price ?? 0)
+          : h.amount;
+      const sorted = [...data.stockHoldings].sort((a, b) => value(b) - value(a));
       for (const h of sorted) {
-        parts.push(`| ${h.name} | ${h.amount} | ${h.note ?? ""} |`);
+        parts.push(
+          `| ${h.name} | ${h.amount} | ${h.symbol} | ${h.shares} | ${
+            h.price ?? ""
+          } | ${h.priceChangePercent ?? ""} | ${h.quoteTime ?? ""} |`,
+        );
       }
       parts.push("");
     }

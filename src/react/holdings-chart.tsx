@@ -4,12 +4,13 @@ import { useMemo } from "react";
 import { formatCurrencyCompact } from "../utils";
 import type { StockHolding } from "../models";
 import { ChartCanvas, EmptyState, CHART_COLORS, getBgSecondary } from "./chart";
+import { holdingValue } from "./components/holdings-table";
 import type { HoldingsTreemapChartProps } from "./types";
 
 // Treemap controller must be explicitly registered (not part of registerables)
 Chart.register(...registerables, TreemapController, TreemapElement);
 
-/** Treemap of stock holdings — rectangle area ∝ amount, click to edit */
+/** Treemap of stock holdings — rectangle area ∝ market value, click to edit */
 export function HoldingsTreemapChart({
   holdings,
   total,
@@ -22,8 +23,11 @@ export function HoldingsTreemapChart({
       data: {
         datasets: [
           {
-            data: holdings.map((h) => h.amount),
-            tree: holdings.map((h) => ({ name: h.name, value: h.amount })),
+            data: holdings.map((h) => holdingValue(h)),
+            tree: holdings.map((h) => ({
+              name: h.name,
+              value: holdingValue(h),
+            })),
             key: "value",
             groups: ["name"],
             backgroundColor: (ctx: { dataIndex: number }) =>

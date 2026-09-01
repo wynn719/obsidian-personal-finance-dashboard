@@ -143,24 +143,34 @@ interface TranslationStrings {
   "holdings.col.name": string;
   "holdings.col.amount": string;
   "holdings.col.share": string;
-  "holdings.col.note": string;
   "holdings.col.actions": string;
   "holdings.empty": string;
   "holdings.deleteConfirm": string;
   "holdings.btn.addHolding": string;
+  "holdings.btn.refreshQuotes": string;
+  "holdings.col.price": string;
+  "holdings.col.change": string;
+  "holdings.col.shares": string;
+  "holdings.quoteUpdated": string;
+  "holdings.quoteUpdatedAt": string;
+  "holdings.quoteFailed": string;
 
   // Holding modal
   "modal.holding.titleAdd": string;
   "modal.holding.titleEdit": string;
   "modal.holding.name": string;
   "modal.holding.namePlaceholder": string;
-  "modal.holding.amount": string;
-  "modal.holding.amountPlaceholder": string;
-  "modal.holding.note": string;
-  "modal.holding.notePlaceholder": string;
+  "modal.holding.symbol": string;
+  "modal.holding.symbolPlaceholder": string;
+  "modal.holding.symbolHint": string;
+  "modal.holding.checking": string;
+  "modal.holding.nameAutoHint": string;
+  "modal.holding.shares": string;
+  "modal.holding.sharesPlaceholder": string;
   "modal.holding.save": string;
-  "modal.holding.invalidName": string;
-  "modal.holding.invalidAmount": string;
+  "modal.holding.invalidSymbol": string;
+  "modal.holding.invalidShares": string;
+  "modal.holding.symbolNotFound": string;
   "modal.holding.saved": string;
 
   // Holdings manage modal
@@ -346,24 +356,34 @@ const en: TranslationStrings = {
   "holdings.col.name": "Name",
   "holdings.col.amount": "Amount",
   "holdings.col.share": "Share",
-  "holdings.col.note": "Note",
   "holdings.col.actions": "Actions",
   "holdings.empty": "No holdings yet. Click \"Add Holding\" to create one.",
   "holdings.deleteConfirm": "Delete this holding?",
   "holdings.btn.addHolding": "Add Holding",
+  "holdings.btn.refreshQuotes": "Refresh Quotes",
+  "holdings.col.price": "Price",
+  "holdings.col.change": "Change",
+  "holdings.col.shares": "Shares",
+  "holdings.quoteUpdated": "Quotes updated ({success}/{total})",
+  "holdings.quoteUpdatedAt": "Updated {time}",
+  "holdings.quoteFailed": "Failed to fetch quotes",
 
   // Holding modal
   "modal.holding.titleAdd": "Add Stock Holding",
   "modal.holding.titleEdit": "Edit Stock Holding",
   "modal.holding.name": "Stock Name",
-  "modal.holding.namePlaceholder": "e.g. 五粮液",
-  "modal.holding.amount": "Amount",
-  "modal.holding.amountPlaceholder": "Holding market value",
-  "modal.holding.note": "Note",
-  "modal.holding.notePlaceholder": "Optional note",
+  "modal.holding.namePlaceholder": "Auto-filled from the stock code",
+  "modal.holding.symbol": "Stock Code",
+  "modal.holding.symbolPlaceholder": "e.g. 600036 / 00700 / AAPL",
+  "modal.holding.symbolHint": "Name is fetched from the quote API after entering the code",
+  "modal.holding.checking": "Looking up…",
+  "modal.holding.nameAutoHint": "Enter a valid stock code, the name fills in automatically",
+  "modal.holding.shares": "Shares",
+  "modal.holding.sharesPlaceholder": "Number of shares",
   "modal.holding.save": "Save",
-  "modal.holding.invalidName": "Please enter a stock name",
-  "modal.holding.invalidAmount": "Please enter a valid positive amount",
+  "modal.holding.invalidSymbol": "Please enter a stock code",
+  "modal.holding.invalidShares": "Please enter a valid positive share count",
+  "modal.holding.symbolNotFound": "Stock code not found",
   "modal.holding.saved": "Holding saved!",
 
   // Holdings manage modal
@@ -552,24 +572,34 @@ const zh: TranslationStrings = {
   "holdings.col.name": "名称",
   "holdings.col.amount": "金额",
   "holdings.col.share": "占比",
-  "holdings.col.note": "备注",
   "holdings.col.actions": "操作",
   "holdings.empty": "暂无持仓数据，点击「添加持仓」开始记录。",
   "holdings.deleteConfirm": "确定删除这条持仓吗？",
   "holdings.btn.addHolding": "添加持仓",
+  "holdings.btn.refreshQuotes": "刷新行情",
+  "holdings.col.price": "现价",
+  "holdings.col.change": "涨跌",
+  "holdings.col.shares": "股数",
+  "holdings.quoteUpdated": "行情已更新（{success}/{total}）",
+  "holdings.quoteUpdatedAt": "更新于 {time}",
+  "holdings.quoteFailed": "行情获取失败",
 
   // Holding modal
   "modal.holding.titleAdd": "添加股票持仓",
   "modal.holding.titleEdit": "编辑股票持仓",
   "modal.holding.name": "股票名称",
-  "modal.holding.namePlaceholder": "如：五粮液",
-  "modal.holding.amount": "持仓金额",
-  "modal.holding.amountPlaceholder": "持仓市值",
-  "modal.holding.note": "备注",
-  "modal.holding.notePlaceholder": "可选备注",
+  "modal.holding.namePlaceholder": "输入代码后自动填充",
+  "modal.holding.symbol": "股票代码",
+  "modal.holding.symbolPlaceholder": "如：600036 / 00700 / AAPL",
+  "modal.holding.symbolHint": "填写代码后自动获取股票名称",
+  "modal.holding.checking": "查询中…",
+  "modal.holding.nameAutoHint": "输入有效代码后自动填充名称",
+  "modal.holding.shares": "持股数",
+  "modal.holding.sharesPlaceholder": "持有股数",
   "modal.holding.save": "保存",
-  "modal.holding.invalidName": "请输入股票名称",
-  "modal.holding.invalidAmount": "请输入有效的正数金额",
+  "modal.holding.invalidSymbol": "请输入股票代码",
+  "modal.holding.invalidShares": "请输入有效的正数股数",
+  "modal.holding.symbolNotFound": "未找到该股票代码",
   "modal.holding.saved": "持仓已保存！",
 
   // Holdings manage modal

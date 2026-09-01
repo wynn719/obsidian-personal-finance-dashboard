@@ -5,6 +5,19 @@ import { DataTable, type Column } from "./data-table";
 import type { StockHolding } from "../../models";
 import type { HoldingsTableProps } from "../types";
 
+/** Effective market value: shares × latest price (falls back to stored amount) */
+export function holdingValue(h: StockHolding): number {
+  return (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
+    ? h.shares * (h.price ?? 0)
+    : h.amount;
+}
+
+/** Day change percent with sign, e.g. "+1.84%" / "-2.56%" */
+function formatChange(pct: number): string {
+  const sign = pct > 0 ? "+" : "";
+  return `${sign}${pct.toFixed(2)}%`;
+}
+
 export function HoldingsTable({
   holdings,
   total,
@@ -25,30 +38,49 @@ export function HoldingsTable({
     {
       key: "name",
       header: t("holdings.col.name"),
-      cell: (h) => h.name,
+      cell: (h) => (
+        <span className="finance-holding-name">
+          {h.name}
+          <span className="finance-holding-symbol">{h.symbol}</span>
+        </span>
+      ),
       excludeFromCard: true,
+    },
+    {
+      key: "price",
+      header: t("holdings.col.price"),
+      cell: (h) => (h.price ? mask(h.price.toFixed(2)) : "—"),
+      numeric: true,
+      hideOnMobile: true,
+    },
+    {
+      key: "change",
+      header: t("holdings.col.change"),
+      cell: (h) => {
+        if (maskNumbers) return "***";
+        const pct = h.priceChangePercent;
+        if (pct === undefined || pct === null) return "—";
+        return (
+          <span className={pct > 0 ? "finance-up" : pct < 0 ? "finance-down" : ""}>
+            {formatChange(pct)}
+          </span>
+        );
+      },
+      numeric: true,
+      hideOnMobile: true,
     },
     {
       key: "amount",
       header: t("holdings.col.amount"),
-      cell: (h) => mask(formatCurrencyCompact(h.amount)),
+      cell: (h) => mask(formatCurrencyCompact(holdingValue(h))),
       numeric: true,
     },
     {
       key: "share",
       header: t("holdings.col.share"),
       cell: (h) =>
-        total > 0
-          ? mask(formatPercent((h.amount / total) * 100))
-          : "—",
+        total > 0 ? mask(formatPercent((holdingValue(h) / total) * 100)) : "—",
       numeric: true,
-    },
-    {
-      key: "note",
-      header: t("holdings.col.note"),
-      cell: (h) => h.note ?? "",
-      className: "finance-note",
-      hideOnMobile: true,
     },
   ];
 
@@ -70,11 +102,12 @@ export function HoldingsTable({
   const summaryRow = (
     <>
       <td>{t("holdings.totalValue")}</td>
+      <td></td>
+      <td></td>
       <td className="finance-number finance-bold">
         {mask(formatCurrencyCompact(total))}
       </td>
       <td className="finance-number finance-bold">100%</td>
-      <td></td>
     </>
   );
 

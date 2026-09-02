@@ -3,7 +3,7 @@ import { TreemapController, TreemapElement } from "chartjs-chart-treemap";
 import { useMemo } from "react";
 import { formatCurrencyCompact } from "../utils";
 import type { HoldingCurrency, StockHolding } from "../models";
-import { ChartCanvas, EmptyState, CHART_COLORS, getBgSecondary } from "./chart";
+import { ChartCanvas, EmptyState, CHART_COLORS } from "./chart";
 import { toDisplayCurrency } from "./components/holdings-table";
 import type { HoldingsTreemapChartProps } from "./types";
 
@@ -33,9 +33,8 @@ export function HoldingsTreemapChart({
             groups: ["name"],
             backgroundColor: (ctx: { dataIndex: number }) =>
               CHART_COLORS[ctx.dataIndex % CHART_COLORS.length],
-            borderColor: getBgSecondary(),
-            borderWidth: 2,
-            spacing: 2,
+            borderWidth: 0,
+            spacing: 0,
             labels: {
               display: true,
               overflow: "cut",

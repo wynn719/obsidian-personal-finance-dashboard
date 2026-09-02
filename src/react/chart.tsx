@@ -11,16 +11,16 @@ import type {
 
 Chart.register(...registerables);
 
-// 方案 D「Obsidian 融合」：Tailwind 400 档低饱和色 + 统一 0.8 透明度，
+// 方案 D「Obsidian 融合」：Tailwind 400 档低饱和色 + 统一 0.85 透明度，
 // 与 Obsidian 明/暗主题背景自然融合；白字标签对比度仍充足。
 const CHART_COLORS = [
-  "rgba(96, 165, 250, 0.8)", // blue 400
-  "rgba(74, 222, 128, 0.8)", // green 400
-  "rgba(251, 191, 36, 0.8)", // amber 400
-  "rgba(167, 139, 250, 0.8)", // violet 400
-  "rgba(34, 211, 238, 0.8)", // cyan 400
-  "rgba(244, 114, 182, 0.8)", // pink 400
-  "rgba(251, 146, 60, 0.8)", // orange 400
+  "rgba(96, 165, 250, 0.85)", // blue 400
+  "rgba(74, 222, 128, 0.85)", // green 400
+  "rgba(251, 191, 36, 0.85)", // amber 400
+  "rgba(167, 139, 250, 0.85)", // violet 400
+  "rgba(34, 211, 238, 0.85)", // cyan 400
+  "rgba(244, 114, 182, 0.85)", // pink 400
+  "rgba(251, 146, 60, 0.85)", // orange 400
 ];
 
 function getBgSecondary(): string {

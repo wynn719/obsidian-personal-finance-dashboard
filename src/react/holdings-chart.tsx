@@ -39,14 +39,19 @@ export function HoldingsTreemapChart({
             labels: {
               display: true,
               overflow: "cut",
-              font: { size: 11 },
+              align: "center",
+              position: "middle",
+              font: [{ size: 12 }, { size: 11 }],
               color: "#ffffff",
-              formatter: (ctx: { raw: { g?: string; v?: number } }) => {
+              // Two centered lines: stock name on top, share % below
+              formatter: (ctx: {
+                raw: { g?: string; v?: number };
+              }): string[] => {
                 const pct =
                   total > 0 && ctx.raw.v
                     ? ((ctx.raw.v / total) * 100).toFixed(1)
                     : "0";
-                return `${ctx.raw.g ?? ""} ${pct}%`;
+                return [ctx.raw.g ?? "", `${pct}%`];
               },
             },
           },

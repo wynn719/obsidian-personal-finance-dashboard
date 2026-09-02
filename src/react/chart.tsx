@@ -11,14 +11,16 @@ import type {
 
 Chart.register(...registerables);
 
+// 方案 D「Obsidian 融合」：Tailwind 400 档低饱和色 + 统一 0.8 透明度，
+// 与 Obsidian 明/暗主题背景自然融合；白字标签对比度仍充足。
 const CHART_COLORS = [
-  "#3b82f6",
-  "#22c55e",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#f97316",
+  "rgba(96, 165, 250, 0.8)", // blue 400
+  "rgba(74, 222, 128, 0.8)", // green 400
+  "rgba(251, 191, 36, 0.8)", // amber 400
+  "rgba(167, 139, 250, 0.8)", // violet 400
+  "rgba(34, 211, 238, 0.8)", // cyan 400
+  "rgba(244, 114, 182, 0.8)", // pink 400
+  "rgba(251, 146, 60, 0.8)", // orange 400
 ];
 
 function getBgSecondary(): string {
@@ -131,16 +133,16 @@ export function BarChart({ data, maskNumbers }: BarChartProps) {
           {
             label: t("chart.income"),
             data: data.map((d) => d.income),
-            backgroundColor: "rgba(34, 197, 94, 0.75)",
-            hoverBackgroundColor: "rgba(34, 197, 94, 0.9)",
+            backgroundColor: "rgba(239, 138, 138, 0.7)",
+            hoverBackgroundColor: "rgba(239, 138, 138, 0.85)",
             borderRadius: 4,
             borderSkipped: false,
           },
           {
             label: t("chart.expense"),
             data: data.map((d) => d.expense),
-            backgroundColor: "rgba(239, 68, 68, 0.75)",
-            hoverBackgroundColor: "rgba(239, 68, 68, 0.9)",
+            backgroundColor: "rgba(125, 201, 143, 0.7)",
+            hoverBackgroundColor: "rgba(125, 201, 143, 0.85)",
             borderRadius: 4,
             borderSkipped: false,
           },
@@ -148,11 +150,11 @@ export function BarChart({ data, maskNumbers }: BarChartProps) {
             label: t("chart.netCashFlow"),
             data: data.map((d) => d.netCashFlow),
             type: "line",
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            borderColor: "rgba(143, 168, 217, 0.9)",
+            backgroundColor: "rgba(143, 168, 217, 0.1)",
             borderWidth: 2.5,
             pointRadius: 4,
-            pointBackgroundColor: "#3b82f6",
+            pointBackgroundColor: "rgba(143, 168, 217, 0.9)",
             pointBorderColor: "#ffffff",
             pointBorderWidth: 2,
             pointHoverRadius: 6,
@@ -223,11 +225,11 @@ export function TotalAssetsChart({ data, maskNumbers }: TotalAssetsChartProps) {
           {
             label: t("chart.monthlyTotalAssets"),
             data: data.map((d) => d.totalAssets),
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            borderColor: "rgba(96, 165, 250, 0.9)",
+            backgroundColor: "rgba(96, 165, 250, 0.12)",
             borderWidth: 2.5,
             pointRadius: 4,
-            pointBackgroundColor: "#3b82f6",
+            pointBackgroundColor: "rgba(96, 165, 250, 0.9)",
             pointBorderColor: "#ffffff",
             pointBorderWidth: 2,
             pointHoverRadius: 6,

@@ -107,7 +107,7 @@ export function MonthlyOverviewTable({
   );
 
   return (
-    <div className="finance-section">
+    <div className="finance-section finance-overview-section">
       <h2>
         <Icon name="calendar" /> {t("overview.title")}
       </h2>

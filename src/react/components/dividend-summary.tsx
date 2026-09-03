@@ -56,7 +56,7 @@ export function DividendSummaryTable({
   );
 
   return (
-    <div className="finance-section">
+    <div className="finance-section finance-dividend-section">
       <h2>
         <Icon name="target" /> {t("dividend.title")} ({year})
       </h2>

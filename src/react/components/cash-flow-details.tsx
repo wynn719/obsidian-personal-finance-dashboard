@@ -92,7 +92,7 @@ export function CashFlowDetailsTable({
   );
 
   return (
-    <div className="finance-section">
+    <div className="finance-section finance-cashflow-section">
       <h2>
         <Icon name="clipboard-list" /> {t("cashFlow.title")}
       </h2>

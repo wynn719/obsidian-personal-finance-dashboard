@@ -112,7 +112,7 @@ export function AssetAllocationTable({
   );
 
   return (
-    <div className="finance-section">
+    <div className="finance-section finance-allocation-section">
       <h2>
         <Icon name="trending-up" /> {t("allocation.title")}
       </h2>

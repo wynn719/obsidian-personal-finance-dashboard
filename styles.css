@@ -892,9 +892,19 @@
   margin-bottom: var(--fd-space-2);
 }
 
+/* mobile 下隐藏整段重表格模块：资产配置 / 股息汇总 / 月度总览 / 收支记录
+   (指标卡、图表、股票持仓仍保留) */
+[data-layout="mobile"] .finance-allocation-section,
+[data-layout="mobile"] .finance-dividend-section,
+[data-layout="mobile"] .finance-overview-section,
+[data-layout="mobile"] .finance-cashflow-section {
+  display: none;
+}
+
 [data-layout="mobile"] .finance-section h2 {
   font-size: 0.95em;
   margin-bottom: var(--fd-space-2);
+  padding-top: 4px;
   padding-bottom: var(--fd-space-1);
 }
 

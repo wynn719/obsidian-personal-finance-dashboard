@@ -82,10 +82,20 @@ export function CashFlowDetailsTable({
 
   const actions = (r: CashFlowRecord) => (
     <>
-      <button className="finance-btn-small" onClick={() => onEdit(r)}>
+      <button
+        className="finance-btn-small"
+        onClick={() => onEdit(r)}
+        aria-label={`编辑 ${r.date}`}
+        title={`编辑 ${r.date}`}
+      >
         <Icon name="pencil" />
       </button>
-      <button className="finance-btn-small" onClick={() => handleDelete(r.id)}>
+      <button
+        className="finance-btn-small"
+        onClick={() => handleDelete(r.id)}
+        aria-label={`删除 ${r.date}`}
+        title={`删除 ${r.date}`}
+      >
         <Icon name="trash-2" />
       </button>
     </>

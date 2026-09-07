@@ -31,6 +31,12 @@ function getBgSecondary(): string {
   );
 }
 
+function getThemeColor(variable: string, fallback: string): string {
+  return (
+    getComputedStyle(document.body).getPropertyValue(variable).trim() || fallback
+  );
+}
+
 /** 通用 Chart.js 容器：config 变化时销毁旧实例并重建。 */
 export function ChartCanvas({ config }: { config: ChartConfiguration }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,6 +70,7 @@ export function PieChart({ snapshot, maskNumbers }: PieChartProps) {
 
   const config = useMemo<ChartConfiguration>(() => {
     const total = snapshot?.totalAssets ?? 0;
+    const mutedColor = getThemeColor("--text-muted", "#858b94");
     return {
       type: "doughnut",
       data: {
@@ -107,7 +114,8 @@ export function PieChart({ snapshot, maskNumbers }: PieChartProps) {
               padding: 16,
               usePointStyle: true,
               pointStyle: "circle",
-              font: { size: 12 },
+              color: mutedColor,
+              font: { size: 11 },
             },
           },
         },
@@ -133,16 +141,16 @@ export function BarChart({ data, maskNumbers }: BarChartProps) {
           {
             label: t("chart.income"),
             data: data.map((d) => d.income),
-            backgroundColor: "rgba(239, 138, 138, 0.7)",
-            hoverBackgroundColor: "rgba(239, 138, 138, 0.85)",
+            backgroundColor: "rgba(239, 138, 138, 0.68)",
+            hoverBackgroundColor: "rgba(239, 138, 138, 0.82)",
             borderRadius: 4,
             borderSkipped: false,
           },
           {
             label: t("chart.expense"),
             data: data.map((d) => d.expense),
-            backgroundColor: "rgba(125, 201, 143, 0.7)",
-            hoverBackgroundColor: "rgba(125, 201, 143, 0.85)",
+            backgroundColor: "rgba(125, 201, 143, 0.68)",
+            hoverBackgroundColor: "rgba(125, 201, 143, 0.82)",
             borderRadius: 4,
             borderSkipped: false,
           },
@@ -150,11 +158,11 @@ export function BarChart({ data, maskNumbers }: BarChartProps) {
             label: t("chart.netCashFlow"),
             data: data.map((d) => d.netCashFlow),
             type: "line",
-            borderColor: "rgba(143, 168, 217, 0.9)",
-            backgroundColor: "rgba(143, 168, 217, 0.1)",
-            borderWidth: 2.5,
-            pointRadius: 4,
-            pointBackgroundColor: "rgba(143, 168, 217, 0.9)",
+            borderColor: "rgba(110, 168, 239, 0.9)",
+            backgroundColor: "rgba(110, 168, 239, 0.1)",
+            borderWidth: 2.25,
+            pointRadius: 3.5,
+            pointBackgroundColor: "rgba(110, 168, 239, 0.9)",
             pointBorderColor: "#ffffff",
             pointBorderWidth: 2,
             pointHoverRadius: 6,
@@ -188,7 +196,7 @@ export function BarChart({ data, maskNumbers }: BarChartProps) {
               padding: 16,
               usePointStyle: true,
               pointStyle: "circle",
-              font: { size: 12 },
+              font: { size: 11 },
             },
           },
         },
@@ -225,11 +233,11 @@ export function TotalAssetsChart({ data, maskNumbers }: TotalAssetsChartProps) {
           {
             label: t("chart.monthlyTotalAssets"),
             data: data.map((d) => d.totalAssets),
-            borderColor: "rgba(96, 165, 250, 0.9)",
-            backgroundColor: "rgba(96, 165, 250, 0.12)",
-            borderWidth: 2.5,
-            pointRadius: 4,
-            pointBackgroundColor: "rgba(96, 165, 250, 0.9)",
+            borderColor: "rgba(110, 168, 239, 0.92)",
+            backgroundColor: "rgba(110, 168, 239, 0.12)",
+            borderWidth: 2.25,
+            pointRadius: 3.5,
+            pointBackgroundColor: "rgba(110, 168, 239, 0.92)",
             pointBorderColor: "#ffffff",
             pointBorderWidth: 2,
             pointHoverRadius: 6,
@@ -263,7 +271,7 @@ export function TotalAssetsChart({ data, maskNumbers }: TotalAssetsChartProps) {
               padding: 16,
               usePointStyle: true,
               pointStyle: "circle",
-              font: { size: 12 },
+              font: { size: 11 },
             },
           },
         },

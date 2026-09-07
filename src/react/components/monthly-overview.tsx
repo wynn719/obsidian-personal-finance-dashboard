@@ -97,10 +97,20 @@ export function MonthlyOverviewTable({
 
   const actions = (row: MonthlyOverviewRow) => (
     <>
-      <button className="finance-btn-small" onClick={() => onEditMonth(row.month)}>
+      <button
+        className="finance-btn-small"
+        onClick={() => onEditMonth(row.month)}
+        aria-label={`编辑 ${row.month}`}
+        title={`编辑 ${row.month}`}
+      >
         <Icon name="pencil" />
       </button>
-      <button className="finance-btn-small" onClick={() => handleDelete(row.month)}>
+      <button
+        className="finance-btn-small"
+        onClick={() => handleDelete(row.month)}
+        aria-label={`删除 ${row.month}`}
+        title={`删除 ${row.month}`}
+      >
         <Icon name="trash-2" />
       </button>
     </>

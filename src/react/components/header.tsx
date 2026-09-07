@@ -54,11 +54,14 @@ function ActionButton({
   // 消费顶层下发的布局模式：mobile 时仅显示图标，隐藏文字说明
   const { layout } = useLayout();
   return (
-    <button className="finance-btn" onClick={onClick}>
+    <button
+      className="finance-btn"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+    >
       <Icon name={icon} />
-      {layout !== "mobile" && (
-        <span className="finance-btn-label">{label}</span>
-      )}
+      <span className="finance-btn-label">{layout !== "mobile" ? label : ""}</span>
     </button>
   );
 }
@@ -88,6 +91,8 @@ export function Header({
         <button
           className={`finance-btn${maskNumbers ? " finance-btn-active" : ""}`}
           onClick={onToggleMask}
+          aria-label={maskNumbers ? "显示金额" : "隐藏金额"}
+          title={maskNumbers ? "显示金额" : "隐藏金额"}
         >
           <Icon name={maskNumbers ? "eye-off" : "eye"} />
         </button>

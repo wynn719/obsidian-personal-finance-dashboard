@@ -78,6 +78,7 @@ export function Header({
   onEditHoldings,
   onRefresh,
 }: HeaderProps) {
+  const { layout } = useLayout();
   return (
     <div className="finance-header">
       <div className="finance-header-title-row">
@@ -95,6 +96,9 @@ export function Header({
           title={maskNumbers ? "显示金额" : "隐藏金额"}
         >
           <Icon name={maskNumbers ? "eye-off" : "eye"} />
+          <span className="finance-btn-label">
+            {layout !== "mobile" ? t("dashboard.btn.maskNumbers") : ""}
+          </span>
         </button>
         <ActionButton
           icon="bar-chart-3"

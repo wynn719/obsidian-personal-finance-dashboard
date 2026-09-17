@@ -1,26 +1,34 @@
 /* ============================================================
-   Finance Dashboard - Design System
-   Professional fintech dashboard styling
-   Follows Obsidian theme variables + custom design tokens
+   Finance Dashboard — Design System
+   设计方向：克制的数据账本（restrained ledger）
+   - 活在 Obsidian 主题内：背景/文字/边框全部消费主题变量
+   - 平面卡片：无渐变、无位移动效，结构靠 1px 主题边框
+   - 信息层级靠字号/字重，不用大写字母、装饰线等模板化手法
+   - 数字一律等宽对齐（tabular-nums / monospace），财务本分
+   - 涨跌色遵守 A 股习惯：股票行情红涨绿跌；财务指标绿正红负
    ============================================================ */
 
-/* ── Design Tokens ─────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   1. Design Tokens（单一事实源，唯一一份）
+   ════════════════════════════════════════════════════════════ */
 :root {
-  /* Semantic colors - Finance Dashboard */
-  --fd-positive: #22c55e;
-  --fd-positive-bg: rgba(34, 197, 94, 0.08);
-  --fd-positive-border: rgba(34, 197, 94, 0.2);
-  --fd-negative: #ef6464;
-  --fd-negative-bg: rgba(239, 100, 100, 0.08);
-  --fd-negative-border: rgba(239, 100, 100, 0.2);
-  --fd-accent: #6ea8ef;
-  --fd-accent-strong: #4f8edc;
-  --fd-accent-bg: rgba(110, 168, 239, 0.12);
-  --fd-accent-border: rgba(110, 168, 239, 0.3);
-  --fd-warning: #f59e0b;
-  --fd-warning-bg: rgba(245, 158, 11, 0.08);
+  /* 语义色 */
+  --fd-positive: #16a34a;
+  --fd-positive-bg: rgba(22, 163, 74, 0.08);
+  --fd-positive-border: rgba(22, 163, 74, 0.2);
+  --fd-negative: #dc2626;
+  --fd-negative-bg: rgba(220, 38, 38, 0.07);
+  --fd-negative-border: rgba(220, 38, 38, 0.2);
+  --fd-accent: #5b8fd9;
+  --fd-accent-strong: #4a7ec8;
+  --fd-accent-bg: rgba(91, 143, 217, 0.12);
+  --fd-accent-border: rgba(91, 143, 217, 0.35);
+  /* 实心 accent 按钮上的文字色（light 白字 / dark 深字，见 .theme-dark） */
+  --fd-accent-contrast: #ffffff;
+  --fd-warning: #d97706;
+  --fd-warning-bg: rgba(217, 119, 6, 0.08);
 
-  /* Spacing scale (8px base) */
+  /* 间距（8px 基） */
   --fd-space-1: 4px;
   --fd-space-2: 8px;
   --fd-space-3: 12px;
@@ -29,72 +37,65 @@
   --fd-space-6: 24px;
   --fd-space-8: 32px;
   --fd-space-10: 40px;
-  --fd-space-12: 48px;
 
-  /* Border radius */
-  --fd-radius-sm: 8px;
-  --fd-radius-md: 12px;
+  /* 圆角：小/中/大 */
+  --fd-radius-sm: 6px;
+  --fd-radius-md: 8px;
   --fd-radius-lg: 12px;
 
-  /* Shadows */
-  --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --fd-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --fd-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  /* 阴影：仅静止一层，hover 不再抬升/加影 */
+  --fd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
 
-  /* Transitions */
-  --fd-transition-fast: 150ms ease-out;
-  --fd-transition-normal: 200ms ease-out;
-  --fd-transition-slow: 300ms ease-out;
+  /* 动效 */
+  --fd-transition-fast: 120ms ease-out;
+  --fd-transition-normal: 180ms ease-out;
 
-  /* Chart colors - Accessible finance palette */
-  --fd-chart-1: #3b82f6; /* Blue - Primary */
-  --fd-chart-2: #22c55e; /* Green - Positive */
-  --fd-chart-3: #f59e0b; /* Amber - Warning */
-  --fd-chart-4: #8b5cf6; /* Purple - Accent */
-  --fd-chart-5: #06b6d4; /* Cyan - Info */
-  --fd-chart-6: #ec4899; /* Pink - Highlight */
-  --fd-chart-7: #f97316; /* Orange - Secondary */
+  /* 图表色板（Tailwind 400 低饱和档，与主题自然融合） */
+  --fd-chart-1: #60a5fa;
+  --fd-chart-2: #4ade80;
+  --fd-chart-3: #fbbf24;
+  --fd-chart-4: #a78bfa;
+  --fd-chart-5: #22d3ee;
+  --fd-chart-6: #f472b6;
+  --fd-chart-7: #fb923c;
 }
 
-/* Dark mode shadow adjustments */
 .theme-dark {
-  --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --fd-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --fd-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --fd-positive: #4ade80;
+  --fd-positive-bg: rgba(74, 222, 128, 0.1);
+  --fd-positive-border: rgba(74, 222, 128, 0.25);
+  --fd-negative: #f87171;
+  --fd-negative-bg: rgba(248, 113, 113, 0.1);
+  --fd-negative-border: rgba(248, 113, 113, 0.25);
+  --fd-accent: #84b8f5;
+  --fd-accent-strong: #6ea8ef;
+  --fd-accent-bg: rgba(132, 184, 245, 0.14);
+  --fd-accent-border: rgba(132, 184, 245, 0.4);
+  --fd-accent-contrast: #0d1b2e; /* 亮蓝底配深字保证对比 */
+  --fd-warning: #fbbf24;
+  --fd-warning-bg: rgba(251, 191, 36, 0.1);
+  --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.theme-dark .finance-table-has-actions th:last-child,
-.theme-dark .finance-table-has-actions td:last-child {
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2);
-}
-
-/* ── Dashboard Container ───────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   2. 容器与头部
+   ════════════════════════════════════════════════════════════ */
 .finance-dashboard {
-  padding: var(--fd-space-3) var(--fd-space-5) var(--fd-space-8);
+  padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-10);
   max-width: min(1560px, 100%);
   margin: 0 auto;
   font-family: var(--font-interface);
   line-height: 1.5;
+  color: var(--text-normal);
 }
 
-/* ── Header ────────────────────────────────────────────────── */
 .finance-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--fd-space-3);
+  margin-bottom: var(--fd-space-5);
   flex-wrap: wrap;
   gap: var(--fd-space-3);
-}
-
-.finance-header h1 {
-  margin: 0;
-  font-size: 1.4em;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-2);
 }
 
 .finance-header-title-row {
@@ -102,6 +103,16 @@
   align-items: center;
   gap: var(--fd-space-3);
   flex-wrap: wrap;
+}
+
+.finance-header h1 {
+  margin: 0;
+  font-size: 1.35em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
 }
 
 .finance-year-selector {
@@ -126,18 +137,29 @@
 }
 
 .finance-year-select {
-  padding: 4px 24px 4px 8px;
+  padding: 5px 28px 5px 10px;
+  min-width: 86px;
+  border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-sm);
   background: var(--background-primary);
   color: var(--text-normal);
   font-size: 0.9em;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--fd-transition-fast);
+  transition: border-color var(--fd-transition-fast);
   outline: none;
-  min-width: 80px;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.finance-year-select:hover {
+  border-color: var(--fd-accent-border);
+}
+
+.finance-year-select:focus-visible {
+  border-color: var(--fd-accent);
+  outline: 2px solid var(--fd-accent);
+  outline-offset: 1px;
 }
 
 .finance-year-select-icon {
@@ -156,67 +178,70 @@
   height: 14px;
 }
 
-.finance-year-select:focus {
-  border-color: var(--fd-accent);
-  box-shadow: 0 0 0 2px var(--fd-accent-bg);
-}
-
 .finance-actions {
   display: flex;
   gap: var(--fd-space-2);
   flex-wrap: wrap;
 }
 
-/* ── Buttons ───────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   3. 按钮
+   ════════════════════════════════════════════════════════════ */
 .finance-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--fd-space-1);
-  padding: 5px 10px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 10px;
   border-radius: var(--fd-radius-sm);
+  border: 1px solid var(--background-modifier-border);
   background: var(--interactive-normal);
   color: var(--text-normal);
   cursor: pointer;
-  font-size: 0.78em;
+  font-size: 0.8em;
   font-weight: 500;
-  transition: all var(--fd-transition-fast);
+  transition: background-color var(--fd-transition-fast),
+    border-color var(--fd-transition-fast);
   white-space: nowrap;
   user-select: none;
 }
 
 .finance-btn:hover {
   background: var(--interactive-hover);
-  border-color: var(--interactive-accent);
-  transform: translateY(-0.5px);
+  border-color: var(--fd-accent-border);
 }
 
 .finance-btn:active {
-  transform: translateY(0);
-  box-shadow: none;
+  background: var(--interactive-hover);
 }
 
+/* 实心激活态：accent 底 + 保证对比的文字色 */
 .finance-btn-active {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border-color: var(--interactive-accent);
+  background: var(--fd-accent);
+  color: var(--fd-accent-contrast);
+  border-color: var(--fd-accent);
 }
 
 .finance-btn-active:hover {
-  background: var(--interactive-accent-hover);
-  border-color: var(--interactive-accent-hover);
+  background: var(--fd-accent-strong);
+  border-color: var(--fd-accent-strong);
 }
 
-.finance-btn-small + .finance-btn-small {
-  margin-left: 6px;
+.finance-btn:focus-visible,
+.finance-btn-small:focus-visible,
+.finance-filter-btn:focus-visible {
+  outline: 2px solid var(--fd-accent);
+  outline-offset: 2px;
 }
 
+/* 小图标按钮（表内行操作） */
 .finance-btn-small {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   padding: 4px;
   border: none;
   background: transparent;
@@ -224,7 +249,8 @@
   font-size: 0.9em;
   border-radius: var(--fd-radius-sm);
   color: var(--text-muted);
-  transition: all var(--fd-transition-fast);
+  transition: background-color var(--fd-transition-fast),
+    color var(--fd-transition-fast);
 }
 
 .finance-btn-small:hover {
@@ -233,60 +259,64 @@
 }
 
 .finance-btn-small:active {
-  transform: scale(0.95);
+  background: var(--background-modifier-hover);
 }
 
-/* ── Metric Cards Grid ─────────────────────────────────────── */
+.finance-btn-small + .finance-btn-small {
+  margin-left: 6px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. 指标卡（首屏主角：数字强、标签弱、左对齐扫读）
+   ════════════════════════════════════════════════════════════ */
 .finance-metrics-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--fd-space-3);
-  margin-bottom: var(--fd-space-3);
+  gap: var(--fd-space-4);
+  margin-bottom: var(--fd-space-5);
 }
 
 .finance-metric-card {
-  background: linear-gradient(180deg, var(--background-secondary), var(--background-primary));
+  background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-3);
-  text-align: center;
+  padding: var(--fd-space-4) var(--fd-space-4) var(--fd-space-3);
+  text-align: left;
   box-shadow: var(--fd-shadow-sm);
-  transition: all var(--fd-transition-normal);
+  transition: border-color var(--fd-transition-normal);
   position: relative;
   overflow: hidden;
 }
 
 .finance-metric-card:hover {
-  border-color: var(--background-modifier-border-hover);
-  box-shadow: var(--fd-shadow-sm);
+  border-color: var(--fd-accent-border);
 }
 
 .finance-metric-label {
-  font-size: 0.68em;
+  font-size: 0.75em;
   color: var(--text-muted);
-  margin-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--fd-space-1);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .finance-metric-value {
-  font-size: 1.1em;
+  font-size: 1.35em;
   font-weight: 700;
   color: var(--text-normal);
-  margin-bottom: 1px;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .finance-metric-suffix {
-  font-size: 0.62em;
+  font-size: 0.7em;
   color: var(--text-muted);
   font-weight: 400;
+  margin-top: 2px;
 }
 
-/* ── Color Classes ─────────────────────────────────────────── */
+/* 语义色类 */
 .positive {
   color: var(--fd-positive) !important;
 }
@@ -295,20 +325,46 @@
   color: var(--fd-negative) !important;
 }
 
-/* ── Sections ──────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   5. 区块卡片
+   ════════════════════════════════════════════════════════════ */
 .finance-section {
-  margin-bottom: var(--fd-space-3);
+  margin-bottom: var(--fd-space-5);
 }
 
 .finance-section h2 {
   margin: 0 0 var(--fd-space-3);
-  font-size: 1em;
-  font-weight: 600;
+  font-size: 1.02em;
+  font-weight: 700;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
-  gap: var(--fd-space-2);
+  gap: 8px;
   flex-shrink: 0;
+}
+
+/* 仪表盘直系 section 与 summary-grid 内 section：统一的平面卡片壳 */
+.finance-dashboard > .finance-section,
+.finance-summary-grid > .finance-section {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--fd-radius-md);
+  padding: var(--fd-space-4);
+  box-shadow: var(--fd-shadow-sm);
+}
+
+/* 资产配置 + 股息汇总 + 股票持仓 三栏并排 */
+.finance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--fd-space-4);
+  align-items: start;
+  margin-bottom: var(--fd-space-5);
+}
+
+.finance-summary-grid > .finance-section {
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 .finance-empty {
@@ -325,36 +381,9 @@
   color: var(--text-muted);
 }
 
-/* ── Large Screen Data Layout ──────────────────────────────── */
-/* 资产配置 + 股息汇总 并排显示 */
-.finance-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--fd-space-3);
-  align-items: start;
-  margin-bottom: var(--fd-space-3);
-}
-
-.finance-summary-grid > .finance-section {
-  min-width: 0;
-  margin-bottom: 0;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-3);
-  box-shadow: var(--fd-shadow-sm);
-}
-
-.finance-dashboard > .finance-section {
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-3);
-  box-shadow: var(--fd-shadow-sm);
-}
-
-
-/* ── Tables ────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   6. 表格
+   ════════════════════════════════════════════════════════════ */
 .finance-table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -372,30 +401,21 @@
   table-layout: auto;
 }
 
-/* Tables without wrapper get their own border */
+/* 无 wrapper 的表格自带边框 */
 .finance-section > .finance-table {
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-sm);
   overflow: hidden;
 }
 
-.finance-table-scroll {
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: var(--fd-radius-md);
-}
-
 .finance-table th {
   background: var(--background-secondary);
-  padding: 7px var(--fd-space-2);
+  padding: 9px var(--fd-space-2);
   text-align: left;
   font-weight: 600;
-  font-size: 0.88em;
+  font-size: 0.85em;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 2px solid var(--background-modifier-border);
+  border-bottom: 1px solid var(--background-modifier-border);
   white-space: nowrap;
   position: sticky;
   top: 0;
@@ -403,9 +423,9 @@
 }
 
 .finance-table td {
-  padding: 7px var(--fd-space-2);
+  padding: 9px var(--fd-space-2);
   border-bottom: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary, #ffffff);
+  background-color: var(--background-primary);
   transition: background-color var(--fd-transition-fast);
 }
 
@@ -422,6 +442,7 @@
   border-bottom: none;
 }
 
+/* 数字列：右对齐 + 等宽数字 */
 .finance-number {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -431,7 +452,6 @@
   letter-spacing: -0.01em;
 }
 
-/* 数值列表头同步右对齐（DataTable 对 numeric 列打 finance-th-numeric） */
 .finance-table th.finance-th-numeric {
   text-align: right;
 }
@@ -444,28 +464,50 @@
   color: var(--text-muted);
 }
 
-/* ── Sticky Actions Column ─────────────────────────────────── */
+/* 合计行 */
+.finance-total-row {
+  font-weight: 700;
+  background: var(--background-secondary) !important;
+}
+
+.finance-total-row td {
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: var(--fd-space-2);
+  padding-bottom: var(--fd-space-2);
+  background: var(--background-secondary) !important;
+}
+
+.finance-bold {
+  font-weight: 700;
+}
+
+/* 偏离目标配置警告行 */
+.finance-deviation-warning {
+  background: var(--fd-negative-bg) !important;
+}
+
+.finance-deviation-warning:hover {
+  background: var(--fd-negative-bg) !important;
+}
+
+/* 右侧 sticky 操作列 */
 .finance-table-has-actions th:last-child,
 .finance-table-has-actions td:last-child {
   position: sticky;
   right: 0;
   z-index: 2;
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
-  /* Ensure opaque background to cover scrolling content */
-  background-color: var(--background-primary, #ffffff);
+  background-color: var(--background-primary);
 }
 
 .finance-table-has-actions th:last-child {
   z-index: 3;
-  background-color: var(--background-secondary, #f5f5f5);
+  background-color: var(--background-secondary);
 }
 
+.theme-dark .finance-table-has-actions th:last-child,
 .theme-dark .finance-table-has-actions td:last-child {
-  background-color: var(--background-primary, #1e1e1e);
-}
-
-.theme-dark .finance-table-has-actions th:last-child {
-  background-color: var(--background-secondary, #2d2d2d);
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.25);
 }
 
 .finance-table-actions-cell {
@@ -476,56 +518,55 @@
   max-width: 80px;
 }
 
-.finance-total-row td:last-child {
-  background: var(--background-secondary) !important;
+/* 左侧 sticky 标签列（月份/类别）：宽表横滚时保留行上下文 */
+.finance-table-sticky-label th:first-child,
+.finance-table-sticky-label td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--background-primary);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
-.finance-bold {
-  font-weight: 700;
+.finance-table-sticky-label th:first-child {
+  z-index: 3;
+  background-color: var(--background-secondary);
 }
 
-.finance-total-row {
-  font-weight: 700;
-  background: var(--background-secondary) !important;
+.theme-dark .finance-table-sticky-label td:first-child,
+.theme-dark .finance-table-has-actions td:last-child {
+  background-color: var(--background-primary);
 }
 
-.finance-total-row td {
-  border-top: 2px solid var(--background-modifier-border);
-  padding-top: var(--fd-space-2);
-  padding-bottom: var(--fd-space-2);
+.theme-dark .finance-table-sticky-label th:first-child,
+.theme-dark .finance-table-has-actions th:last-child {
+  background-color: var(--background-secondary);
 }
 
-.finance-deviation-warning {
-  background: var(--fd-negative-bg) !important;
-}
-
-.finance-deviation-warning:hover {
-  background: rgba(239, 68, 68, 0.12) !important;
-}
-
-/* ── Charts ────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   7. 图表
+   ════════════════════════════════════════════════════════════ */
 .finance-charts-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--fd-space-3);
-  margin-bottom: var(--fd-space-3);
+  gap: var(--fd-space-4);
+  margin-bottom: var(--fd-space-5);
 }
 
 .finance-chart-container {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-3);
+  padding: var(--fd-space-4);
   box-shadow: var(--fd-shadow-sm);
-  transition: box-shadow var(--fd-transition-normal);
+  transition: border-color var(--fd-transition-normal);
   display: flex;
   flex-direction: column;
-  /* 抵消 .finance-section 的 margin-bottom：图表在 grid 内，间距由 gap 提供 */
-  margin-bottom: 0;
+  margin-bottom: 0; /* grid 内间距由 gap 提供 */
 }
 
 .finance-chart-container:hover {
-  box-shadow: var(--fd-shadow-sm);
+  border-color: var(--fd-accent-border);
 }
 
 .finance-chart-container canvas {
@@ -534,20 +575,23 @@
   max-height: 260px;
 }
 
-/* ── Filter Bar ────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   8. 筛选条（segmented control）与分页
+   ════════════════════════════════════════════════════════════ */
 .finance-filter-bar {
   display: flex;
   gap: var(--fd-space-1);
   margin-bottom: var(--fd-space-3);
   background: var(--background-secondary);
-  padding: var(--fd-space-1);
+  padding: 4px;
   border-radius: var(--fd-radius-md);
   border: 1px solid var(--background-modifier-border);
   width: fit-content;
 }
 
 .finance-filter-btn {
-  padding: 4px 10px;
+  min-height: 30px;
+  padding: 5px 12px;
   border: 1px solid transparent;
   border-radius: var(--fd-radius-sm);
   background: transparent;
@@ -555,7 +599,8 @@
   cursor: pointer;
   font-size: 0.78em;
   font-weight: 500;
-  transition: all var(--fd-transition-fast);
+  transition: background-color var(--fd-transition-fast),
+    color var(--fd-transition-fast);
 }
 
 .finance-filter-btn:hover {
@@ -564,9 +609,9 @@
 }
 
 .finance-filter-btn.active {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border-color: var(--interactive-accent);
+  background: var(--fd-accent);
+  color: var(--fd-accent-contrast);
+  border-color: var(--fd-accent);
   box-shadow: var(--fd-shadow-sm);
 }
 
@@ -578,7 +623,9 @@
   padding: var(--fd-space-2);
 }
 
-/* ── Lucide Icons ──────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   9. 图标
+   ════════════════════════════════════════════════════════════ */
 .finance-icon {
   display: inline-flex;
   align-items: center;
@@ -592,11 +639,7 @@
   stroke-width: 2;
 }
 
-.finance-btn .finance-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
+.finance-btn .finance-icon svg,
 .finance-btn-small .finance-icon svg {
   width: 14px;
   height: 14px;
@@ -611,10 +654,12 @@
 .finance-header h1 .finance-icon svg {
   width: 1.2em;
   height: 1.2em;
-  color: var(--interactive-accent);
+  color: var(--fd-accent);
 }
 
-/* ── Modal Styles ──────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   10. 弹窗与表单
+   ════════════════════════════════════════════════════════════ */
 .finance-modal {
   padding: var(--fd-space-2);
 }
@@ -623,7 +668,6 @@
   margin-top: 0;
 }
 
-/* ── Modal Form Fields ─────────────────────────────────────── */
 .finance-modal-form {
   display: flex;
   flex-direction: column;
@@ -658,6 +702,13 @@
   flex-shrink: 0;
 }
 
+.finance-field-hint {
+  display: block;
+  font-size: 0.78em;
+  opacity: 0.55;
+  margin-top: 2px;
+}
+
 .finance-modal input[type="text"],
 .finance-modal input[type="number"],
 .finance-modal input[type="date"],
@@ -665,7 +716,8 @@
 .finance-modal select {
   flex: 1;
   min-width: 0;
-  padding: 6px 10px;
+  min-height: 36px;
+  padding: 8px 10px;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-sm);
   background: var(--background-modifier-form-field);
@@ -676,7 +728,8 @@
 
 .finance-modal input:focus,
 .finance-modal select:focus {
-  border-color: var(--interactive-accent);
+  border-color: var(--fd-accent);
+  box-shadow: 0 0 0 3px var(--fd-accent-bg);
 }
 
 .finance-modal input[type="number"] {
@@ -684,42 +737,43 @@
 }
 
 .finance-btn-cta {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
+  background: var(--fd-accent-strong);
+  color: var(--fd-accent-contrast);
+  border: 1px solid var(--fd-accent-strong);
   align-self: flex-start;
   margin-top: var(--fd-space-2);
 }
 
 .finance-btn-cta:hover {
-  background: var(--interactive-accent-hover);
-  color: var(--text-on-accent);
+  background: var(--fd-accent);
+  border-color: var(--fd-accent);
+  color: var(--fd-accent-contrast);
 }
 
-/* ── Sticky 标签列（月份/类别）：宽表横向滚动时保留行上下文 ── */
-.finance-table-sticky-label th:first-child,
-.finance-table-sticky-label td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background-color: var(--background-primary, #ffffff);
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+.finance-modal-wide {
+  width: min(760px, 92vw);
 }
 
-.finance-table-sticky-label th:first-child {
-  z-index: 3;
-  background-color: var(--background-secondary, #f5f5f5);
+/* 只读输入框 */
+.finance-input-readonly {
+  opacity: 0.75;
+  cursor: default;
+  background: var(--background-modifier-hover);
 }
 
-.theme-dark .finance-table-sticky-label td:first-child {
-  background-color: var(--background-primary, #1e1e1e);
+.finance-name-currency-row {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
 }
 
-.theme-dark .finance-table-sticky-label th:first-child {
-  background-color: var(--background-secondary, #2d2d2d);
+.finance-name-currency-row input {
+  flex: 1;
 }
 
-/* ── CashFlow 移动端卡片（阅读型表 → 纵向堆叠，无横向滚动）── */
+/* ════════════════════════════════════════════════════════════
+   11. 移动端卡片视图（DataTable mobileMode：纵向堆叠）
+   ════════════════════════════════════════════════════════════ */
 .finance-dt-cards {
   display: flex;
   flex-direction: column;
@@ -730,7 +784,8 @@
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-3);
+  padding: var(--fd-space-4);
+  box-shadow: var(--fd-shadow-sm);
 }
 
 .finance-dt-card-summary {
@@ -761,11 +816,11 @@
 }
 
 .finance-dt-card-type.income {
-  color: var(--fd-positive);
+  color: var(--fd-negative); /* A股习惯：流入红 */
 }
 
 .finance-dt-card-type.expense {
-  color: var(--fd-negative);
+  color: var(--fd-positive); /* 流出绿 */
 }
 
 .finance-dt-card-actions {
@@ -810,445 +865,70 @@
   max-width: 60%;
 }
 
-/* ── Responsive Design (top-down via data-layout) ────────────
-   Layout mode dispatched from <LayoutProvider> (ResizeObserver on
-   the dashboard root contentEl). Thresholds are CONTAINER width:
-     full ≥1100px | compact 768–1099px | mobile <768px
-   Only width/layout rules live here. Input-device (hover:none),
-   reduced-motion, and print remain @media — orthogonal concerns. */
-
-/* compact: summary 折单列；metric cards 3列(2行) */
-[data-layout="compact"] .finance-summary-grid,
-[data-layout="mobile"] .finance-summary-grid {
-  grid-template-columns: 1fr;
-  /* gap 沿用桌面 base(--fd-space-3)，保持块间距与 PC 一致 */
-}
-
-/* mobile 单列时两表间距 + 与下方模块间距收紧 */
-[data-layout="mobile"] .finance-summary-grid {
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
-}
-
-[data-layout="compact"] .finance-metrics-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-/* mobile: 按钮仅图标 / metric 2列 / charts 1列 / 表格缩字号
-   header 保持单行（年份左、操作按钮右），不另起一行；空间不足时 flex-wrap 兜底 */
-.finance-dashboard[data-layout="mobile"] {
-  padding: var(--fd-space-2);
-}
-
-/* actions 不铺满容器，按钮按内容宽靠右；gap 收紧适配图标按钮 */
-[data-layout="mobile"] .finance-actions {
-  gap: var(--fd-space-1);
-}
-
-[data-layout="mobile"] .finance-btn {
-  /* mobile 下按钮纯图标，做成正方形触控按钮 */
-  font-size: 0.72em;
-  padding: 5px;
-  min-width: 28px;
-  min-height: 28px;
-  justify-content: center;
-}
-
-[data-layout="mobile"] .finance-metrics-grid {
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
-}
-
-[data-layout="mobile"] .finance-metric-card {
-  padding: var(--fd-space-2);
-}
-
-[data-layout="mobile"] .finance-metric-label {
-  font-size: 0.68em;
-}
-
-[data-layout="mobile"] .finance-metric-value {
-  font-size: 1.05em;
-}
-
-[data-layout="mobile"] .finance-metric-suffix {
-  font-size: 0.62em;
-}
-
-[data-layout="mobile"] .finance-charts-row {
-  grid-template-columns: 1fr;
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
-}
-
-/* mobile 下所有 section 卡片(图表 + 各表格)统一收紧 padding，与 dashboard 根 padding、metric card 一致 */
-[data-layout="mobile"] .finance-section {
-  padding: var(--fd-space-2);
-}
-
-/* mobile 下 dashboard 直系 section(月度概览/现金流明细)之间间距收紧；
-   用 > 直系选择器避免误伤 summary-grid 内已被 margin-bottom:0 抵消的 section */
-.finance-dashboard[data-layout="mobile"] > .finance-section {
-  margin-bottom: var(--fd-space-2);
-}
-
-/* mobile 下隐藏整段重表格模块：资产配置 / 股息汇总 / 月度总览 / 收支记录
-   (指标卡、图表、股票持仓仍保留) */
-[data-layout="mobile"] .finance-allocation-section,
-[data-layout="mobile"] .finance-dividend-section,
-[data-layout="mobile"] .finance-overview-section,
-[data-layout="mobile"] .finance-cashflow-section {
-  display: none;
-}
-
-[data-layout="mobile"] .finance-section h2 {
-  font-size: 0.95em;
-  margin-bottom: var(--fd-space-2);
-  padding-top: 4px;
-  padding-bottom: var(--fd-space-1);
-}
-
-[data-layout="mobile"] .finance-table {
-  font-size: 0.72em;
-}
-
-[data-layout="mobile"] .finance-table th,
-[data-layout="mobile"] .finance-table td {
-  padding: var(--fd-space-1) var(--fd-space-2);
-  white-space: nowrap;
-}
-
-/* ── Reference-inspired visual polish ─────────────────────── */
-:root {
-  --fd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
-  --fd-shadow-md: 0 2px 8px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.04);
-}
-
-.theme-dark {
-  --fd-accent: #84b8f5;
-  --fd-accent-strong: #6ea8ef;
-  --fd-accent-bg: rgba(132, 184, 245, 0.14);
-  --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
-  --fd-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.16);
-}
-
-.finance-dashboard {
-  padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-10);
-  color: var(--text-normal);
-}
-
-.finance-header {
-  margin-bottom: var(--fd-space-5);
-}
-
-.finance-year-select {
-  min-width: 86px;
-  padding: 6px 28px 6px 10px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-sm);
-}
-
-.finance-btn {
-  min-height: 32px;
-  padding: 6px 10px;
-  font-size: 0.8em;
-}
-
-.finance-btn:hover {
-  border-color: var(--fd-accent-border);
-  transform: none;
-}
-
-.finance-btn-active {
-  background: var(--fd-accent-bg);
-  color: var(--fd-accent-strong);
-  border-color: var(--fd-accent-border);
-}
-
-.finance-btn-active:hover {
-  background: var(--fd-accent-bg);
-  border-color: var(--fd-accent);
-}
-
-.finance-btn:focus-visible,
-.finance-btn-small:focus-visible,
-.finance-filter-btn:focus-visible,
-.finance-year-select:focus-visible {
-  outline: 2px solid var(--fd-accent);
-  outline-offset: 2px;
-}
-
-.finance-btn-small {
-  width: 32px;
-  height: 32px;
-}
-
-.finance-metrics-grid {
-  gap: var(--fd-space-4);
-  margin-bottom: var(--fd-space-5);
-}
-
-.finance-metric-card {
-  background: var(--background-primary);
-  padding: var(--fd-space-4) var(--fd-space-3);
-  transition: border-color var(--fd-transition-normal), box-shadow var(--fd-transition-normal);
-}
-
-.finance-metric-card:hover {
-  border-color: var(--fd-accent-border);
-  box-shadow: var(--fd-shadow-md);
-}
-
-.finance-metric-label {
-  font-size: 0.72em;
-  text-transform: none;
-  letter-spacing: 0.02em;
-}
-
-.finance-metric-value {
-  font-size: 1.35em;
-}
-
-.finance-metric-suffix {
-  font-size: 0.7em;
-}
-
-.finance-summary-grid {
-  gap: var(--fd-space-4);
-  margin-bottom: var(--fd-space-5);
-}
-
-.finance-summary-grid > .finance-section,
-.finance-dashboard > .finance-section {
-  padding: var(--fd-space-4);
-}
-
-.finance-section h2 {
-  font-size: 1.02em;
-  font-weight: 700;
-  gap: 8px;
-}
-
-.finance-table th {
-  padding: 9px var(--fd-space-2);
-  border-bottom-width: 1px;
-}
-
-.finance-table td {
-  padding: 9px var(--fd-space-2);
-}
-
-.finance-table tbody tr:hover td {
-  background: var(--background-modifier-hover);
-}
-
-.finance-chart-container {
-  padding: var(--fd-space-4);
-}
-
-.finance-chart-container:hover {
-  border-color: var(--fd-accent-border);
-  box-shadow: var(--fd-shadow-md);
-}
-
-.finance-filter-bar {
-  padding: 4px;
-}
-
-.finance-filter-btn {
-  min-height: 30px;
-  padding: 5px 12px;
-}
-
-.finance-filter-btn.active {
-  background: var(--fd-accent);
-  color: #ffffff;
-  border-color: var(--fd-accent);
-}
-
-.finance-modal input[type="text"],
-.finance-modal input[type="number"],
-.finance-modal input[type="date"],
-.finance-modal input[type="month"],
-.finance-modal select {
-  min-height: 36px;
-  padding: 8px 10px;
-}
-
-.finance-modal input:focus,
-.finance-modal select:focus {
-  border-color: var(--fd-accent);
-  box-shadow: 0 0 0 3px var(--fd-accent-bg);
-}
-
-.finance-btn-cta {
-  background: var(--fd-accent-strong);
-}
-
-.finance-btn-cta:hover {
-  background: var(--fd-accent);
-}
-
-.finance-dt-card {
-  padding: var(--fd-space-4);
-  box-shadow: var(--fd-shadow-sm);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .finance-dashboard *,
-  .finance-dashboard *::before,
-  .finance-dashboard *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-@media (hover: hover) {
-  .finance-btn-small[title*="删除"]:hover,
-  .finance-btn-small[aria-label*="删除"]:hover {
-    color: var(--fd-negative);
-    background: var(--fd-negative-bg);
-  }
-}
-
-[data-layout="mobile"] .finance-btn {
-  width: 40px;
-  min-width: 40px;
-  min-height: 40px;
-}
-
-[data-layout="mobile"] .finance-metric-card {
-  min-height: 84px;
-  padding: var(--fd-space-3) var(--fd-space-2);
-}
-
-[data-layout="mobile"] .finance-metric-value {
-  font-size: 1.18em;
-}
-
-[data-layout="mobile"] .finance-section {
-  padding: var(--fd-space-3);
-}
-
-[data-layout="mobile"] .finance-table-wrapper {
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
-
-[data-layout="mobile"] .finance-filter-bar {
-  width: 100%;
-  gap: var(--fd-space-1);
-}
-
-[data-layout="mobile"] .finance-filter-btn {
-  flex: 1;
-  font-size: 0.72em;
-  padding: 4px 6px;
-  min-height: 26px;
-}
-
-[data-layout="mobile"] .finance-btn-small {
-  box-sizing: border-box;
-  width: 22px;
-  height: 22px;
-  padding: 2px;
-  font-size: 0.68em;
-}
-
-[data-layout="mobile"] .finance-btn-small + .finance-btn-small {
-  margin-left: 3px;
-}
-
-[data-layout="mobile"] .finance-year-select {
-  min-height: 26px;
-  padding: 3px 6px;
-}
-
-/* ── Accessibility ─────────────────────────────────────────── */
-
-/* Focus states */
-.finance-btn:focus-visible,
-.finance-btn-small:focus-visible,
-.finance-filter-btn:focus-visible {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: 2px;
-}
-
-/* ── Touch Device Optimizations (input-device, not width) ────
-   触屏 hover 抑制与宽度无关，任何触屏设备（手机/平板/触屏笔电）均适用。 */
-@media (hover: none) and (pointer: coarse) {
-  .finance-btn:hover,
-  .finance-btn-small:hover,
-  .finance-filter-btn:hover {
-    background: var(--interactive-normal);
-    transform: none;
-  }
-
-  .finance-btn:active,
-  .finance-btn-small:active,
-  .finance-filter-btn:active {
-    background: var(--interactive-hover);
-    transform: scale(0.98);
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .finance-btn,
-  .finance-btn-small,
-  .finance-metric-card,
-  .finance-chart-container,
-  .finance-table tbody tr,
-  .finance-table td,
-  .finance-filter-btn {
-    transition: none !important;
-  }
-
-  .finance-btn:hover,
-  .finance-btn-small:active {
-    transform: none !important;
-  }
-}
-
-/* ── Print Styles ──────────────────────────────────────────── */
-@media print {
-  .finance-actions,
-  .finance-filter-bar,
-  .finance-btn-small {
-    display: none !important;
-  }
-
-  .finance-metric-card,
-  .finance-chart-container {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
-
-  .finance-dashboard {
-    max-width: 100%;
-    padding: 0;
-  }
-}
-
-/* ── Holdings 模块（股票持仓占比 Treemap，位于 summary grid 第三列）───────── */
+/* ════════════════════════════════════════════════════════════
+   12. 股票持仓模块
+   ════════════════════════════════════════════════════════════ */
 .finance-holdings-chart canvas {
   min-height: 240px;
   max-height: 280px;
 }
 
-/* compact/mobile 单列时给 Treemap 更高空间 */
-[data-layout="compact"] .finance-holdings-chart canvas,
-[data-layout="mobile"] .finance-holdings-chart canvas {
-  min-height: 260px;
-  max-height: 320px;
+.finance-holdings-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
 }
 
-/* 管理弹窗（宽） */
-.finance-modal-wide {
-  width: min(760px, 92vw);
+.finance-holdings-title span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-1);
+}
+
+.finance-holding-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-1);
+  min-width: 0;
+}
+
+.finance-holding-symbol {
+  font-size: 0.75em;
+  opacity: 0.6;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--background-modifier-hover);
+  white-space: nowrap;
+}
+
+/* A股习惯：涨红跌绿 */
+.finance-up {
+  color: var(--color-red, #e74c3c);
+}
+
+.finance-down {
+  color: var(--color-green, #1abc9c);
+}
+
+.finance-btn-spinning svg {
+  animation: finance-spin 1s linear infinite;
+}
+
+@keyframes finance-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.finance-quote-time {
+  font-size: 0.8em;
+  opacity: 0.6;
+  align-self: center;
+  white-space: nowrap;
 }
 
 .finance-modal-holdings-header {
@@ -1274,104 +954,217 @@
   align-self: auto;
 }
 
-/* bare 模式：弹窗内无卡片壳 */
 .finance-holdings-bare {
   min-width: 0;
 }
 
-/* ── 持仓行情（实时价格）────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   13. 响应式（data-layout 顶层下发，断点=容器宽）
+   full ≥1100 | compact 768–1099 | mobile <768
+   ════════════════════════════════════════════════════════════ */
 
-/* 卡片标题行：标题 + 刷新按钮 两端对齐 */
-.finance-holdings-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* compact：summary 折单列；metric 3 列 */
+[data-layout="compact"] .finance-summary-grid,
+[data-layout="mobile"] .finance-summary-grid {
+  grid-template-columns: 1fr;
+}
+
+[data-layout="compact"] .finance-metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+[data-layout="compact"] .finance-holdings-chart canvas,
+[data-layout="mobile"] .finance-holdings-chart canvas {
+  min-height: 260px;
+  max-height: 320px;
+}
+
+/* mobile：整体收紧 */
+.finance-dashboard[data-layout="mobile"] {
+  padding: var(--fd-space-2);
+  /* 底部预留 120px：让出 Obsidian 移动端底部操作栏 */
+  padding-bottom: 120px;
+}
+
+[data-layout="mobile"] .finance-summary-grid {
   gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
 }
 
-.finance-holdings-title span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-1);
+[data-layout="mobile"] .finance-metrics-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
 }
 
-/* 名称旁的股票代码徽标 */
-.finance-holding-name {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-1);
-  min-width: 0;
+[data-layout="mobile"] .finance-metric-card {
+  min-height: 84px;
+  padding: var(--fd-space-3) var(--fd-space-2);
 }
 
-.finance-holding-symbol {
-  font-size: 0.75em;
-  opacity: 0.6;
-  padding: 0 4px;
-  border-radius: 4px;
-  background: var(--background-modifier-hover, rgba(128, 128, 128, 0.12));
+[data-layout="mobile"] .finance-metric-value {
+  font-size: 1.18em;
+}
+
+[data-layout="mobile"] .finance-charts-row {
+  grid-template-columns: 1fr;
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-2);
+}
+
+/* 卡片（图表 + 表格）统一收紧 padding */
+[data-layout="mobile"] .finance-section {
+  padding: var(--fd-space-3);
+}
+
+.finance-dashboard[data-layout="mobile"] > .finance-section {
+  margin-bottom: var(--fd-space-2);
+}
+
+/* mobile 隐藏整段重表格模块，保留指标卡/图表/持仓 */
+[data-layout="mobile"] .finance-allocation-section,
+[data-layout="mobile"] .finance-dividend-section,
+[data-layout="mobile"] .finance-overview-section,
+[data-layout="mobile"] .finance-cashflow-section {
+  display: none;
+}
+
+[data-layout="mobile"] .finance-section h2 {
+  font-size: 0.95em;
+  margin-bottom: var(--fd-space-2);
+  padding-top: 4px;
+  padding-bottom: var(--fd-space-1);
+}
+
+[data-layout="mobile"] .finance-year-label {
+  display: none;
+}
+
+[data-layout="mobile"] .finance-table {
+  font-size: 0.72em;
+}
+
+[data-layout="mobile"] .finance-table th,
+[data-layout="mobile"] .finance-table td {
+  padding: var(--fd-space-1) var(--fd-space-2);
   white-space: nowrap;
 }
 
-/* 涨跌色（A股习惯：涨红跌绿） */
-.finance-up {
-  color: var(--color-red, #e74c3c);
+[data-layout="mobile"] .finance-table-wrapper {
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
-.finance-down {
-  color: var(--color-green, #1abc9c);
+/* mobile 头部：按钮纯图标、40px 触控目标、靠右不铺满 */
+[data-layout="mobile"] .finance-actions {
+  gap: var(--fd-space-1);
 }
 
-/* 行情刷新按钮旋转动画 */
-.finance-btn-spinning svg {
-  animation: finance-spin 1s linear infinite;
+[data-layout="mobile"] .finance-btn {
+  font-size: 0.72em;
+  padding: 5px;
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  justify-content: center;
 }
 
-@keyframes finance-spin {
-  from {
-    transform: rotate(0deg);
+/* mobile 下按钮只剩 icon：隐藏空 label span，避免 flex gap 把 icon 挤偏 */
+[data-layout="mobile"] .finance-btn .finance-btn-label {
+  display: none;
+}
+
+[data-layout="mobile"] .finance-btn-small {
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  padding: 2px;
+  font-size: 0.68em;
+}
+
+[data-layout="mobile"] .finance-btn-small + .finance-btn-small {
+  margin-left: 3px;
+}
+
+[data-layout="mobile"] .finance-year-select {
+  min-height: 26px;
+  padding: 3px 6px;
+}
+
+/* mobile 筛选条铺满，按钮均分 */
+[data-layout="mobile"] .finance-filter-bar {
+  width: 100%;
+  gap: var(--fd-space-1);
+}
+
+[data-layout="mobile"] .finance-filter-btn {
+  flex: 1;
+  font-size: 0.72em;
+  padding: 4px 6px;
+  min-height: 26px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   14. 正交媒体查询：输入设备 / 动效偏好 / 打印
+   （与宽度无关，仅这些关注点用 @media）
+   ════════════════════════════════════════════════════════════ */
+
+/* 触屏：抑制 hover 态，用 active 反馈 */
+@media (hover: none) and (pointer: coarse) {
+  .finance-btn:hover,
+  .finance-btn-small:hover,
+  .finance-filter-btn:hover {
+    background: var(--interactive-normal);
   }
-  to {
-    transform: rotate(360deg);
+
+  .finance-btn:active,
+  .finance-btn-small:active,
+  .finance-filter-btn:active {
+    background: var(--interactive-hover);
   }
 }
 
+/* 删除按钮在可 hover 设备上的语义反馈 */
+@media (hover: hover) {
+  .finance-btn-small[title*="删除"]:hover,
+  .finance-btn-small[aria-label*="删除"]:hover {
+    color: var(--fd-negative);
+    background: var(--fd-negative-bg);
+  }
+}
+
+/* 减少动效偏好：全局压制动效与旋转 */
 @media (prefers-reduced-motion: reduce) {
+  .finance-dashboard *,
+  .finance-dashboard *::before,
+  .finance-dashboard *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
   .finance-btn-spinning svg {
     animation: none;
   }
 }
 
-/* 最近刷新时间 */
-.finance-quote-time {
-  font-size: 0.8em;
-  opacity: 0.6;
-  align-self: center;
-  white-space: nowrap;
-}
+/* 打印 */
+@media print {
+  .finance-actions,
+  .finance-filter-bar,
+  .finance-btn-small {
+    display: none !important;
+  }
 
-/* 表单字段提示文字 */
-.finance-field-hint {
-  display: block;
-  font-size: 0.78em;
-  opacity: 0.55;
-  margin-top: 2px;
-}
+  .finance-metric-card,
+  .finance-chart-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
 
-/* 只读输入框（股票名称自动填充展示） */
-.finance-input-readonly {
-  opacity: 0.75;
-  cursor: default;
-  background: var(--background-modifier-hover, rgba(128, 128, 128, 0.08));
-}
-
-
-/* 表单：名称 + 币种徽标同行 */
-.finance-name-currency-row {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
-
-.finance-name-currency-row input {
-  flex: 1;
+  .finance-dashboard {
+    max-width: 100%;
+    padding: 0;
+  }
 }

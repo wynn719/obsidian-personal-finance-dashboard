@@ -9,6 +9,17 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
 
+/**
+ * Round a monetary value to the given decimals, eliminating binary
+ * floating-point artifacts (e.g. 47 × 1290.88 = 60671.36000000001).
+ * Call on every amount before it is stored or written to Markdown.
+ */
+export function roundAmount(value: number, decimals: number = 2): number {
+  if (!Number.isFinite(value)) return value;
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
 /** Format number as currency string (Chinese Yuan) */
 export function formatCurrency(amount: number): string {
   return amount.toLocaleString("zh-CN", {

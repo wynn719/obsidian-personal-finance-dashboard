@@ -10,7 +10,7 @@ import {
   StockHolding,
   HoldingCurrency,
 } from "./models";
-import { generateId } from "./utils";
+import { generateId, roundAmount } from "./utils";
 
 const DEFAULT_DATA_FOLDER = "Finance";
 const DEFAULT_MISC_FILE_PATH = "Finance/Misc.md";
@@ -367,6 +367,9 @@ export class DataStore {
    * Market value in the given display currency.
    * Native value = shares × price (falls back to stored amount before
    * first refresh); converted via per-holding fxRate when needed.
+   * Rounded to 2 decimals — float multiplication of prices such as
+   * 1290.88 leaves artifacts (60671.36000000001) that would leak into
+   * totals and the Markdown file otherwise.
    */
   holdingValue(
     h: StockHolding,
@@ -376,7 +379,9 @@ export class DataStore {
       (h.shares ?? 0) > 0 && (h.price ?? 0) > 0
         ? h.shares * (h.price ?? 0)
         : h.amount;
-    return convertCurrency(native, h.currency ?? "CNY", displayCurrency, h.fxRate ?? 1);
+    return roundAmount(
+      convertCurrency(native, h.currency ?? "CNY", displayCurrency, h.fxRate ?? 1),
+    );
   }
 
   getTotalHoldingsAmount(displayCurrency: HoldingCurrency = "CNY"): number {
@@ -408,7 +413,7 @@ export class DataStore {
       h.fxRate = u.fxRate;
       h.quoteTime = new Date().toISOString();
       if ((h.shares ?? 0) > 0) {
-        h.amount = (h.shares ?? 0) * u.price;
+        h.amount = roundAmount((h.shares ?? 0) * u.price);
       }
       changed = true;
     }
@@ -971,7 +976,9 @@ class MiscMarkdownParser {
           const hasQuoteCols = cells.length >= 6;
           const hasCurrencyCols = cells.length >= 8;
           const name = cells[0];
-          const amount = parseFloat(cells[1]) || 0;
+          // Normalize legacy float artifacts (60671.36000000001 → 60671.36),
+          // so old files self-heal on the next save
+          const amount = roundAmount(parseFloat(cells[1]) || 0);
           let symbol = hasQuoteCols ? cells[2].trim() : "";
           let shares = hasQuoteCols ? parseFloat(cells[3]) || 0 : 0;
           let price = hasQuoteCols ? parseFloat(cells[4]) || 0 : 0;
@@ -1063,7 +1070,7 @@ class MiscMarkdownSerializer {
       const sorted = [...data.stockHoldings].sort((a, b) => value(b) - value(a));
       for (const h of sorted) {
         parts.push(
-          `| ${h.name} | ${h.amount} | ${h.symbol} | ${h.shares} | ${
+          `| ${h.name} | ${roundAmount(h.amount)} | ${h.symbol} | ${h.shares} | ${
             h.price ?? ""
           } | ${h.priceChangePercent ?? ""} | ${h.currency ?? "CNY"} | ${
             h.fxRate ?? 1

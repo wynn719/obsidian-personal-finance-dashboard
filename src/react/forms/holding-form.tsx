@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Notice } from "obsidian";
 import { StockHolding, HoldingCurrency } from "../../models";
-import { generateId } from "../../utils";
+import { generateId, roundAmount } from "../../utils";
 import { DataStore } from "../../data-store";
 import { fetchQuoteName, resolveSymbol } from "../../quote-service";
 import { t } from "../../i18n";
@@ -87,7 +87,7 @@ export function HoldingForm({
       amount:
         symbolUnchanged && sharesUnchanged && existingHolding
           ? existingHolding.amount
-          : sharesNum * (existingHolding?.price ?? 0),
+          : roundAmount(sharesNum * (existingHolding?.price ?? 0)),
       price: symbolUnchanged ? existingHolding?.price : undefined,
       priceChangePercent: symbolUnchanged
         ? existingHolding?.priceChangePercent

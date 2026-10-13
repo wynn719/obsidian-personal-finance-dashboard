@@ -40,5 +40,7 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 
 ## 已知小历史
 - calculator.getMonthlyCashFlow/getMonthlyTotalAssets 已修：加可选 year 参数跟随 currentYear（原先硬编码日历年）
-- 股票持仓模块（2026-09-01）：原为独立 ItemView，后按用户要求合并进主仪表盘，成为 dashboard-app.tsx 内的 finance-holdings-section 双栏模块（左 Treemap + 右明细表）。数据存 Finance/Misc.md（settings.miscDataFilePath 可配）。fixture 插件目录当前是**拷贝**非软链（setup-fixture 后被覆盖），每次改完需手动 cp main.js/manifest.json/styles.css 过去。
+- 股票持仓模块（2026-09-01）：原为独立 ItemView，后按用户要求合并进主仪表盘，成为 dashboard-app.tsx 内的 finance-holdings-section 双栏模块（左 Treemap + 右明细表）。数据存 Finance/Misc.md（settings.miscDataFilePath 可配）。fixture 插件目录 `fixture/.obsidian/plugins/personal-finance-dashboard` 是**指向 `dist/` 的软链**（2026-10-13 复核更正，此前误记成项目根目录）；`npm run build` 会 copy-dist 刷新它，`npm run dev`（watch）只写根目录 main.js、**不会**同步到 fixture，需手动 build 或 cp。
+- **金额精度约定（2026-10-13）**：所有 amount 在"存储/写盘"前用 `utils.roundAmount(v, 2)` 归一（消除 `47×1290.88=60671.36000000001` 类 IEEE-754 乘法残留）。落点：`updateHoldingQuotes`、`holdingValue`、`MiscMarkdownSerializer`、`holding-form` 计算 amount 处；`MiscMarkdownParser` 解析时同样归一 → 旧文件下次保存自愈。注意：原始 API 数值（price/fxRate）round-trip 干净，只有做算术才会产生残留。
+- 持仓 Treemap tooltip：mobile 布局下关闭（`useLayout()` → `tooltip.enabled: !isMobile`）；其他图表保留（移动端 tooltip 是读精确值的唯一途径）。
 - 原 renderTotalAssetsChart 有 new Chart 未存实例的内存泄漏，React 迁移后由 useRef 自动管理消除

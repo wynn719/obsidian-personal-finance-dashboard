@@ -41,7 +41,8 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - README 双语文档（2026-10-13 更新）：Commands 表、Releasing 段、Preact 架构树、fixture→dist 调试流程、收支表列序 `Date|Type|Category|Amount|Note`；新增 LICENSE（MIT，Copyright 2026 Wynne Zheng，若需改署名在此文件）。
 
 ## 分支
-- main：本地领先 origin/main 3 提交（85cadf1 精度 / 6915d4c 移动端 / 19afa75 docs），尚未 push。市场信号模块改动（2026-10-13）在**工作区未提交**，待用户审 UI 后决定。
+- main：与 origin/main 已同步（2026-10-13 已 push 全部 4 个提交：85cadf1 精度 / 6915d4c 移动端 / 19afa75 docs / ad864ae 市场信号模块）。
+- 提交身份：本仓库 local 配置 = `wynn719 <762671261@qq.com>`（全局配置为工作身份 wynnezheng@tencent.com，勿混用）。
 
 ## 市场信号模块（2026-10-13，移植自 WorkBuddy 每日自动化）
 - 三个独立手动刷新模块，位于资产配置行上方（`dashboard-app.tsx` 的 `.finance-market-grid`），各带刷新按钮 + 更新时间；数据缓存于 Misc.md，打开即见上次结果。

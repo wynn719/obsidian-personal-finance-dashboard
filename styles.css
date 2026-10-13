@@ -46,6 +46,10 @@
   /* 阴影：仅静止一层，hover 不再抬升/加影 */
   --fd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
 
+  /* 移动端头部控件统一尺寸：年份 selector 与操作按钮同高（单一事实源）。
+     实测 border-box 下 select 的 min-height 即最终高度，故按钮照此对齐。 */
+  --fd-control-size: 26px;
+
   /* 动效 */
   --fd-transition-fast: 120ms ease-out;
   --fd-transition-normal: 180ms ease-out;
@@ -1055,17 +1059,19 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* mobile 头部：按钮纯图标、40px 触控目标、靠右不铺满 */
+/* mobile 头部：按钮纯图标、尺寸对齐左侧年份 selector（同 --fd-control-size） */
 [data-layout="mobile"] .finance-actions {
   gap: var(--fd-space-1);
 }
 
 [data-layout="mobile"] .finance-btn {
+  box-sizing: border-box;
   font-size: 0.72em;
-  padding: 5px;
-  width: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  padding: 0;
+  width: var(--fd-control-size);
+  min-width: var(--fd-control-size);
+  height: var(--fd-control-size);
+  min-height: var(--fd-control-size);
   justify-content: center;
 }
 
@@ -1087,7 +1093,7 @@
 }
 
 [data-layout="mobile"] .finance-year-select {
-  min-height: 26px;
+  min-height: var(--fd-control-size);
   padding: 3px 6px;
 }
 

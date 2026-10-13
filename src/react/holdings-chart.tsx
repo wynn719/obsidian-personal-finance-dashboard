@@ -5,6 +5,7 @@ import { formatCurrencyCompact } from "../utils";
 import type { HoldingCurrency, StockHolding } from "../models";
 import { ChartCanvas, EmptyState, CHART_COLORS } from "./chart";
 import { toDisplayCurrency } from "./components/holdings-table";
+import { useLayout } from "./responsive";
 import type { HoldingsTreemapChartProps } from "./types";
 
 // Treemap controller must be explicitly registered (not part of registerables)
@@ -18,6 +19,12 @@ export function HoldingsTreemapChart({
   displayCurrency = "CNY",
   onEditHolding,
 }: HoldingsTreemapChartProps) {
+  // 移动端无 hover 语义：手指点击本意是「编辑该持仓」，此时再弹 tooltip
+  // 只会被随即打开的编辑弹窗遮住（闪烁噪音），故 mobile 下关闭 tooltip。
+  // 占比信息已由方块内标签（名称 + %）与下方明细表承载，不损失信息。
+  const { layout } = useLayout();
+  const isMobile = layout === "mobile";
+
   const config = useMemo<ChartConfiguration>(() => {
     return {
       type: "treemap" as unknown as ChartConfiguration["type"],
@@ -62,6 +69,7 @@ export function HoldingsTreemapChart({
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: !isMobile,
             backgroundColor: "rgba(15, 23, 42, 0.9)",
             titleColor: "#f8fafc",
             bodyColor: "#e2e8f0",
@@ -97,7 +105,7 @@ export function HoldingsTreemapChart({
         },
       },
     };
-  }, [holdings, total, maskNumbers, displayCurrency, onEditHolding]);
+  }, [holdings, total, maskNumbers, displayCurrency, onEditHolding, isMobile]);
 
   if (holdings.length === 0) return <EmptyState />;
   return <ChartCanvas config={config} />;

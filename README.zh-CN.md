@@ -2,9 +2,11 @@
 
 一款精心设计的 [Obsidian](https://obsidian.md) 插件，用于追踪个人资产、收支和股息 —— 所有数据以纯 Markdown 文件存储在你的 Vault 中。
 
+> 🌐 English documentation: [README.md](README.md)
+
 ![Obsidian](https://img.shields.io/badge/Obsidian-v0.15.0+-7c3aed?logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Version](https://img.shields.io/github/v/release/wynn719/obsidian-personal-finance-dashboard?label=Version&color=blue)
 
 ---
 
@@ -16,7 +18,7 @@
 - 📅 **月度总览表** — 追踪每月各类别资产金额、环比变化、工资收入和投资回报
 - 💸 **收支管理** — 按分类记录收入和支出，支持筛选和分页
 - 🏦 **股息追踪** — 按股票记录股息收入，支持自动补全和年度汇总
-- 🗂️ **股票持仓占比** — 仪表盘内置模块，矩形树图 + 明细表展示各股票持仓；只需填写股票代码（A 股 / 港股 / 美股）+ 股数，名称自动获取，一键刷新实时行情计算市值并持久化（数据存于独立的 `Misc.md` 文件）
+- 🗂️ **股票持仓占比** — 仪表盘内置模块，矩形树图 + 明细表展示各股票持仓；只需填写股票代码（A 股 / 港股 / 美股）+ 股数，名称自动获取，一键刷新实时行情计算市值（多币种自动按人民币换算）并持久化（数据存于独立的 `Misc.md` 文件）
 - 📁 **Markdown 优先** — 所有数据以可读的 Markdown 文件存储（每年一个文件），完全可移植、可版本控制
 - 🔒 **隐私模式** — 一键将所有财务数字替换为 `***`
 - 🌐 **双语支持** — 完整的中文和英文界面
@@ -43,6 +45,19 @@
 - 点击左侧边栏中的 **钱包图标**
 - 或使用命令面板：`Open Finance Dashboard`
 
+### 常用命令
+
+所有操作都可以从命令面板调用：
+
+| 命令 | 说明 |
+|------|------|
+| `Open Finance Dashboard` | 打开（或聚焦）仪表盘视图 |
+| `Add Asset Snapshot` | 记录每月资产快照 |
+| `Add Income/Expense` | 记录一笔收支 |
+| `Add Dividend` | 记录股息收入 |
+| `Add Stock Holding` | 添加股票持仓 |
+| `Refresh Finance Data` | 从磁盘重新加载数据文件 |
+
 ### 股票持仓模块
 
 - 仪表盘内的「股票持仓占比」区块，无需切换视图
@@ -50,7 +65,7 @@
   - **股票代码**：A 股如 `600036` / 港股如 `00700` / 美股如 `AAPL`
   - **持股数**：持有股数
   - 股票名称由行情接口自动获取写入，无需手填
-- 点击 **🔄 刷新行情**（管理弹窗右上角或持仓卡片标题栏）获取实时价格，市值 = 股数 × 现价并写回 `Misc.md`，涨跌幅按 A 股习惯涨红跌绿显示
+- 点击 **🔄 刷新行情**（管理弹窗右上角或持仓卡片标题栏）获取实时价格，市值 = 股数 × 现价（按 2 位小数归一后）写回 `Misc.md`，涨跌幅按 A 股习惯涨红跌绿显示
 - 支持 A 股 / 港股 / 美股多币种持仓：行情请求自动附带实时汇率（美元/港币兑人民币），市值与占比统一按人民币口径换算（现价列显示原币价）
 - 点击树图色块（或明细表中的 ✏️ 按钮）编辑，🗑️ 删除
 - 行情来源为腾讯公开行情接口（qt.gtimg.cn），无需 API Key
@@ -108,7 +123,7 @@
 
 ### Markdown 格式
 
-每个文件包含三个部分：
+每个年度文件包含三个部分：
 
 #### 资产快照
 
@@ -136,11 +151,11 @@
 ```markdown
 # Cash Flow Records
 
-| Date | Type | Amount | Category | Note |
-|------|------|--------|----------|------|
-| 2025-12-01 | income | 35000 | 工资 | 12月工资 |
-| 2025-12-15 | expense | 5500 | 房租 | 12月房租 |
-| 2025-12-20 | income | 8000 | 副业 | 自由职业收入 |
+| Date | Type | Category | Amount | Note |
+|------|------|----------|--------|------|
+| 2025-12-01 | income | 工资 | 35000 | 12月工资 |
+| 2025-12-15 | expense | 房租 | 5500 | 12月房租 |
+| 2025-12-20 | income | 副业 | 8000 | 自由职业收入 |
 ```
 
 #### 股息记录
@@ -161,14 +176,13 @@
 ```markdown
 # Stock Holdings
 
-| Name | Amount | Note |
-|------|--------|------|
-| 五粮液 | 257800 | 白酒龙头 |
-| 腾讯控股 | 189300 | 港股通 |
-| 中国神华 | 95200 | 高股息 |
+| Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt |
+|------|--------|--------|--------|-------|---------|----------|--------|-----------|
+| 五粮液 | 258588 | 000858 | 3600 | 71.83 | 0.79 | CNY | 1 | 2026-09-01T16:00:00+08:00 |
+| 腾讯控股 | 189802 | 00700 | 430 | 441.4 | -2.56 | HKD | 0.857 | 2026-09-01T16:00:00+08:00 |
 ```
 
-持仓占比在运行时按总市值自动计算，无需手工维护。
+`Amount` = 股数 × 现价（原币口径），每次刷新行情时重算并**按 2 位小数归一**，文件里不会出现浮点误差残留；`FXRate` 为最近一次刷新时的人民币汇率（用于把非人民币持仓折算成人民币）；`Change%` 为当日涨跌幅。持仓占比在运行时按总市值自动计算，无需手工维护。
 
 > 💡 **提示**：由于数据是纯 Markdown 格式，你可以直接在 Obsidian 或任何文本编辑器中编辑它。插件会自动检测文件变更并刷新仪表盘。
 
@@ -178,27 +192,40 @@
 
 ```
 src/
-├── main.ts              # 插件入口 & 生命周期
-├── data-store.ts        # 数据持久化（Markdown ↔ 内存）
-├── calculator.ts        # 纯计算层
-├── models.ts            # TypeScript 接口 & 默认值
-├── settings.ts          # Obsidian 设置页
-├── i18n.ts              # 国际化（中/英）
-├── utils.ts             # 格式化 & 工具函数
+├── main.ts                     # 插件入口 & 生命周期
+├── data-store.ts               # 数据持久化（Markdown ↔ 内存），含 Misc.md 持仓
+├── calculator.ts               # 纯计算层
+├── quote-service.ts            # 实时行情 + 汇率（批量请求 qt.gtimg.cn）
+├── models.ts                   # TypeScript 接口 & 默认值
+├── settings.ts                 # Obsidian 设置页
+├── i18n.ts                     # 国际化（中/英）
+├── utils.ts                    # 格式化 & 工具函数
+├── react/                      # Preact UI 层
+│   ├── dashboard-app.tsx       # 仪表盘顶层组件
+│   ├── responsive.tsx          # 容器级响应式（LayoutProvider / useLayout）
+│   ├── use-finance-data.ts     # store 订阅 hook
+│   ├── chart.tsx               # Chart.js 封装
+│   ├── holdings-chart.tsx      # 持仓矩形树图
+│   ├── components/             # 指标卡、表格（含通用 DataTable）、区块组件
+│   ├── forms/                  # 快照 / 收支 / 股息 / 持仓录入表单
+│   └── hooks/                  # use-quote-refresh 等
 ├── views/
-│   └── dashboard-view.ts  # 仪表盘 UI（ItemView）
-└── modals/
-    ├── asset-snapshot-modal.ts  # 月度快照录入
-    ├── cash-flow-modal.ts       # 收支录入
-    └── dividend-modal.ts        # 股息录入
+│   └── dashboard-view.tsx      # 仪表盘视图外壳（ItemView + createRoot 挂载）
+└── modals/                     # 原生 Obsidian 弹窗外壳
+    ├── asset-snapshot-modal.tsx
+    ├── cash-flow-modal.tsx
+    ├── dividend-modal.tsx
+    ├── holding-modal.tsx
+    └── holdings-manage-modal.tsx
 ```
 
 ### 核心设计理念
 
 - **Markdown 即数据源** — 不使用私有数据库，数据保持可移植、可读性强
 - **按年分文件** — 文件大小可控，便于年度对比
-- **无 UI 框架** — 通过 Obsidian 的 `createEl()` API 进行纯命令式 DOM 操作
-- **观察者模式** — `DataStore` 在数据变更时通知仪表盘视图自动重新渲染
+- **Preact UI 层** — 组件用 React 风格 JSX 编写、运行在 Preact 上（esbuild 把 `react` 别名到 `preact/compat`）；视图/弹窗外壳保持原生 Obsidian API（`ItemView` / `Modal` + `createRoot`）
+- **容器级响应式** — 用 `ResizeObserver` 测量视图容器宽度，派生 `full` / `compact` / `mobile` 三档布局，经 `data-layout` 属性 + Context 统一下发；组件消费该信号而非猜测视口（解决 Obsidian 分栏场景的错配）
+- **观察者模式** — `DataStore` 在数据变更时通知 UI 自动重新渲染
 - **跨年写入** — 添加记录到不同年份时自动处理文件切换
 
 ---
@@ -216,30 +243,33 @@ src/
 # 安装依赖
 npm install
 
-# 将构建产物软链到 fixture Vault 的插件目录
-ln -sf $(pwd)/main.js fixture/.obsidian/plugins/personal-finance-dashboard/main.js
-ln -sf $(pwd)/manifest.json fixture/.obsidian/plugins/personal-finance-dashboard/manifest.json
-ln -sf $(pwd)/styles.css fixture/.obsidian/plugins/personal-finance-dashboard/styles.css
-
-# 启动开发模式（监听文件变更 & 自动重建）
-npm run dev
+# 类型检查 + 打包 + 复制构建产物到 dist/
+npm run build
 ```
 
-`fixture/` 目录是一个可直接使用的 Obsidian Vault，包含示例财务数据（`Finance/2025.md`、`Finance/2026.md`）。在 Obsidian 中打开该文件夹作为 Vault 并启用插件即可开始测试。代码修改后会自动重建，重新加载插件即可生效。
+`fixture/` 目录是一个可直接使用的 Obsidian Vault，包含示例财务数据（`Finance/2025.md`、`Finance/2026.md`、`Finance/Misc.md`）。在 Obsidian 中打开该文件夹作为 Vault 并启用插件即可开始测试。
+
+> 💡 fixture Vault 的插件目录（`fixture/.obsidian/plugins/personal-finance-dashboard`）是指向 `dist/` 的软链，所以**让它更新的是 `npm run build`** —— 构建后在 Obsidian 中重载插件即可生效。`npm run dev` 是 watch 模式，只重建项目根目录的 `main.js`，fixture Vault 读不到它。若想让 watch 直接生效，先跑一次 `npm run setup-fixture`：它会把 fixture 的插件文件改指项目根目录产物（下次 `npm run build` 会重置回 `dist/` 链接）。
 
 ### 常用命令
 
 | 命令 | 说明 |
 |------|------|
-| `npm run dev` | 开发模式（监听变更 & 自动重建） |
-| `npm run build` | 生产构建（类型检查 + 打包 + 复制到 `dist/`） |
+| `npm run build` | 生产构建 —— 类型检查 + 压缩打包 + 复制到 `dist/` |
+| `npm run dev` | watch 模式 —— 增量重建项目根目录的 `main.js` |
+| `npm run setup-fixture` | 把 fixture Vault 的插件文件改指项目根目录产物 |
 | `npx tsc -noEmit -skipLibCheck` | 仅类型检查 |
+
+### 发布流程
+
+推送一个 tag（如 `git tag v1.0.13 && git push origin v1.0.13`），[release workflow](.github/workflows/release.yml) 会在 GitHub Actions 上构建并自动发布 Release，附上 `main.js`、`manifest.json`、`styles.css` 和 zip 包，无需手动打包。
 
 ### 技术栈
 
 - **TypeScript** 5.3 — 启用 `strictNullChecks`
-- **esbuild** — 极速打包（构建 < 1 秒）
-- **Chart.js** 4.x — 交互式图表可视化
+- **Preact** 10 — UI 层，经 `preact/compat` 别名直接运行为 React 风格代码
+- **esbuild** — 极速打包（watch 模式 + 生产压缩构建）
+- **Chart.js** 4 — 交互式图表，配合 `chartjs-chart-treemap` 渲染持仓树图
 - **Obsidian API** — 插件框架（声明为 external 模块）
 
 ---

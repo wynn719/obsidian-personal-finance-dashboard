@@ -2,9 +2,11 @@
 
 A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking personal assets, income, expenses, and dividends — all within your vault, powered by plain Markdown files.
 
+> 🌐 中文文档见 [README.zh-CN.md](README.zh-CN.md)
+
 ![Obsidian](https://img.shields.io/badge/Obsidian-v0.15.0+-7c3aed?logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Version](https://img.shields.io/github/v/release/wynn719/obsidian-personal-finance-dashboard?label=Version&color=blue)
 
 ---
 
@@ -16,7 +18,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 - 📅 **Monthly Overview Table** — Track each month's category amounts, MoM% changes, salary income, and investment returns
 - 💸 **Cash Flow Management** — Record income and expenses with categories, filterable and paginated
 - 🏦 **Dividend Tracking** — Log dividend income by stock, with autocomplete and yearly summaries
-- 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; just enter a stock code (A-share / HK / US) + share count — names auto-fetch, one-click quote refresh computes and persists market value (stored in a standalone `Misc.md` file)
+- 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; just enter a stock code (A-share / HK / US) + share count — names auto-fetch, one-click quote refresh computes market value (multi-currency, valued in CNY) and writes it back to the standalone `Misc.md` file
 - 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
@@ -43,6 +45,19 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 - Click the **📊 wallet icon** in the left sidebar ribbon
 - Or use the Command Palette: `Open Finance Dashboard`
 
+### Commands
+
+Every action is also available from the Command Palette:
+
+| Command | Description |
+|---------|-------------|
+| `Open Finance Dashboard` | Open (or focus) the dashboard view |
+| `Add Asset Snapshot` | Record a monthly asset snapshot |
+| `Add Income/Expense` | Log a cash flow record |
+| `Add Dividend` | Record dividend income |
+| `Add Stock Holding` | Add a stock holding |
+| `Refresh Finance Data` | Reload data files from disk |
+
 ### Stock Holdings Module
 
 - The "Stock Holdings Treemap" section inside the dashboard — no view switching needed
@@ -50,7 +65,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
   - **Stock code**: A-share `600036` / HK `00700` / US `AAPL`
   - **Share count**: number of shares held
   - The stock name is fetched automatically from the quote API
-- Click **🔄 Refresh Quotes** (manage modal top-right or the holdings card header) to fetch live prices — market value = shares × price, written back to `Misc.md` on every refresh, with day change shown red-up/green-down (A-share convention)
+- Click **🔄 Refresh Quotes** (manage modal top-right or the holdings card header) to fetch live prices — market value = shares × price is written back to `Misc.md` on every refresh (rounded to 2 decimals), with day change shown red-up/green-down (A-share convention)
 - Multi-currency holdings (A-share / HK / US): the quote request automatically includes live FX rates (USD/HKD → CNY); market values and shares are uniformly converted to CNY behind the scenes (the price column shows the native currency)
 - Click any treemap block (or the ✏️ button in the details table) to edit; 🗑️ to delete
 - Quotes come from Tencent's public quote API (qt.gtimg.cn), no API key required
@@ -108,7 +123,7 @@ your-vault/
 
 ### Markdown Format
 
-Each file contains three sections:
+Each year file contains three sections:
 
 #### Asset Snapshots
 
@@ -136,11 +151,11 @@ Each file contains three sections:
 ```markdown
 # Cash Flow Records
 
-| Date | Type | Amount | Category | Note |
-|------|------|--------|----------|------|
-| 2025-12-01 | income | 35000 | 工资 | 12月工资 |
-| 2025-12-15 | expense | 5500 | 房租 | 12月房租 |
-| 2025-12-20 | income | 8000 | 副业 | 自由职业收入 |
+| Date | Type | Category | Amount | Note |
+|------|------|----------|--------|------|
+| 2025-12-01 | income | 工资 | 35000 | 12月工资 |
+| 2025-12-15 | expense | 房租 | 5500 | 12月房租 |
+| 2025-12-20 | income | 副业 | 8000 | 自由职业收入 |
 ```
 
 #### Dividend Records
@@ -163,11 +178,11 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 
 | Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt |
 |------|--------|--------|--------|-------|---------|----------|--------|-----------|
-| 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | CNY | 1 | 2026-09-01T16:00:00+08:00 |
+| 五粮液 | 258588 | 000858 | 3600 | 71.83 | 0.79 | CNY | 1 | 2026-09-01T16:00:00+08:00 |
 | 腾讯控股 | 189802 | 00700 | 430 | 441.4 | -2.56 | HKD | 0.857 | 2026-09-01T16:00:00+08:00 |
 ```
 
-Share percentages are computed at runtime from the total amount — nothing to maintain by hand.
+`Amount` = shares × price in the native currency — recomputed and rounded to 2 decimals on every quote refresh, so the file never picks up floating-point artifacts. `FXRate` is the CNY rate at the last refresh (used to value non-CNY holdings in CNY). Share percentages are computed at runtime from the total amount — nothing to maintain by hand.
 
 > 💡 **Tip**: Since data is plain Markdown, you can edit it directly in Obsidian or any text editor. The plugin will auto-detect changes and refresh.
 
@@ -177,27 +192,40 @@ Share percentages are computed at runtime from the total amount — nothing to m
 
 ```
 src/
-├── main.ts              # Plugin entry point & lifecycle
-├── data-store.ts        # Data persistence (Markdown ↔ Memory)
-├── calculator.ts        # Pure computation layer
-├── models.ts            # TypeScript interfaces & defaults
-├── settings.ts          # Obsidian settings tab
-├── i18n.ts              # Internationalization (en/zh)
-├── utils.ts             # Formatting & helper utilities
+├── main.ts                     # Plugin entry point & lifecycle
+├── data-store.ts               # Data persistence (Markdown ↔ memory), incl. Misc.md holdings
+├── calculator.ts               # Pure computation layer
+├── quote-service.ts            # Live quotes + FX rates (batched, qt.gtimg.cn)
+├── models.ts                   # TypeScript interfaces & defaults
+├── settings.ts                 # Obsidian settings tab
+├── i18n.ts                     # Internationalization (en/zh)
+├── utils.ts                    # Formatting & helper utilities
+├── react/                      # Preact UI layer
+│   ├── dashboard-app.tsx       # Top-level dashboard component
+│   ├── responsive.tsx          # Container-driven layout (LayoutProvider / useLayout)
+│   ├── use-finance-data.ts     # Store subscription hook
+│   ├── chart.tsx               # Chart.js wrappers
+│   ├── holdings-chart.tsx      # Holdings treemap
+│   ├── components/             # Metric cards, tables (generic DataTable), sections
+│   ├── forms/                  # Snapshot / cash flow / dividend / holding forms
+│   └── hooks/                  # use-quote-refresh
 ├── views/
-│   └── dashboard-view.ts  # Dashboard UI (ItemView)
-└── modals/
-    ├── asset-snapshot-modal.ts  # Monthly snapshot entry
-    ├── cash-flow-modal.ts       # Income/expense entry
-    └── dividend-modal.ts        # Dividend entry
+│   └── dashboard-view.tsx      # ItemView shell (createRoot mount)
+└── modals/                     # Native Obsidian modal shells
+    ├── asset-snapshot-modal.tsx
+    ├── cash-flow-modal.tsx
+    ├── dividend-modal.tsx
+    ├── holding-modal.tsx
+    └── holdings-manage-modal.tsx
 ```
 
 ### Key Design Decisions
 
 - **Markdown as Source of Truth** — No proprietary database; data stays portable and human-readable
 - **Per-Year Files** — Keeps files manageable and allows easy year-over-year comparison
-- **No UI Framework** — Pure imperative DOM manipulation via Obsidian's `createEl()` API
-- **Observer Pattern** — `DataStore` notifies the dashboard view on any data change for automatic re-rendering
+- **Preact UI Layer** — Components are written with React-style JSX and run on Preact (esbuild aliases `react` → `preact/compat`); the view/modal shells stay native Obsidian (`ItemView` / `Modal` + `createRoot`)
+- **Container-Driven Responsive Layout** — A `ResizeObserver` on the view container derives a `full` / `compact` / `mobile` layout and dispatches it via a `data-layout` attribute + context; components consume that instead of guessing from the viewport (fixes the Obsidian split-pane mismatch)
+- **Observer Pattern** — `DataStore` notifies the UI on any data change for automatic re-rendering
 - **Cross-Year Writes** — Adding records to a different year automatically handles file switching
 
 ---
@@ -215,31 +243,34 @@ src/
 # Install dependencies
 npm install
 
-# Symlink build outputs into the fixture vault's plugin directory
-ln -sf $(pwd)/main.js fixture/.obsidian/plugins/personal-finance-dashboard/main.js
-ln -sf $(pwd)/manifest.json fixture/.obsidian/plugins/personal-finance-dashboard/manifest.json
-ln -sf $(pwd)/styles.css fixture/.obsidian/plugins/personal-finance-dashboard/styles.css
-
-# Start dev mode (watch & auto-rebuild)
-npm run dev
+# Type check + bundle + copy the build output to dist/
+npm run build
 ```
 
-The `fixture/` directory is a ready-to-use Obsidian vault with sample financial data (`Finance/2025.md`, `Finance/2026.md`). Open it as a vault in Obsidian and enable the plugin to start testing. Any code changes will auto-rebuild and take effect after reloading the plugin.
+The `fixture/` directory is a ready-to-use Obsidian vault with sample financial data (`Finance/2025.md`, `Finance/2026.md`, `Finance/Misc.md`). Open it as a vault in Obsidian and enable the plugin to start testing.
+
+> 💡 The vault's plugin folder (`fixture/.obsidian/plugins/personal-finance-dashboard`) is a symlink to `dist/`, so **`npm run build` is what refreshes the test vault** — reload the plugin in Obsidian afterwards to pick up the change. `npm run dev` only rebuilds the repo-root `main.js` in watch mode, which the fixture vault does not read. If you want watch-driven iteration, run `npm run setup-fixture` once — it re-points the fixture's plugin files directly at the repo-root build output (the next `npm run build` resets them back to `dist/`).
 
 ### Build Commands
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Development mode with watch & auto-rebuild |
-| `npm run build` | Production build (type check + bundle + copy to `dist/`) |
+| `npm run build` | Production build — type check + minified bundle + copy to `dist/` |
+| `npm run dev` | Watch mode — incremental rebuild of the repo-root `main.js` |
+| `npm run setup-fixture` | Re-point the fixture vault's plugin files at the repo-root build output |
 | `npx tsc -noEmit -skipLibCheck` | Type checking only |
+
+### Releasing
+
+Push a tag (e.g. `git tag v1.0.13 && git push origin v1.0.13`) — the [release workflow](.github/workflows/release.yml) builds the plugin on GitHub Actions and publishes a release with `main.js`, `manifest.json`, `styles.css` and a zip. No manual packaging.
 
 ### Tech Stack
 
 - **TypeScript** 5.3 — with `strictNullChecks` enabled
-- **esbuild** — Fast bundling (< 1s builds)
-- **Chart.js** 4.x — Interactive chart visualizations
-- **Obsidian API** — Plugin framework (declared as external module)
+- **Preact** 10 — UI layer, running React-style code via the `preact/compat` alias
+- **esbuild** — fast bundling (watch mode + minified production builds)
+- **Chart.js** 4 — interactive charts, plus `chartjs-chart-treemap` for the holdings treemap
+- **Obsidian API** — plugin framework (declared as an external module)
 
 ---
 

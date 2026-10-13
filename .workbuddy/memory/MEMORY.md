@@ -34,6 +34,11 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - `npm run setup-fixture` 建 fixture 软链接；`npm run dev` watch；`open "obsidian://open?path=.../fixture"` 打开测试 Vault
 - fixture 路径：/Users/wynnezheng/Codes/githubcode/obsidian-personal-finance-dashboard/fixture
 
+## 发布与文档（2026-10-13）
+- GitHub：github.com/wynn719/obsidian-personal-finance-dashboard（public）。Release 由 `.github/workflows/release.yml` 在 push tag 时自动构建发布（dist 内 main.js/manifest.json/styles.css/zip）。
+- ⚠️ 口径不一致（未修）：tag 已到 v1.0.12，但 `manifest.json` 的 version 一直写 1.0.0（历史各 tag 处也是 1.0.0）。README 版本徽章已改为 shields 动态 release 徽章。
+- README 双语文档（2026-10-13 更新）：Commands 表、Releasing 段、Preact 架构树、fixture→dist 调试流程、收支表列序 `Date|Type|Category|Amount|Note`；新增 LICENSE（MIT，Copyright 2026 Wynne Zheng，若需改署名在此文件）。
+
 ## 分支
 - main：已合并 feature/react-migration（快进，2026-07-24）。含 Preact 迁移 + 响应式架构 + DataTable。本地领先 origin/main 4 提交，尚未 push。
 - feature/react-migration：已并入 main，可保留或删除。

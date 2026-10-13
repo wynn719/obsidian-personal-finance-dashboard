@@ -152,3 +152,15 @@ export interface HoldingFormProps {
   existingHolding?: StockHolding;
   onClose: () => void;
 }
+
+// ===== Market signals（策略信号 / TTM 股息率 / ETF 溢价，内嵌于主仪表盘） =====
+export interface IndexSignalSectionProps {
+  store: DataStore;
+}
+export interface DividendYieldSectionProps {
+  store: DataStore;
+  maskNumbers: boolean;
+}
+export interface EtfPremiumSectionProps {
+  store: DataStore;
+}

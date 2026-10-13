@@ -9,6 +9,10 @@ import {
   MiscData,
   StockHolding,
   HoldingCurrency,
+  IndexSignal,
+  IndexSignalZone,
+  DividendYieldRow,
+  EtfPremiumRow,
 } from "./models";
 import { generateId, roundAmount } from "./utils";
 
@@ -444,6 +448,44 @@ export class DataStore {
     this.miscData.stockHoldings = this.miscData.stockHoldings.filter(
       (h) => h.id !== id,
     );
+    await this.saveMisc();
+    this.notifyChange();
+  }
+
+  // ------------------------------------------------------------
+  // Market signal caches (manually refreshed, persisted to Misc.md)
+  // ------------------------------------------------------------
+
+  getIndexSignal(): IndexSignal | null {
+    return this.miscData.indexSignal ?? null;
+  }
+
+  async updateIndexSignal(signal: IndexSignal): Promise<void> {
+    this.miscData.indexSignal = signal;
+    await this.saveMisc();
+    this.notifyChange();
+  }
+
+  getDividendYields(): DividendYieldRow[] {
+    return [...(this.miscData.dividendYields ?? [])].sort(
+      (a, b) => b.yieldPct - a.yieldPct,
+    );
+  }
+
+  async updateDividendYields(rows: DividendYieldRow[]): Promise<void> {
+    this.miscData.dividendYields = rows;
+    await this.saveMisc();
+    this.notifyChange();
+  }
+
+  getEtfPremiums(): EtfPremiumRow[] {
+    return [...(this.miscData.etfPremiums ?? [])].sort(
+      (a, b) => a.premium - b.premium,
+    );
+  }
+
+  async updateEtfPremiums(rows: EtfPremiumRow[]): Promise<void> {
+    this.miscData.etfPremiums = rows;
     await this.saveMisc();
     this.notifyChange();
   }
@@ -932,110 +974,266 @@ class MarkdownSerializer {
 //   Finance/Misc.md
 //
 //   # Stock Holdings
-//   | Name | Amount | Symbol | Shares | Price | Change% | UpdatedAt |
-//   |------|--------|--------|--------|-------|---------|-----------|
-//   | 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | 2026-09-01T16:00:00+08:00 |
+//   | Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt |
+//   |------|--------|--------|--------|-------|---------|----------|--------|-----------|
+//   | 五粮液 | 257800 | 000858 | 3600 | 71.83 | 0.79 | CNY | 1 | 2026-09-01T16:00:00+08:00 |
+//
+//   # Index Signal
+//   | IndexCode | Name | TradeDate | Close | MA250 | Deviation% | Zone | UpdatedAt |
+//
+//   # Dividend Yields
+//   | Name | Symbol | DivType | AnnualPeriod | InterimPeriod | TTM | Price | Yield% | Pending | UpdatedAt |
+//
+//   # ETF Premiums
+//   | Code | Name | Price | Premium% | Fee% | Scale | UpdatedAt |
 // ============================================================
 
-class MiscMarkdownParser {
+/** Split the misc markdown into `# section` blocks (title + raw lines) */
+function splitMiscSections(
+  markdown: string,
+): Array<{ title: string; lines: string[] }> {
+  const sections: Array<{ title: string; lines: string[] }> = [];
+  let current: { title: string; lines: string[] } | null = null;
+  for (const raw of markdown.split("\n")) {
+    const line = raw.trim();
+    if (/^#\s+/.test(line) && !/^##\s+/.test(line)) {
+      current = { title: line.replace(/^#\s+/, ""), lines: [] };
+      sections.push(current);
+    } else if (current) {
+      current.lines.push(raw);
+    }
+  }
+  return sections;
+}
+
+/**
+ * Parse a markdown table row keeping empty cells — required for positional
+ * parsing of sections with optional columns (unlike parseMarkdownTableRow,
+ * which drops empty cells and shifts indices).
+ */
+function parseTableRowKeepEmpty(line: string): string[] {
+  let s = line.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|")) s = s.slice(0, -1);
+  return s.split("|").map((cell) => cell.trim());
+}
+
+/** Extract data rows (header + separator skipped) from a markdown table block */
+function extractTableRows(lines: string[]): string[][] {
+  const rows: string[][] = [];
+  let headerSkipped = false;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line.startsWith("|")) continue;
+    if (!headerSkipped) {
+      headerSkipped = true;
+      continue; // header row
+    }
+    const cells = parseTableRowKeepEmpty(line);
+    if (cells.length > 0 && cells.every((c) => c === "" || /^:?-+:?$/.test(c))) {
+      continue; // separator row (|---|)
+    }
+    rows.push(cells);
+  }
+  return rows;
+}
+
+/** Parse rows of the `# Stock Holdings` section (legacy column variants supported) */
+function parseHoldingRows(lines: string[]): StockHolding[] {
+  const holdings: StockHolding[] = [];
+  let inTable = false;
+  let headerParsed = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    if (line.startsWith("|")) {
+      if (!inTable) {
+        inTable = true;
+        headerParsed = false;
+        continue; // Skip header row
+      }
+      if (!headerParsed) {
+        headerParsed = true;
+        continue; // Skip separator row (|---|---|---|)
+      }
+      const cells = parseMarkdownTableRow(line);
+      if (cells.length >= 2) {
+        // Current 9-column: Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt
+        // Legacy 8-column (with Note): Note dropped
+        // Legacy 7-column (without Currency/FXRate): currency inferred from symbol
+        // Legacy 3-column (Name | Amount | Note): only name/amount survive
+        const hasQuoteCols = cells.length >= 6;
+        const hasCurrencyCols = cells.length >= 8;
+        const name = cells[0];
+        // Normalize legacy float artifacts (60671.36000000001 → 60671.36),
+        // so old files self-heal on the next save
+        const amount = roundAmount(parseFloat(cells[1]) || 0);
+        let symbol = hasQuoteCols ? cells[2].trim() : "";
+        let shares = hasQuoteCols ? parseFloat(cells[3]) || 0 : 0;
+        let price = hasQuoteCols ? parseFloat(cells[4]) || 0 : 0;
+        let changePct = hasQuoteCols
+          ? parseFloat(cells[5].replace("%", "")) || 0
+          : 0;
+        let currency: HoldingCurrency | undefined = hasCurrencyCols
+          ? (cells[6].trim().toUpperCase() as HoldingCurrency)
+          : undefined;
+        let fxRate = hasCurrencyCols ? parseFloat(cells[7]) || 0 : 0;
+        let quoteTime: string | undefined;
+
+        if (cells.length >= 9) {
+          quoteTime = cells[8] || undefined;
+        } else if (cells.length >= 8) {
+          // Legacy 8-column: cells[6]=Note, cells[7]=UpdatedAt — wait for
+          // actual 9-col detection above; for 8 cols assume Note variant
+          quoteTime = undefined;
+        }
+
+        // Infer currency from symbol when missing/invalid
+        if (
+          !currency ||
+          !["CNY", "HKD", "USD"].includes(currency) ||
+          fxRate <= 0
+        ) {
+          if (/^\d{5}$/.test(symbol)) {
+            currency = "HKD";
+            fxRate = fxRate > 0 ? fxRate : 0.86;
+          } else if (symbol && /^[A-Z]/i.test(symbol)) {
+            currency = "USD";
+            fxRate = fxRate > 0 ? fxRate : 6.72;
+          } else {
+            currency = "CNY";
+            fxRate = 1;
+          }
+        }
+
+        holdings.push({
+          id: generateId(),
+          name,
+          amount,
+          symbol,
+          shares,
+          currency,
+          fxRate,
+          price: price > 0 ? price : undefined,
+          priceChangePercent: hasQuoteCols ? changePct : undefined,
+          quoteTime: quoteTime || undefined,
+        });
+      }
+      continue;
+    }
+
+    if (line === "") {
+      inTable = false;
+      headerParsed = false;
+    }
+  }
+
+  return holdings;
+}
+
+/** Parse the `# Index Signal` section (a single data row) */
+function parseIndexSignalRows(lines: string[]): IndexSignal | null {
+  const rows = extractTableRows(lines);
+  if (rows.length === 0) return null;
+  // IndexCode | Name | TradeDate | Close | MA250 | Deviation% | Zone | UpdatedAt
+  const cells = rows[0];
+  if (cells.length < 8) return null;
+  const indexCode = cells[0].trim();
+  const tradeDate = cells[2].trim();
+  const close = parseFloat(cells[3]);
+  const ma250 = parseFloat(cells[4]);
+  const zone = cells[6].trim() as IndexSignalZone;
+  if (!indexCode || !tradeDate) return null;
+  if (!Number.isFinite(close) || !Number.isFinite(ma250)) return null;
+  if (!["buy", "hold", "sell", "overheat"].includes(zone)) return null;
+  const deviation = roundAmount(parseFloat(cells[5]));
+  return {
+    indexCode,
+    indexName: cells[1].trim(),
+    tradeDate,
+    close,
+    ma250,
+    deviation: Number.isFinite(deviation) ? deviation : 0,
+    zone,
+    updatedAt: cells[7].trim(),
+  };
+}
+
+/** Parse the `# Dividend Yields` section */
+function parseDividendYieldRows(lines: string[]): DividendYieldRow[] {
+  const rows: DividendYieldRow[] = [];
+  // Name | Symbol | DivType | AnnualPeriod | InterimPeriod | TTM | Price | Yield% | Pending | UpdatedAt
+  for (const cells of extractTableRows(lines)) {
+    if (cells.length < 8) continue;
+    const name = cells[0].trim();
+    const symbol = cells[1].trim();
+    const divType = cells[2].trim() === "semi" ? "semi" : "annual";
+    const annualPeriod = cells[3].trim();
+    const interimPeriod = cells[4].trim() || undefined;
+    const ttmPerShare = roundAmount(parseFloat(cells[5]) || 0, 4);
+    const price = roundAmount(parseFloat(cells[6]) || 0);
+    const yieldPct = roundAmount(parseFloat(cells[7]) || 0);
+    if (!name || !symbol) continue;
+    rows.push({
+      name,
+      symbol,
+      divType,
+      annualPeriod,
+      interimPeriod,
+      ttmPerShare,
+      price,
+      yieldPct,
+      pendingAnnual: cells[8]?.trim() || undefined,
+      updatedAt: cells[9]?.trim() || "",
+    });
+  }
+  return rows;
+}
+
+/** Parse the `# ETF Premiums` section */
+function parseEtfPremiumRows(lines: string[]): EtfPremiumRow[] {
+  const rows: EtfPremiumRow[] = [];
+  // Code | Name | Price | Premium% | Fee% | Scale | UpdatedAt
+  for (const cells of extractTableRows(lines)) {
+    if (cells.length < 6) continue;
+    const code = cells[0].trim();
+    const price = roundAmount(parseFloat(cells[2]) || 0, 3);
+    const premium = roundAmount(parseFloat(cells[3]));
+    if (!code) continue;
+    rows.push({
+      code,
+      name: cells[1].trim(),
+      price,
+      premium,
+      fee: roundAmount(parseFloat(cells[4]) || 0),
+      scale: roundAmount(parseFloat(cells[5]) || 0),
+      updatedAt: cells[6]?.trim() || "",
+    });
+  }
+  return rows;
+}
+
+export class MiscMarkdownParser {
   static parse(markdown: string): MiscData {
     const data: MiscData = { stockHoldings: [] };
-    const lines = markdown.split("\n");
-    let inHoldings = false;
-    let inTable = false;
-    let headerParsed = false;
 
-    for (const raw of lines) {
-      const line = raw.trim();
-
-      // Top-level heading switches section
-      if (/^#\s+/.test(line) && !/^##\s+/.test(line)) {
-        inHoldings = line.includes("Stock Holdings") || line.includes("股票持仓");
-        inTable = false;
-        headerParsed = false;
-        continue;
-      }
-      if (!inHoldings) continue;
-
-      if (line.startsWith("|")) {
-        if (!inTable) {
-          inTable = true;
-          headerParsed = false;
-          continue; // Skip header row
-        }
-        if (!headerParsed) {
-          headerParsed = true;
-          continue; // Skip separator row (|---|---|---|)
-        }
-        const cells = parseMarkdownTableRow(line);
-        if (cells.length >= 2) {
-          // Current 9-column: Name | Amount | Symbol | Shares | Price | Change% | Currency | FXRate | UpdatedAt
-          // Legacy 8-column (with Note): Note dropped
-          // Legacy 7-column (without Currency/FXRate): currency inferred from symbol
-          // Legacy 3-column (Name | Amount | Note): only name/amount survive
-          const hasQuoteCols = cells.length >= 6;
-          const hasCurrencyCols = cells.length >= 8;
-          const name = cells[0];
-          // Normalize legacy float artifacts (60671.36000000001 → 60671.36),
-          // so old files self-heal on the next save
-          const amount = roundAmount(parseFloat(cells[1]) || 0);
-          let symbol = hasQuoteCols ? cells[2].trim() : "";
-          let shares = hasQuoteCols ? parseFloat(cells[3]) || 0 : 0;
-          let price = hasQuoteCols ? parseFloat(cells[4]) || 0 : 0;
-          let changePct = hasQuoteCols
-            ? parseFloat(cells[5].replace("%", "")) || 0
-            : 0;
-          let currency: HoldingCurrency | undefined = hasCurrencyCols
-            ? (cells[6].trim().toUpperCase() as HoldingCurrency)
-            : undefined;
-          let fxRate = hasCurrencyCols ? parseFloat(cells[7]) || 0 : 0;
-          let quoteTime: string | undefined;
-
-          if (cells.length >= 9) {
-            quoteTime = cells[8] || undefined;
-          } else if (cells.length >= 8) {
-            // Legacy 8-column: cells[6]=Note, cells[7]=UpdatedAt — wait for
-            // actual 9-col detection above; for 8 cols assume Note variant
-            quoteTime = undefined;
-          }
-
-          // Infer currency from symbol when missing/invalid
-          if (
-            !currency ||
-            !["CNY", "HKD", "USD"].includes(currency) ||
-            fxRate <= 0
-          ) {
-            if (/^\d{5}$/.test(symbol)) {
-              currency = "HKD";
-              fxRate = fxRate > 0 ? fxRate : 0.86;
-            } else if (symbol && /^[A-Z]/i.test(symbol)) {
-              currency = "USD";
-              fxRate = fxRate > 0 ? fxRate : 6.72;
-            } else {
-              currency = "CNY";
-              fxRate = 1;
-            }
-          }
-
-          data.stockHoldings.push({
-            id: generateId(),
-            name,
-            amount,
-            symbol,
-            shares,
-            currency,
-            fxRate,
-            price: price > 0 ? price : undefined,
-            priceChangePercent: hasQuoteCols ? changePct : undefined,
-            quoteTime: quoteTime || undefined,
-          });
-        }
-        continue;
-      }
-
-      if (line === "") {
-        inTable = false;
-        headerParsed = false;
+    for (const section of splitMiscSections(markdown)) {
+      const title = section.title;
+      if (title.includes("Stock Holdings") || title.includes("股票持仓")) {
+        data.stockHoldings = parseHoldingRows(section.lines);
+      } else if (
+        title.includes("Index Signal") ||
+        title.includes("指数信号")
+      ) {
+        data.indexSignal = parseIndexSignalRows(section.lines) ?? undefined;
+      } else if (
+        title.includes("Dividend Yields") ||
+        title.includes("股息率")
+      ) {
+        data.dividendYields = parseDividendYieldRows(section.lines);
+      } else if (title.includes("ETF Premium") || title.includes("ETF溢价")) {
+        data.etfPremiums = parseEtfPremiumRows(section.lines);
       }
     }
 
@@ -1043,7 +1241,7 @@ class MiscMarkdownParser {
   }
 }
 
-class MiscMarkdownSerializer {
+export class MiscMarkdownSerializer {
   static serialize(data: MiscData): string {
     const parts: string[] = [];
 
@@ -1080,7 +1278,61 @@ class MiscMarkdownSerializer {
       parts.push("");
     }
 
-    // Future non-yearly sections append here
+    // ---- Index Signal cache (single row) ----
+    if (data.indexSignal) {
+      const s = data.indexSignal;
+      parts.push("# Index Signal\n");
+      parts.push(
+        "| IndexCode | Name | TradeDate | Close | MA250 | Deviation% | Zone | UpdatedAt |",
+      );
+      parts.push(
+        "|-----------|------|-----------|-------|-------|------------|------|-----------|",
+      );
+      parts.push(
+        `| ${s.indexCode} | ${s.indexName} | ${s.tradeDate} | ${s.close} | ${s.ma250} | ${s.deviation} | ${s.zone} | ${s.updatedAt} |`,
+      );
+      parts.push("");
+    }
+
+    // ---- TTM dividend yields cache (sorted by yield desc) ----
+    if (data.dividendYields && data.dividendYields.length > 0) {
+      parts.push("# Dividend Yields\n");
+      parts.push(
+        "| Name | Symbol | DivType | AnnualPeriod | InterimPeriod | TTM | Price | Yield% | Pending | UpdatedAt |",
+      );
+      parts.push(
+        "|------|--------|---------|--------------|---------------|-----|-------|--------|---------|-----------|",
+      );
+      const sorted = [...data.dividendYields].sort(
+        (a, b) => b.yieldPct - a.yieldPct,
+      );
+      for (const r of sorted) {
+        parts.push(
+          `| ${r.name} | ${r.symbol} | ${r.divType} | ${r.annualPeriod} | ${
+            r.interimPeriod ?? ""
+          } | ${r.ttmPerShare} | ${r.price} | ${r.yieldPct} | ${
+            r.pendingAnnual ?? ""
+          } | ${r.updatedAt} |`,
+        );
+      }
+      parts.push("");
+    }
+
+    // ---- ETF premium cache (sorted by premium asc) ----
+    if (data.etfPremiums && data.etfPremiums.length > 0) {
+      parts.push("# ETF Premiums\n");
+      parts.push("| Code | Name | Price | Premium% | Fee% | Scale | UpdatedAt |");
+      parts.push("|------|------|-------|----------|------|-------|-----------|");
+      const sorted = [...data.etfPremiums].sort(
+        (a, b) => a.premium - b.premium,
+      );
+      for (const r of sorted) {
+        parts.push(
+          `| ${r.code} | ${r.name} | ${r.price} | ${r.premium} | ${r.fee} | ${r.scale} | ${r.updatedAt} |`,
+        );
+      }
+      parts.push("");
+    }
 
     return parts.join("\n");
   }

@@ -13,8 +13,8 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - UI 层在 `src/react/`：dashboard-app.tsx(顶层) + use-finance-data.ts(hook 订阅 store) + icon.tsx + chart.tsx + components/ + forms/
 - 视图/Modal 外壳在 src/views/dashboard-view.tsx、src/modals/*.tsx：createRoot 挂载（preact/compat），onClose 先 root.unmount() 再 contentEl.empty()
 - maskNumbers 为顶层 useState 下发；Chart.js 用 useRef+useEffect+destroy；Icon 用 useEffect+ref 调 setIcon
-- esbuild 已开 minify(prod) + define NODE_ENV=production + target es2022；prod main.js 288KB / gz 94KB
-- esbuild 0.17 无原生 alias，用 preactAlias resolve 插件（createRequire 解析绝对路径）
+- esbuild 已开 minify(prod) + define NODE_ENV=production + target es2022；prod main.js 370KB / gz 117KB（2026-10-13 含市场信号模块后）
+- esbuild 0.17 无原生 alias，用 preactAlias resolve 插件（createRequire 解析绝对路径）；测试场景可用 CLI `--alias:obsidian=<stub>` 在 node 里跑纯函数
 - **通用表格组件 `src/react/components/data-table.tsx`**：DataTable\<T\> 列模型驱动，内部消费 useLayout() 统一处理移动端适配（mobileMode card/table + stickyLabel + actions + summaryRow）。4 张表（CashFlow/MonthlyOverview/AssetAllocation/DividendSummary）全部复用，各自只声明列+模式。卡片类名 `finance-dt-*`。
 
 ## 响应式策略（2026-07-23 重构：顶层下发 data-layout）
@@ -30,9 +30,10 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - Chart.js 仍 responsive:true+maintainAspectRatio:false；charts 列数现在靠默认 auto-fit，仅 mobile 锁 1 列
 - 待办：组件级行为适配(如 mobile 折叠宽表)可按需 `useLayout()`；图表高度按宽度动态化
 
-## 本地预览
-- `npm run setup-fixture` 建 fixture 软链接；`npm run dev` watch；`open "obsidian://open?path=.../fixture"` 打开测试 Vault
-- fixture 路径：/Users/wynnezheng/Codes/githubcode/obsidian-personal-finance-dashboard/fixture
+## 本地预览与部署点（两个）
+- **fixture（测试）**：`npm run setup-fixture` 建软链；`open "obsidian://open?path=.../fixture"`；插件目录软链指向 `dist/`，`npm run build` 即自动生效。路径：/Users/wynnezheng/Codes/githubcode/obsidian-personal-finance-dashboard/fixture
+- **typora（真实使用，2026-10-13 起）**：用户手动复制 dist 三件套到 `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/typora/.obsidian/plugins/personal-finance-dashboard/`；**build 后需再次复制 + 重载插件**才生效（iCloud vault 不适合做软链）。
+- 网络故障排查手段（2026-10-13 实战）：`scutil --proxy` 查系统代理 / `curl --noproxy '*'` 测直连 / 检查目标 vault Misc.md mtime 判断用户刷新是否落盘。
 
 ## 发布与文档（2026-10-13）
 - GitHub：github.com/wynn719/obsidian-personal-finance-dashboard（public）。Release 由 `.github/workflows/release.yml` 在 push tag 时自动构建发布（dist 内 main.js/manifest.json/styles.css/zip）。
@@ -40,8 +41,16 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - README 双语文档（2026-10-13 更新）：Commands 表、Releasing 段、Preact 架构树、fixture→dist 调试流程、收支表列序 `Date|Type|Category|Amount|Note`；新增 LICENSE（MIT，Copyright 2026 Wynne Zheng，若需改署名在此文件）。
 
 ## 分支
-- main：已合并 feature/react-migration（快进，2026-07-24）。含 Preact 迁移 + 响应式架构 + DataTable。本地领先 origin/main 4 提交，尚未 push。
-- feature/react-migration：已并入 main，可保留或删除。
+- main：本地领先 origin/main 3 提交（85cadf1 精度 / 6915d4c 移动端 / 19afa75 docs），尚未 push。市场信号模块改动（2026-10-13）在**工作区未提交**，待用户审 UI 后决定。
+
+## 市场信号模块（2026-10-13，移植自 WorkBuddy 每日自动化）
+- 三个独立手动刷新模块，位于资产配置行上方（`dashboard-app.tsx` 的 `.finance-market-grid`），各带刷新按钮 + 更新时间；数据缓存于 Misc.md，打开即见上次结果。
+- ①年线策略信号：`src/index-signal-service.ts`（中证官网 index-perf，UA/Referer 优先、失败降级默认头）；插件端算 MA250/偏离度；四区间 buy<0 / hold 0-3 / sell 3-6 / overheat>6；解析按「OHLC 四价全同」剔除休市填充行；450 自然日约得 ~297 交易日。
+- ②TTM 股息率：`src/dividend-yield-service.ts`（东财 RPT_SHAREBONUS_DET 批量 in 查询 + 复用 quote-service 取现价）；口径 1:1 复刻 ttm_yield.py（实施分配+有除权日；最近年报+最近中期；pending 检测）。与 westock 口径实测一致（招行两边 2.016），差异仅在 westock 两位舍入 vs 东财精确值。
+- ③ETF 溢价：`src/etf-premium-service.ts`（腾讯 qt.gtimg.cn 一次批量 16 只）；实测字段 **[44]=规模(亿) [77]=溢价率(%) [78]=IOPV**；清单+费率内置（与自动化提示词一致）；≤3% 高亮 + 过滤切换。
+- 数据层：models 增 IndexSignal/DividendYieldRow/EtfPremiumRow；`MiscMarkdownParser` 重构为按 `#` 分节 dispatch（新增 parseTableRowKeepEmpty 保空列 / extractTableRows），Serializer 增 3 个 section（已 export 便于 node round-trip 测试）。
+- UI：`components/{index-signal,dividend-yield,etf-premium}.tsx`，均独立 section；样式在 styles.css「12.5 市场信号模块」段；移动端不隐藏（card 模式）。
+- 验证手段：`/tmp/market-test/`（esbuild --alias stub）跑纯函数 + round-trip；fixture/Finance/Misc.md 已含今日真实缓存数据。
 
 ## 已知小历史
 - calculator.getMonthlyCashFlow/getMonthlyTotalAssets 已修：加可选 year 参数跟随 currentYear（原先硬编码日历年）

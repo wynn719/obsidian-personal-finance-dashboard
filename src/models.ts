@@ -90,9 +90,82 @@ export interface StockHolding {
   quoteTime?: string;
 }
 
+// ============================================================
+// Market signal caches (Misc Data) — refreshed manually, cached to disk
+// ============================================================
+
+/** Yearly-mean-line strategy zone (CSI Dividend Low Volatility 100) */
+export type IndexSignalZone = "buy" | "hold" | "sell" | "overheat";
+
+/** Index MA250 deviation signal (cached; mirrors the daily WorkBuddy check) */
+export interface IndexSignal {
+  /** CSI index code, e.g. "930955" */
+  indexCode: string;
+  /** Index display name, e.g. "中证红利低波动100指数" */
+  indexName: string;
+  /** Latest trading day, "YYYY-MM-DD" */
+  tradeDate: string;
+  /** Close of the latest trading day */
+  close: number;
+  /** 250-trading-day moving average of the close */
+  ma250: number;
+  /** Deviation from MA250 in percent, e.g. 1.94 means +1.94% */
+  deviation: number;
+  /** Strategy zone derived from the deviation */
+  zone: IndexSignalZone;
+  /** ISO timestamp of the last refresh */
+  updatedAt: string;
+}
+
+/** One stock's TTM dividend yield (tracker pool, mirrors ttm_yield.py) */
+export interface DividendYieldRow {
+  name: string;
+  /** Plain 6-digit A-share code, e.g. "600036" */
+  symbol: string;
+  /** "semi" = annual + interim, "annual" = annual only */
+  divType: "semi" | "annual";
+  /** Latest implemented annual report period, "YYYY-MM-DD" */
+  annualPeriod: string;
+  /** Latest implemented interim report period (semi only), "YYYY-MM-DD" */
+  interimPeriod?: string;
+  /** TTM dividend per share (¥, pre-tax) */
+  ttmPerShare: number;
+  /** Latest price (¥) */
+  price: number;
+  /** TTM yield in percent, e.g. 4.78 means 4.78% */
+  yieldPct: number;
+  /** Latest annual report period not yet implemented (reminder), if any */
+  pendingAnnual?: string;
+  /** ISO timestamp of the last refresh */
+  updatedAt: string;
+}
+
+/** One ETF's premium quote vs its latest NAV (market data) */
+export interface EtfPremiumRow {
+  /** ETF code, e.g. "513100" */
+  code: string;
+  name: string;
+  /** Latest price (¥) */
+  price: number;
+  /** Premium percent vs the latest published NAV; negative = discount */
+  premium: number;
+  /** Combined fee percent (management + custody) */
+  fee: number;
+  /** Fund scale in 100M CNY */
+  scale: number;
+  /** ISO timestamp of the last refresh */
+  updatedAt: string;
+}
+
 /** Container for the standalone Misc data file (extensible: one `#` section per data type) */
 export interface MiscData {
   stockHoldings: StockHolding[];
+  /** Cached MA250 strategy signal (single index) */
+  indexSignal?: IndexSignal;
+  /** Cached TTM dividend yield tracker rows */
+  dividendYields?: DividendYieldRow[];
+  /** Cached ETF premium monitor rows */
+  etfPremiums?: EtfPremiumRow[];
 }
 
 export const EMPTY_MISC_DATA: MiscData = {

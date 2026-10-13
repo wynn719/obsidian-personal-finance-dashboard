@@ -178,6 +178,48 @@ interface TranslationStrings {
   // Holdings manage modal
   "modal.holdingsManage.title": string;
 
+  // Market signals: index MA250 signal / TTM dividend yields / ETF premiums
+  "signal.title": string;
+  "signal.col.close": string;
+  "signal.col.ma250": string;
+  "signal.col.deviation": string;
+  "signal.zone.buy": string;
+  "signal.zone.hold": string;
+  "signal.zone.sell": string;
+  "signal.zone.overheat": string;
+  "signal.advice.buy": string;
+  "signal.advice.hold": string;
+  "signal.advice.sell": string;
+  "signal.advice.overheat": string;
+  "signal.empty": string;
+  "signal.btn.refresh": string;
+
+  "dividendYield.title": string;
+  "dividendYield.col.name": string;
+  "dividendYield.col.ttm": string;
+  "dividendYield.col.price": string;
+  "dividendYield.col.yield": string;
+  "dividendYield.pending": string;
+  "dividendYield.empty": string;
+  "dividendYield.btn.refresh": string;
+
+  "etfPremium.title": string;
+  "etfPremium.col.code": string;
+  "etfPremium.col.name": string;
+  "etfPremium.col.price": string;
+  "etfPremium.col.premium": string;
+  "etfPremium.col.fee": string;
+  "etfPremium.col.scale": string;
+  "etfPremium.filter.low": string;
+  "etfPremium.filter.all": string;
+  "etfPremium.empty": string;
+  "etfPremium.noneLow": string;
+  "etfPremium.btn.refresh": string;
+
+  "market.updatedAt": string;
+  "market.refreshFailed": string;
+  "market.partialFailed": string;
+
   // Commands & Ribbon
   "command.openDashboard": string;
   "command.addSnapshot": string;
@@ -392,6 +434,52 @@ const en: TranslationStrings = {
 
   // Holdings manage modal
   "modal.holdingsManage.title": "Stock Holdings Details",
+
+  // Market signals: index MA250 signal / TTM dividend yields / ETF premiums
+  "signal.title": "Dividend Low-Vol 100 · MA250 Signal",
+  "signal.col.close": "Close",
+  "signal.col.ma250": "MA250",
+  "signal.col.deviation": "Deviation",
+  "signal.zone.buy": "Buy zone",
+  "signal.zone.hold": "Hold zone",
+  "signal.zone.sell": "Sell sweet spot",
+  "signal.zone.overheat": "Overheated",
+  "signal.advice.buy": "Below the annual line — accumulation zone.",
+  "signal.advice.hold":
+    "0–3% above the annual line — hold above the break-even line.",
+  "signal.advice.sell":
+    "Entering the sell sweet spot (+3%–+6%, sweet point ≈ +5%).",
+  "signal.advice.overheat":
+    "Overheated (above +6%) — opportunity cost rising.",
+  "signal.empty": "No signal yet. Click refresh to fetch the index history.",
+  "signal.btn.refresh": "Refresh index signal",
+
+  "dividendYield.title": "High Dividend TTM",
+  "dividendYield.col.name": "Stock",
+  "dividendYield.col.ttm": "TTM / share",
+  "dividendYield.col.price": "Price",
+  "dividendYield.col.yield": "Yield",
+  "dividendYield.pending":
+    "The latest annual report ({period}) is not yet implemented; the annual part uses the previous implemented plan.",
+  "dividendYield.empty": "No dividend yield data. Click refresh to fetch.",
+  "dividendYield.btn.refresh": "Refresh dividend yields",
+
+  "etfPremium.title": "US ETF Premium Monitor",
+  "etfPremium.col.code": "Code",
+  "etfPremium.col.name": "Name",
+  "etfPremium.col.price": "Price",
+  "etfPremium.col.premium": "Premium",
+  "etfPremium.col.fee": "Fee",
+  "etfPremium.col.scale": "Scale (100M)",
+  "etfPremium.filter.low": "≤3%",
+  "etfPremium.filter.all": "All",
+  "etfPremium.empty": "No premium data. Click refresh to fetch.",
+  "etfPremium.noneLow": "All {count} ETFs are above 3%; lowest: {name} +{pct}%",
+  "etfPremium.btn.refresh": "Refresh ETF premiums",
+
+  "market.updatedAt": "Updated {time}",
+  "market.refreshFailed": "Refresh failed — check your network and try again",
+  "market.partialFailed": "{count} symbol(s) failed to fetch",
 
   // Commands & Ribbon
   "command.openDashboard": "Open Finance Dashboard",
@@ -610,6 +698,49 @@ const zh: TranslationStrings = {
 
   // Holdings manage modal
   "modal.holdingsManage.title": "股票持仓占比明细",
+
+  // Market signals: index MA250 signal / TTM dividend yields / ETF premiums
+  "signal.title": "红利低波100 · 年线信号",
+  "signal.col.close": "收盘",
+  "signal.col.ma250": "MA250",
+  "signal.col.deviation": "偏离度",
+  "signal.zone.buy": "买入区",
+  "signal.zone.hold": "持有区",
+  "signal.zone.sell": "卖出甜区",
+  "signal.zone.overheat": "过热区",
+  "signal.advice.buy": "跌破年线，低吸区。",
+  "signal.advice.hold": "年线上方 0~3%，保本线之上，继续持有。",
+  "signal.advice.sell": "进入卖出甜区 +3%~+6%（甜点约 +5%）。",
+  "signal.advice.overheat": "过热区（+6% 以上），机会成本上升。",
+  "signal.empty": "暂无信号数据，点击刷新拉取指数行情。",
+  "signal.btn.refresh": "刷新指数信号",
+
+  "dividendYield.title": "高股息 TTM",
+  "dividendYield.col.name": "股票",
+  "dividendYield.col.ttm": "TTM 每股",
+  "dividendYield.col.price": "现价",
+  "dividendYield.col.yield": "股息率",
+  "dividendYield.pending":
+    "最新年报（{period}）尚未实施，年报部分取更早一期已实施方案。",
+  "dividendYield.empty": "暂无股息率数据，点击刷新拉取。",
+  "dividendYield.btn.refresh": "刷新股息率",
+
+  "etfPremium.title": "美股 ETF 溢价监控",
+  "etfPremium.col.code": "代码",
+  "etfPremium.col.name": "名称",
+  "etfPremium.col.price": "现价",
+  "etfPremium.col.premium": "溢价率",
+  "etfPremium.col.fee": "费率",
+  "etfPremium.col.scale": "规模(亿)",
+  "etfPremium.filter.low": "≤3%",
+  "etfPremium.filter.all": "全部",
+  "etfPremium.empty": "暂无溢价数据，点击刷新拉取。",
+  "etfPremium.noneLow": "{count} 只标的溢价率均 > 3%，最低：{name} +{pct}%",
+  "etfPremium.btn.refresh": "刷新溢价数据",
+
+  "market.updatedAt": "更新于 {time}",
+  "market.refreshFailed": "刷新失败，请检查网络后重试",
+  "market.partialFailed": "{count} 只数据获取失败",
 
   // Commands & Ribbon
   "command.openDashboard": "打开财务仪表盘",

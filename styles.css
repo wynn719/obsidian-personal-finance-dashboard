@@ -349,7 +349,8 @@
 
 /* 仪表盘直系 section 与 summary-grid 内 section：统一的平面卡片壳 */
 .finance-dashboard > .finance-section,
-.finance-summary-grid > .finance-section {
+.finance-summary-grid > .finance-section,
+.finance-market-grid > .finance-section {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-md);
@@ -367,6 +368,20 @@
 }
 
 .finance-summary-grid > .finance-section {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* 市场信号区：策略信号 / TTM 股息率 / ETF 溢价 三栏并排（各自独立模块） */
+.finance-market-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--fd-space-4);
+  align-items: start;
+  margin-bottom: var(--fd-space-5);
+}
+
+.finance-market-grid > .finance-section {
   min-width: 0;
   margin-bottom: 0;
 }
@@ -963,6 +978,150 @@
 }
 
 /* ════════════════════════════════════════════════════════════
+   12.5 市场信号模块（策略信号 / TTM 股息率 / ETF 溢价）
+   ════════════════════════════════════════════════════════════ */
+.finance-market-section .finance-holdings-title {
+  flex-wrap: wrap;
+  row-gap: var(--fd-space-1);
+}
+
+.finance-market-head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  margin-left: auto;
+}
+
+/* —— 指数策略信号卡 —— */
+.finance-signal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-3);
+}
+
+.finance-signal-hero {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fd-space-3);
+  flex-wrap: wrap;
+}
+
+.finance-signal-dev {
+  font-size: 1.9em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-signal-buy {
+  color: var(--fd-accent);
+}
+
+.finance-signal-hold {
+  color: var(--text-normal);
+}
+
+.finance-signal-sell {
+  color: var(--fd-warning);
+}
+
+.finance-signal-overheat {
+  color: var(--fd-negative);
+}
+
+.finance-zone-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.82em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.finance-zone-buy {
+  color: var(--fd-accent-strong);
+  background: var(--fd-accent-bg);
+}
+
+.finance-zone-hold {
+  color: var(--text-muted);
+  background: var(--background-modifier-hover);
+}
+
+.finance-zone-sell {
+  color: var(--fd-warning);
+  background: var(--fd-warning-bg);
+}
+
+.finance-zone-overheat {
+  color: var(--fd-negative);
+  background: var(--fd-negative-bg);
+}
+
+.finance-signal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fd-space-1) var(--fd-space-4);
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.finance-signal-meta b {
+  color: var(--text-normal);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-signal-advice {
+  margin: 0;
+  font-size: 0.92em;
+}
+
+/* —— ETF 溢价过滤切换 —— */
+.finance-etf-filter {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.finance-etf-filter button {
+  border: 1px solid var(--background-modifier-border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  font-family: inherit;
+  padding: 1px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1.6;
+  box-shadow: none;
+}
+
+.finance-etf-filter button:hover {
+  color: var(--text-normal);
+  border-color: var(--text-muted);
+}
+
+.finance-etf-filter button.finance-etf-filter-active {
+  color: var(--fd-accent-strong);
+  background: var(--fd-accent-bg);
+  border-color: var(--fd-accent-border);
+}
+
+/* 达标（溢价率 ≤ 3%）高亮 */
+.finance-etf-ok {
+  color: var(--fd-positive);
+  font-weight: 600;
+}
+
+/* TTM 股息率：最新年报未实施提醒角标 */
+.finance-dy-pending {
+  color: var(--fd-warning);
+  font-size: 0.85em;
+  cursor: help;
+}
+
+/* ════════════════════════════════════════════════════════════
    13. 响应式（data-layout 顶层下发，断点=容器宽）
    full ≥1100 | compact 768–1099 | mobile <768
    ════════════════════════════════════════════════════════════ */
@@ -971,6 +1130,12 @@
 [data-layout="compact"] .finance-summary-grid,
 [data-layout="mobile"] .finance-summary-grid {
   grid-template-columns: 1fr;
+}
+
+[data-layout="compact"] .finance-market-grid,
+[data-layout="mobile"] .finance-market-grid {
+  grid-template-columns: 1fr;
+  gap: var(--fd-space-3);
 }
 
 [data-layout="compact"] .finance-metrics-grid {

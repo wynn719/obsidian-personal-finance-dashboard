@@ -7,6 +7,9 @@ import { useQuoteRefresh } from "./hooks/use-quote-refresh";
 import { LayoutProvider } from "./responsive";
 import { Header } from "./components/header";
 import { MetricCards } from "./components/metric-cards";
+import { IndexSignalSection } from "./components/index-signal";
+import { DividendYieldSection } from "./components/dividend-yield";
+import { EtfPremiumSection } from "./components/etf-premium";
 import { AssetAllocationTable } from "./components/asset-allocation";
 import { MonthlyOverviewTable } from "./components/monthly-overview";
 import { DividendSummaryTable } from "./components/dividend-summary";
@@ -101,6 +104,13 @@ export function FinanceApp({
       />
 
       <MetricCards metrics={metrics} maskNumbers={maskNumbers} />
+
+      {/* 市场信号区：红利低波年线信号 / TTM 股息率 / ETF 溢价监控（各自独立模块，手动刷新） */}
+      <div className="finance-market-grid">
+        <IndexSignalSection store={store} />
+        <DividendYieldSection store={store} maskNumbers={maskNumbers} />
+        <EtfPremiumSection store={store} />
+      </div>
 
       {/* 资产配置 + 股息汇总 + 股票持仓 Treemap 同一行 */}
       <div className="finance-summary-grid">

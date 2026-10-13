@@ -92,6 +92,16 @@ export function getCurrentYear(): string {
   return String(new Date().getFullYear());
 }
 
+/** Format an ISO timestamp as local "HH:mm" (empty string when invalid) */
+export function formatClockTime(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return `${String(d.getHours()).padStart(2, "0")}:${String(
+    d.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
 /** Create a DOM element with optional classes and text */
 export function createEl(
   tag: string,

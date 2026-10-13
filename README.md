@@ -19,6 +19,10 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
 - 💸 **Cash Flow Management** — Record income and expenses with categories, filterable and paginated
 - 🏦 **Dividend Tracking** — Log dividend income by stock, with autocomplete and yearly summaries
 - 🗂️ **Stock Holdings Treemap** — Dashboard module with a treemap + details table for stock holdings; just enter a stock code (A-share / HK / US) + share count — names auto-fetch, one-click quote refresh computes market value (multi-currency, valued in CNY) and writes it back to the standalone `Misc.md` file
+- 🧭 **Market Signal Modules** — Three independent, manually-refreshed modules (results cached to `Misc.md`):
+  - **MA250 strategy signal** — CSI Dividend Low-Volatility 100 (930955): deviation from its 250-day moving average with buy / hold / sell-sweet-spot / overheated zones
+  - **High dividend TTM** — 9-stock A-share tracker: latest implemented annual + interim dividend per share ÷ live price
+  - **US ETF premium monitor** — 16 Nasdaq / S&P 500 QDII ETFs: live premium vs latest NAV, fee & scale, rows ≤ 3% highlighted (filterable)
 - 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
@@ -69,6 +73,18 @@ Every action is also available from the Command Palette:
 - Multi-currency holdings (A-share / HK / US): the quote request automatically includes live FX rates (USD/HKD → CNY); market values and shares are uniformly converted to CNY behind the scenes (the price column shows the native currency)
 - Click any treemap block (or the ✏️ button in the details table) to edit; 🗑️ to delete
 - Quotes come from Tencent's public quote API (qt.gtimg.cn), no API key required
+
+### Market Signal Modules
+
+Three independent modules sit above the asset-allocation row — each is self-contained with its own refresh button. Nothing polls in the background: data is fetched only when you click 🔄, and the last result is cached in `Misc.md` so it's still visible next time you open the dashboard.
+
+| Module | What it shows | Data source |
+|--------|---------------|-------------|
+| **MA250 strategy signal** | CSI Dividend Low-Volatility 100 (930955): latest close vs the 250-day average, deviation, and strategy zone (buy < 0 / hold 0–3% / sell sweet spot 3–6% / overheated > 6%) | csindex.com.cn (index-perf) |
+| **High dividend TTM** | 9 A-share tracker stocks: latest implemented annual + interim dividend per share ÷ live price, sorted by yield (the exact definition used by the companion daily automation) | East Money dividend API + Tencent quotes |
+| **US ETF premium monitor** | 16 Nasdaq / S&P 500 QDII ETFs: price, premium vs latest published NAV, combined fee and scale; shows only ≤ 3% rows by default, toggle for all 16 | Tencent quotes (qt.gtimg.cn) |
+
+> 💡 The ETF premium is computed by the quote API as price ÷ latest published NAV − 1 — the same definition as the low-premium scanner. Negative values mean a discount.
 
 ### Recording Data
 
@@ -169,9 +185,11 @@ Each year file contains three sections:
 | 2025-07-20 | 招商银行 | 8600 | 中期分红 |
 ```
 
-#### Stock Holdings (Misc.md)
+#### Misc.md — Non-Yearly Data
 
-Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#` section holds one data type — currently stock holdings:
+Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#` section holds one data type.
+
+**Stock Holdings** — written by the holdings module:
 
 ```markdown
 # Stock Holdings
@@ -183,6 +201,32 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 ```
 
 `Amount` = shares × price in the native currency — recomputed and rounded to 2 decimals on every quote refresh, so the file never picks up floating-point artifacts. `FXRate` is the CNY rate at the last refresh (used to value non-CNY holdings in CNY). Share percentages are computed at runtime from the total amount — nothing to maintain by hand.
+
+**Market signal caches** — written by the three signal modules on each manual refresh (also safe to edit by hand):
+
+```markdown
+# Index Signal
+
+| IndexCode | Name | TradeDate | Close | MA250 | Deviation% | Zone | UpdatedAt |
+|-----------|------|-----------|-------|-------|------------|------|-----------|
+| 930955 | 中证红利低波动100指数 | 2026-10-13 | 11495.63 | 11728.84 | -1.99 | buy | 2026-10-13T11:03:32.569Z |
+
+# Dividend Yields
+
+| Name | Symbol | DivType | AnnualPeriod | InterimPeriod | TTM | Price | Yield% | Pending | UpdatedAt |
+|------|--------|---------|--------------|---------------|-----|-------|--------|---------|-----------|
+| 招商银行 | 600036 | semi | 2025-12-31 | 2025-06-30 | 2.016 | 42.8 | 4.71 |  | 2026-10-13T11:03:32.569Z |
+
+# ETF Premiums
+
+| Code | Name | Price | Premium% | Fee% | Scale | UpdatedAt |
+|------|------|-------|----------|------|-------|-----------|
+| 513100 | 纳指ETF国泰 | 2.375 | 15.5 | 0.8 | 230.01 | 2026-10-13T11:03:32.432Z |
+```
+
+- `Index Signal` — `Zone` is `buy` / `hold` / `sell` / `overheat`; `Deviation%` is close ÷ MA250 − 1
+- `Dividend Yields` — `DivType` is `semi` (annual + interim) or `annual`; an empty `Pending` cell means the latest annual report is already implemented
+- `ETF Premiums` — `Premium%` is vs the latest published NAV (negative = discount); `Scale` is in 100M CNY
 
 > 💡 **Tip**: Since data is plain Markdown, you can edit it directly in Obsidian or any text editor. The plugin will auto-detect changes and refresh.
 
@@ -196,6 +240,9 @@ src/
 ├── data-store.ts               # Data persistence (Markdown ↔ memory), incl. Misc.md holdings
 ├── calculator.ts               # Pure computation layer
 ├── quote-service.ts            # Live quotes + FX rates (batched, qt.gtimg.cn)
+├── index-signal-service.ts     # MA250 strategy signal (csindex.com.cn)
+├── etf-premium-service.ts      # Nasdaq/S&P QDII ETF premiums (qt.gtimg.cn)
+├── dividend-yield-service.ts   # TTM dividend yields (East Money + quotes)
 ├── models.ts                   # TypeScript interfaces & defaults
 ├── settings.ts                 # Obsidian settings tab
 ├── i18n.ts                     # Internationalization (en/zh)
@@ -206,7 +253,7 @@ src/
 │   ├── use-finance-data.ts     # Store subscription hook
 │   ├── chart.tsx               # Chart.js wrappers
 │   ├── holdings-chart.tsx      # Holdings treemap
-│   ├── components/             # Metric cards, tables (generic DataTable), sections
+│   ├── components/             # Metric cards, tables (generic DataTable), market signal sections
 │   ├── forms/                  # Snapshot / cash flow / dividend / holding forms
 │   └── hooks/                  # use-quote-refresh
 ├── views/
@@ -226,6 +273,7 @@ src/
 - **Preact UI Layer** — Components are written with React-style JSX and run on Preact (esbuild aliases `react` → `preact/compat`); the view/modal shells stay native Obsidian (`ItemView` / `Modal` + `createRoot`)
 - **Container-Driven Responsive Layout** — A `ResizeObserver` on the view container derives a `full` / `compact` / `mobile` layout and dispatches it via a `data-layout` attribute + context; components consume that instead of guessing from the viewport (fixes the Obsidian split-pane mismatch)
 - **Observer Pattern** — `DataStore` notifies the UI on any data change for automatic re-rendering
+- **Manual Refresh, Cached to Disk** — Market data modules (quotes, index signal, dividend yields, ETF premiums) fetch only on demand and persist their last result to `Misc.md`, so the view stays current without background polling
 - **Cross-Year Writes** — Adding records to a different year automatically handles file switching
 
 ---

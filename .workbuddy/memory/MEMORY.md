@@ -34,6 +34,7 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - **fixture（测试）**：`npm run setup-fixture` 建软链；`open "obsidian://open?path=.../fixture"`；插件目录软链指向 `dist/`，`npm run build` 即自动生效。路径：/Users/wynnezheng/Codes/githubcode/obsidian-personal-finance-dashboard/fixture
 - **typora（真实使用，2026-10-13 起）**：用户手动复制 dist 三件套到 `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/typora/.obsidian/plugins/personal-finance-dashboard/`；**build 后需再次复制 + 重载插件**才生效（iCloud vault 不适合做软链）。
 - 网络故障排查手段（2026-10-13 实战）：`scutil --proxy` 查系统代理 / `curl --noproxy '*'` 测直连 / 检查目标 vault Misc.md mtime 判断用户刷新是否落盘。
+- **用户 Mac 网络环境（2026-10-19 查明）**：装有腾讯企业网络代理系统扩展 `com.tencent.NGNAppProxy.NGNAppProxyEx`，系统 DNS 指向内网 `10.28.0.21`（search domain tencent.com）。macOS 把向 10.x 发 DNS 查询视为「本地网络访问」，**应用需在 系统设置→隐私与安全性→本地网络 中获得授权**；Obsidian 曾因缺此授权导致全部外部请求失败（手机/Chrome/curl 均正常）。排查同类问题先跑：`scutil --dns` / `systemextensionsctl list` / `codesign --verify`。
 
 ## 发布与文档（2026-10-13）
 - GitHub：github.com/wynn719/obsidian-personal-finance-dashboard（public）。Release 由 `.github/workflows/release.yml` 在 push tag 时自动构建发布（dist 内 main.js/manifest.json/styles.css/zip）。
@@ -52,6 +53,15 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - 数据层：models 增 IndexSignal/DividendYieldRow/EtfPremiumRow；`MiscMarkdownParser` 重构为按 `#` 分节 dispatch（新增 parseTableRowKeepEmpty 保空列 / extractTableRows），Serializer 增 3 个 section（已 export 便于 node round-trip 测试）。
 - UI：`components/{index-signal,dividend-yield,etf-premium}.tsx`，均独立 section；样式在 styles.css「12.5 市场信号模块」段；移动端不隐藏（card 模式）。
 - 验证手段：`/tmp/market-test/`（esbuild --alias stub）跑纯函数 + round-trip；fixture/Finance/Misc.md 已含今日真实缓存数据。
+
+## 移动端高密度版面（2026-10-20 落地，对齐 Ardot 738377014719826）
+- 设计源：iCloud `Workbuddy/2026-10-20-10-23-17/`（390×844 主屏 + 说明面板 + Pad 1194×834）。三动作：一主四从 / 一行一语义 / 卡片堆→数据表。
+- 只作用 mobile（<768）：`MetricCards` 走 `MobileMetrics`（hero + 四列指标带）；`IndexSignalSection` 走两行紧凑分支（标题按 ` · ` 拆名称+chip，省略 advice）；TTM 表 `mobileMode="table"` 四列（名称/现价/TTM/股息率）行高 58。桌面与 compact 原样保留。
+- 视觉：圆角 18、零描边、`--fd-card-shadow` 极轻阴影分块；字号阶梯 34/15/13/11/10；区块间距 12。
+- **A 股色 token 独立**：`--fd-up #D0372B` / `--fd-down #0E8A5F` / `--fd-link #0066CC`，与账本语义 `--fd-positive/negative`（绿正红负）并存 → 桌面仍绿正红负，**口径分叉未统一，待哥拍板**。
+- 特异性坑：TTM section 是 `.finance-market-grid` 子元素，覆盖其 padding 必须写 `[data-layout="mobile"] .finance-market-grid > .finance-dy-section`（0,3,0）。
+- 验证：`/tmp/mobile-preview.html` mock 主题变量 + 引真实 styles.css，`npx playwright screenshot --channel=chrome --viewport-size="390,844" --color-scheme={light,dark}`。`--device "iPhone 13"` 会走 webkit，与 `--channel` 冲突。
+- 未做：header 按钮收纳进「···」、Pad 断点（横排 hero + 行业列 + 相对股息率分布条）、表尾「—」说明与查看全部。
 
 ## 已知小历史
 - calculator.getMonthlyCashFlow/getMonthlyTotalAssets 已修：加可选 year 参数跟随 currentYear（原先硬编码日历年）

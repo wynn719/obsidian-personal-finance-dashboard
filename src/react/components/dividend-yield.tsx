@@ -71,31 +71,36 @@ export function DividendYieldSection({
       ),
     },
     {
-      key: "ttm",
-      header: t("dividendYield.col.ttm"),
-      numeric: true,
-      cell: (r) => mask(`¥${r.ttmPerShare.toFixed(4)}`),
-    },
-    {
       key: "price",
       header: t("dividendYield.col.price"),
       numeric: true,
       cell: (r) => mask(r.price.toFixed(2)),
     },
     {
+      key: "ttm",
+      header: t("dividendYield.col.ttm"),
+      numeric: true,
+      cell: (r) => mask(`¥${r.ttmPerShare.toFixed(4)}`),
+    },
+    {
       key: "yield",
       header: t("dividendYield.col.yield"),
       numeric: true,
-      className: "finance-bold",
+      className: "finance-dy-yield",
       cell: (r) => `${r.yieldPct.toFixed(2)}%`,
     },
   ];
 
   return (
-    <div className="finance-section finance-market-section">
+    <div className="finance-section finance-market-section finance-dy-section">
       <h2 className="finance-holdings-title">
         <span>
           <Icon name="percent" /> {t("dividendYield.title")}
+          {rows.length > 0 ? (
+            <span className="finance-count-chip">
+              {t("market.count", { count: rows.length })}
+            </span>
+          ) : null}
         </span>
         <span className="finance-market-head-right">
           {lastUpdated ? (
@@ -120,8 +125,9 @@ export function DividendYieldSection({
         columns={columns}
         rows={rows}
         rowKey={(r) => r.symbol}
-        mobileMode="card"
+        mobileMode="table"
         stickyLabel={false}
+        className="finance-dy-table finance-mobile-table"
         emptyText={t("dividendYield.empty")}
       />
     </div>

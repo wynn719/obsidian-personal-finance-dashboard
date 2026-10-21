@@ -183,6 +183,7 @@ interface TranslationStrings {
   "signal.col.close": string;
   "signal.col.ma250": string;
   "signal.col.deviation": string;
+  "signal.col.vsMa": string;
   "signal.zone.buy": string;
   "signal.zone.hold": string;
   "signal.zone.sell": string;
@@ -217,6 +218,7 @@ interface TranslationStrings {
   "etfPremium.btn.refresh": string;
 
   "market.updatedAt": string;
+  "market.count": string;
   "market.refreshFailed": string;
   "market.partialFailed": string;
 
@@ -440,6 +442,7 @@ const en: TranslationStrings = {
   "signal.col.close": "Close",
   "signal.col.ma250": "MA250",
   "signal.col.deviation": "Deviation",
+  "signal.col.vsMa": "vs MA250",
   "signal.zone.buy": "Buy zone",
   "signal.zone.hold": "Hold zone",
   "signal.zone.sell": "Sell sweet spot",
@@ -455,7 +458,7 @@ const en: TranslationStrings = {
   "signal.btn.refresh": "Refresh index signal",
 
   "dividendYield.title": "High Dividend TTM",
-  "dividendYield.col.name": "Stock",
+  "dividendYield.col.name": "Name / Code",
   "dividendYield.col.ttm": "TTM / share",
   "dividendYield.col.price": "Price",
   "dividendYield.col.yield": "Yield",
@@ -478,6 +481,7 @@ const en: TranslationStrings = {
   "etfPremium.btn.refresh": "Refresh ETF premiums",
 
   "market.updatedAt": "Updated {time}",
+  "market.count": "{count} items",
   "market.refreshFailed": "Refresh failed — check your network and try again",
   "market.partialFailed": "{count} symbol(s) failed to fetch",
 
@@ -704,6 +708,7 @@ const zh: TranslationStrings = {
   "signal.col.close": "收盘",
   "signal.col.ma250": "MA250",
   "signal.col.deviation": "偏离度",
+  "signal.col.vsMa": "距年线",
   "signal.zone.buy": "买入区",
   "signal.zone.hold": "持有区",
   "signal.zone.sell": "卖出甜区",
@@ -716,7 +721,7 @@ const zh: TranslationStrings = {
   "signal.btn.refresh": "刷新指数信号",
 
   "dividendYield.title": "高股息 TTM",
-  "dividendYield.col.name": "股票",
+  "dividendYield.col.name": "名称 / 代码",
   "dividendYield.col.ttm": "TTM 每股",
   "dividendYield.col.price": "现价",
   "dividendYield.col.yield": "股息率",
@@ -739,6 +744,7 @@ const zh: TranslationStrings = {
   "etfPremium.btn.refresh": "刷新溢价数据",
 
   "market.updatedAt": "更新于 {time}",
+  "market.count": "{count} 只",
   "market.refreshFailed": "刷新失败，请检查网络后重试",
   "market.partialFailed": "{count} 只数据获取失败",
 

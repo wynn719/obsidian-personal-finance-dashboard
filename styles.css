@@ -28,6 +28,22 @@
   --fd-warning: #d97706;
   --fd-warning-bg: rgba(217, 119, 6, 0.08);
 
+  /* A 股口径语义色：正/涨红、负/跌绿。与账本语义的 --fd-positive/negative 分开维护，
+     供行情类数值（环比、偏离度、股息率）使用。色值取自移动端重设计稿。 */
+  --fd-up: #d0372b;
+  --fd-up-bg: #fcebe9;
+  --fd-down: #0e8a5f;
+  --fd-down-bg: #e9f6ef;
+  --fd-link: #0066cc;
+  /* 移动端页面底色：对齐设计稿 #F5F5F7。不复用 --background-secondary——
+     Obsidian 默认主题的 secondary 接近纯白，白卡浮上去看不出分块。 */
+  --fd-page-bg: #f5f5f7;
+  /* 移动端一级模块之间的垂直间距（单一事实源）：区块、网格 gap、卡片间距全部取值于此，
+     避免出现 8 / 12 / 16 / 20 混用导致节奏不齐。取值对齐设计稿「区块间距 16、组内 0」。 */
+  --fd-block-gap: 16px;
+  /* 移动端分块阴影：设计稿要求去描边，只靠极轻阴影维持白卡与灰底的边界 */
+  --fd-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+
   /* 间距（8px 基） */
   --fd-space-1: 4px;
   --fd-space-2: 8px;
@@ -79,6 +95,13 @@
   --fd-warning: #fbbf24;
   --fd-warning-bg: rgba(251, 191, 36, 0.1);
   --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --fd-up: #ff6f61;
+  --fd-up-bg: rgba(255, 111, 97, 0.14);
+  --fd-down: #3ddc97;
+  --fd-down-bg: rgba(61, 220, 151, 0.14);
+  --fd-link: #6aa9ff;
+  --fd-page-bg: #161616;
+  --fd-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -992,6 +1015,21 @@
   margin-left: auto;
 }
 
+/* 区块标题旁的数量微标签（如「6 只」） */
+.finance-count-chip {
+  font-size: 0.72em;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* TTM 股息率列：A 股口径正数用红（水平值，非涨跌） */
+.finance-dy-yield {
+  color: var(--fd-up);
+  font-weight: 600;
+}
+
 /* —— 指数策略信号卡 —— */
 .finance-signal-body {
   display: flex;
@@ -1150,20 +1188,49 @@
 
 /* mobile：整体收紧 */
 .finance-dashboard[data-layout="mobile"] {
-  padding: var(--fd-space-2);
+  padding: 16px 16px 120px;
+  /* 整屏统一灰底：白卡浮在灰底上，靠色差分块（设计稿手法） */
+  background-color: var(--fd-page-bg);
+  /* 内容不足一屏时也把灰底铺满，避免下方露出视图默认白底 */
+  min-height: 100%;
   /* 底部预留 120px：让出 Obsidian 移动端底部操作栏 */
-  padding-bottom: 120px;
 }
 
-[data-layout="mobile"] .finance-summary-grid {
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
+/* 视图容器本身也要染成同一灰，否则 contentEl 之外的边距仍是主题底色。
+   必须带 data-layout 条件——否则桌面端会被一起染灰。 */
+.workspace-leaf-content[data-type="finance-dashboard-view"]
+  .view-content[data-layout="mobile"] {
+  background-color: var(--fd-page-bg);
+}
+
+/* —— 区块节奏统一：所有一级模块共用 --fd-block-gap ——
+   之前 header 底部是 20px（继承桌面）、TTM 之后是 16+12=28px（margin 叠 gap），
+   其余是 12px，三种节奏混在一起。这里一次性收敛，后续调整只改 token。 */
+[data-layout="mobile"] .finance-header,
+[data-layout="mobile"] .finance-market-grid,
+[data-layout="mobile"] .finance-summary-grid,
+[data-layout="mobile"] .finance-charts-row,
+.finance-dashboard[data-layout="mobile"] > .finance-section {
+  margin-bottom: var(--fd-block-gap);
+}
+
+[data-layout="mobile"] .finance-market-grid,
+[data-layout="mobile"] .finance-summary-grid,
+[data-layout="mobile"] .finance-charts-row {
+  gap: var(--fd-block-gap);
+}
+
+/* 网格内的卡片间距由 gap 承担，自身不再留 margin（否则会与 gap 叠加） */
+[data-layout="mobile"] .finance-market-grid > .finance-section,
+[data-layout="mobile"] .finance-summary-grid > .finance-section,
+[data-layout="mobile"] .finance-charts-row > .finance-section {
+  margin-bottom: 0;
 }
 
 [data-layout="mobile"] .finance-metrics-grid {
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
+  gap: var(--fd-block-gap);
+  margin-bottom: var(--fd-block-gap);
 }
 
 [data-layout="mobile"] .finance-metric-card {
@@ -1177,17 +1244,11 @@
 
 [data-layout="mobile"] .finance-charts-row {
   grid-template-columns: 1fr;
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-2);
 }
 
 /* 卡片（图表 + 表格）统一收紧 padding */
 [data-layout="mobile"] .finance-section {
   padding: var(--fd-space-3);
-}
-
-.finance-dashboard[data-layout="mobile"] > .finance-section {
-  margin-bottom: var(--fd-space-2);
 }
 
 /* mobile 隐藏整段重表格模块，保留指标卡/图表/持仓 */
@@ -1199,7 +1260,8 @@
 }
 
 [data-layout="mobile"] .finance-section h2 {
-  font-size: 0.95em;
+  font-size: 17px;
+  font-weight: 600;
   margin-bottom: var(--fd-space-2);
   padding-top: 4px;
   padding-bottom: var(--fd-space-1);
@@ -1273,6 +1335,448 @@
   font-size: 0.72em;
   padding: 4px 6px;
   min-height: 26px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   13.5 移动端高密度版面（对齐重设计稿：总资产 hero + 四列指标带
+        + 两行信号条 + 58px 四列数据表）
+
+   四个动作的 CSS 落点：
+   ① 信息分区：六张等权卡 → 一主四从（.finance-hero）
+   ② 排版压缩：字号阶梯 34 / 15 / 13 / 11 / 10，单位降为后缀
+   ③ 结构表化：卡片堆 → 数据表（.finance-dy-table，行高 58）
+   ④ 间距取舍：区块间距 12、组内 0，同组用 1px hairline 切分，
+      卡片去描边去阴影，只靠白底与浅灰底分块
+   ════════════════════════════════════════════════════════════ */
+
+/* —— 总资产 hero 卡：独占主位，环比收进胶囊徽章 —— */
+[data-layout="mobile"] .finance-hero {
+  background: var(--background-primary);
+  border-radius: 18px;
+  padding: 16px 16px 0;
+  margin-bottom: var(--fd-block-gap);
+  box-shadow: var(--fd-card-shadow);
+}
+
+[data-layout="mobile"] .finance-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-layout="mobile"] .finance-hero-main {
+  min-width: 0;
+}
+
+[data-layout="mobile"] .finance-hero-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+[data-layout="mobile"] .finance-hero-value {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-top: 4px;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="mobile"] .finance-hero-unit {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+[data-layout="mobile"] .finance-hero-mom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+[data-layout="mobile"] .finance-hero-badge {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="mobile"] .finance-hero-delta {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .finance-hero-badge.is-up {
+  color: var(--fd-up);
+  background: var(--fd-up-bg);
+}
+
+[data-layout="mobile"] .finance-hero-badge.is-down {
+  color: var(--fd-down);
+  background: var(--fd-down-bg);
+}
+
+/* 四列指标带：竖线 hairline 切分，组内 0 间距 */
+[data-layout="mobile"] .finance-hero-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+  padding: 12px 0 14px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+[data-layout="mobile"] .finance-hero-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 8px;
+  border-left: 1px solid var(--background-modifier-border);
+}
+
+[data-layout="mobile"] .finance-hero-cell:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+[data-layout="mobile"] .finance-hero-cell:last-child {
+  padding-right: 0;
+}
+
+[data-layout="mobile"] .finance-hero-cell-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-layout="mobile"] .finance-hero-cell-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— 市场信号条：两行紧凑排版 —— */
+[data-layout="mobile"] .finance-market-grid > .finance-section {
+  padding: 14px 16px;
+  border: none;
+  border-radius: 18px;
+  box-shadow: var(--fd-card-shadow);
+}
+
+[data-layout="mobile"] .finance-signal-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+[data-layout="mobile"] .finance-signal-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+[data-layout="mobile"] .finance-signal-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-normal);
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .finance-signal-chip {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .finance-signal-spacer {
+  flex: 1 1 auto;
+  min-width: 4px;
+}
+
+[data-layout="mobile"] .finance-signal-k {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .finance-signal-dev {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 区间 chip 压到微标签档（10px 触底，不再往下压） */
+[data-layout="mobile"] .finance-signal-compact .finance-zone-badge {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.7;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+/* 买入区对齐设计稿的 iOS 蓝 */
+[data-layout="mobile"] .finance-signal-compact .finance-zone-buy {
+  color: var(--fd-link);
+  background: rgba(0, 102, 204, 0.1);
+}
+
+[data-layout="mobile"] .finance-signal-line-sub {
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+[data-layout="mobile"] .finance-signal-kv b {
+  font-weight: 600;
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="mobile"] .finance-signal-date {
+  font-size: 10px;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* —— 市场信号区两张数据表（TTM 股息率 / ETF 溢价）——
+   共用同一套结构：标题压在灰底上、表格自己是一张无外框白卡。
+   特异性需高于 .finance-market-grid > .finance-section，否则卡片 padding 会残留。 */
+[data-layout="mobile"] .finance-market-grid > .finance-dy-section,
+[data-layout="mobile"] .finance-market-grid > .finance-etf-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  /* 与相邻模块的间距交给 .finance-market-grid 的 gap，这里不再叠加 margin */
+  margin-bottom: 0;
+}
+
+[data-layout="mobile"] .finance-dy-section h2,
+[data-layout="mobile"] .finance-etf-section h2 {
+  /* 标题与卡片左边缘对齐（页面 padding 处），不再额外缩进 */
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+[data-layout="mobile"] .finance-dy-section .finance-market-head-right,
+[data-layout="mobile"] .finance-etf-section .finance-market-head-right {
+  gap: 8px;
+}
+
+[data-layout="mobile"] .finance-dy-section .finance-table-wrapper,
+[data-layout="mobile"] .finance-etf-section .finance-table-wrapper {
+  /* border-box 必须显式声明：wrapper 默认 content-box，padding 0 4px 会把
+     100% 宽度再撑出 8px，白卡右缘出血到其它卡片之外 */
+  box-sizing: border-box;
+  background: var(--background-primary);
+  border: none;
+  border-radius: 18px;
+  box-shadow: var(--fd-card-shadow);
+  padding: 0;
+  overflow: hidden;
+}
+
+/* —— 移动端数据表通用骨架：58px 行高、hairline 行分隔、名称+代码双行 —— */
+[data-layout="mobile"] .finance-mobile-table {
+  font-size: 15px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* 列宽按设计稿比例固定，避免 auto layout 把数字列挤成内容宽度 */
+[data-layout="mobile"] .finance-dy-table th:nth-child(1),
+[data-layout="mobile"] .finance-dy-table td:nth-child(1) {
+  width: 38%;
+}
+
+[data-layout="mobile"] .finance-dy-table th:nth-child(2),
+[data-layout="mobile"] .finance-dy-table td:nth-child(2) {
+  width: 20%;
+}
+
+[data-layout="mobile"] .finance-dy-table th:nth-child(3),
+[data-layout="mobile"] .finance-dy-table td:nth-child(3) {
+  width: 26%;
+}
+
+[data-layout="mobile"] .finance-dy-table th:nth-child(4),
+[data-layout="mobile"] .finance-dy-table td:nth-child(4) {
+  width: 16%;
+}
+
+/* ETF 三列：名称占比更大（名称长），两个数值列均分 */
+[data-layout="mobile"] .finance-etf-table th:nth-child(1),
+[data-layout="mobile"] .finance-etf-table td:nth-child(1) {
+  width: 46%;
+}
+
+[data-layout="mobile"] .finance-etf-table th:nth-child(2),
+[data-layout="mobile"] .finance-etf-table td:nth-child(2) {
+  width: 27%;
+}
+
+[data-layout="mobile"] .finance-etf-table th:nth-child(3),
+[data-layout="mobile"] .finance-etf-table td:nth-child(3) {
+  width: 27%;
+}
+
+[data-layout="mobile"] .finance-mobile-table th {
+  height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  background: transparent;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+[data-layout="mobile"] .finance-mobile-table td {
+  height: 58px;
+  padding: 0 8px;
+  color: var(--text-normal);
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .finance-mobile-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+[data-layout="mobile"] .finance-mobile-table th:first-child,
+[data-layout="mobile"] .finance-mobile-table td:first-child {
+  padding-left: 16px;
+}
+
+[data-layout="mobile"] .finance-mobile-table th:last-child,
+[data-layout="mobile"] .finance-mobile-table td:last-child {
+  padding-right: 16px;
+}
+
+/* 名称列：名与代码上下两行，避免横向挤占 */
+[data-layout="mobile"] .finance-mobile-table .finance-holding-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  font-weight: 600;
+}
+
+[data-layout="mobile"] .finance-mobile-table .finance-holding-symbol {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  padding: 0;
+  background: none;
+  opacity: 0.55;
+}
+
+/* 现价 / TTM 属次级数值，降到 13px 一档 */
+/* 次级数值降到 13px */
+[data-layout="mobile"] .finance-mobile-table td.finance-number {
+  font-size: 13px;
+}
+
+/* 读表主锚点列保持 15px：TTM 的股息率、ETF 的溢价率（同特异性靠后定义胜出） */
+[data-layout="mobile"] .finance-mobile-table td.finance-dy-yield,
+[data-layout="mobile"] .finance-mobile-table td.finance-bold {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+[data-layout="mobile"] .finance-mobile-table td.finance-dy-yield {
+  color: var(--fd-up);
+}
+
+/* —— 图表卡 / 持仓卡：标题压在灰底、画布自己是白卡 ——
+   与 TTM/ETF 同一结构（标题在外、内容成卡），否则「标题到上一模块」会凭空多出
+   一个卡片内边距（14px），扫读时整页节奏不是等距的。 */
+[data-layout="mobile"] .finance-chart-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+[data-layout="mobile"] .finance-chart-container h2 {
+  /* 与表格模块保持一致：标题贴在页面 padding 处，不再额外缩进 */
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+[data-layout="mobile"] .finance-chart-container canvas {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  /* 内边距与其它卡片看齐（16px），保证画布内容与表格文字同一缩进线 */
+  padding: 16px;
+  background: var(--background-primary);
+  border-radius: 18px;
+  box-shadow: var(--fd-card-shadow);
+}
+
+/* 图表高度：单列铺满后压低上限，避免一张图吃掉整屏 */
+[data-layout="mobile"] .finance-chart-container canvas {
+  min-height: 200px;
+  max-height: 240px;
+}
+
+/* Treemap 要放下多个方块，给更高一档 */
+[data-layout="mobile"] .finance-holdings-chart canvas {
+  min-height: 280px;
+  max-height: 320px;
+}
+
+/* ETF 过滤切换收成微标签档，避免和标题抢宽度 */
+[data-layout="mobile"] .finance-etf-filter button {
+  font-size: 11px;
+  padding: 0 7px;
+  line-height: 1.7;
+}
+
+/* 这两张表的更新时间让位给标题与过滤控件（设计稿也未在此处展示时间） */
+[data-layout="mobile"] .finance-dy-section .finance-quote-time,
+[data-layout="mobile"] .finance-etf-section .finance-quote-time {
+  display: none;
+}
+
+/* 空状态同样落成白卡，不留 dashed 边框在灰底上 */
+[data-layout="mobile"] .finance-dy-section .finance-empty,
+[data-layout="mobile"] .finance-etf-section .finance-empty {
+  background: var(--background-primary);
+  border: none;
+  border-radius: 18px;
+  box-shadow: var(--fd-card-shadow);
+  padding: 24px 16px;
 }
 
 /* ════════════════════════════════════════════════════════════

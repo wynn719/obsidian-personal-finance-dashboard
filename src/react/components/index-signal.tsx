@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Notice } from "obsidian";
 import { Icon } from "../icon";
+import { useLayout } from "../responsive";
 import { t } from "../../i18n";
 import { fetchIndexSignal } from "../../index-signal-service";
 import { formatClockTime } from "../../utils";
@@ -14,6 +15,7 @@ import type { IndexSignalSectionProps } from "../types";
  */
 export function IndexSignalSection({ store }: IndexSignalSectionProps) {
   const [refreshing, setRefreshing] = useState(false);
+  const { layout } = useLayout();
   const signal = store.getIndexSignal();
 
   // t() 在渲染期求值，保证切换语言后立即生效
@@ -44,6 +46,69 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
     }
   };
 
+  const refreshBtn = (
+    <button
+      className={`finance-btn-small${refreshing ? " finance-btn-spinning" : ""}`}
+      onClick={handleRefresh}
+      disabled={refreshing}
+      title={t("signal.btn.refresh")}
+    >
+      <Icon name="refresh-cw" />
+    </button>
+  );
+
+  // 移动端：压成两行——① 指数名 + 年线信号 chip ／ 距年线 + 区间 chip
+  //                      ② 收盘 + MA250 ／ 交易日 + 刷新
+  // 长文案 advice 在移动端省略（区间 chip 已表达结论），桌面端保留。
+  if (layout === "mobile") {
+    const [name, sub] = t("signal.title").split(" · ");
+    return (
+      <div className="finance-section finance-market-section">
+        {signal ? (
+          <div className="finance-signal-compact">
+            <div className="finance-signal-line">
+              <span className="finance-signal-name">{name}</span>
+              {sub ? (
+                <span className="finance-signal-chip">{sub}</span>
+              ) : null}
+              <span className="finance-signal-spacer" />
+              <span className="finance-signal-k">
+                {t("signal.col.vsMa")}
+              </span>
+              <span
+                className={`finance-signal-dev ${
+                  signal.deviation >= 0 ? "is-up" : "is-down"
+                }`}
+              >
+                {signal.deviation > 0 ? "+" : ""}
+                {signal.deviation.toFixed(2)}%
+              </span>
+              <span className={`finance-zone-badge finance-zone-${signal.zone}`}>
+                {zoneLabels[signal.zone]}
+              </span>
+            </div>
+            <div className="finance-signal-line finance-signal-line-sub">
+              <span className="finance-signal-kv">
+                {t("signal.col.close")} <b>{signal.close.toFixed(2)}</b>
+              </span>
+              <span className="finance-signal-kv">
+                {t("signal.col.ma250")} <b>{signal.ma250.toFixed(2)}</b>
+              </span>
+              <span className="finance-signal-spacer" />
+              <span className="finance-signal-date">{signal.tradeDate}</span>
+              {refreshBtn}
+            </div>
+          </div>
+        ) : (
+          <div className="finance-signal-compact">
+            <p className="finance-empty">{t("signal.empty")}</p>
+            {refreshBtn}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="finance-section finance-market-section">
       <h2 className="finance-holdings-title">
@@ -58,16 +123,7 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
               })}
             </span>
           ) : null}
-          <button
-            className={`finance-btn-small${
-              refreshing ? " finance-btn-spinning" : ""
-            }`}
-            onClick={handleRefresh}
-            disabled={refreshing}
-            title={t("signal.btn.refresh")}
-          >
-            <Icon name="refresh-cw" />
-          </button>
+          {refreshBtn}
         </span>
       </h2>
 

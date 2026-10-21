@@ -51,15 +51,14 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
 
   const columns: Column<EtfPremiumRow>[] = [
     {
-      key: "code",
-      header: t("etfPremium.col.code"),
-      cell: (r) => <span className="finance-holding-symbol">{r.code}</span>,
-    },
-    {
       key: "name",
       header: t("etfPremium.col.name"),
-      excludeFromCard: true,
-      cell: (r) => r.name,
+      cell: (r) => (
+        <span className="finance-holding-name">
+          {r.name}
+          <span className="finance-holding-symbol">{r.code}</span>
+        </span>
+      ),
     },
     {
       key: "price",
@@ -99,10 +98,15 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
   ];
 
   return (
-    <div className="finance-section finance-market-section">
+    <div className="finance-section finance-market-section finance-etf-section">
       <h2 className="finance-holdings-title">
         <span>
           <Icon name="scale" /> {t("etfPremium.title")}
+          {visible.length > 0 ? (
+            <span className="finance-count-chip">
+              {t("market.count", { count: visible.length })}
+            </span>
+          ) : null}
         </span>
         <span className="finance-market-head-right">
           {rows.length > 0 ? (
@@ -144,8 +148,9 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
           columns={columns}
           rows={visible}
           rowKey={(r) => r.code}
-          mobileMode="card"
+          mobileMode="table"
           stickyLabel={false}
+          className="finance-etf-table finance-mobile-table"
         />
       ) : rows.length === 0 ? (
         <p className="finance-empty">{t("etfPremium.empty")}</p>

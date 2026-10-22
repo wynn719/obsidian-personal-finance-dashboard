@@ -90,6 +90,34 @@ export class FinanceSettingTab extends PluginSettingTab {
       });
 
     // ============================================================
+    // Pomodoro Data File Path (own file, separate from Misc.md)
+    // ============================================================
+    new Setting(containerEl)
+      .setName(t("settings.pomodoroDataFilePath"))
+      .setDesc(t("settings.pomodoroDataFilePathDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("Finance/Pomodoro.md")
+          .setValue(settings.pomodoroDataFilePath)
+          .onChange(async (value) => {
+            const trimmed = value.trim();
+            if (trimmed.length === 0) return;
+            // 不能撞年度文件，也不能和 Misc 共用同一个文件
+            if (
+              /(\d{4})\.md$/.test(trimmed) ||
+              trimmed === settings.miscDataFilePath
+            ) {
+              new Notice(t("settings.pomodoroDataFilePathInvalid"));
+              return;
+            }
+            settings.pomodoroDataFilePath = trimmed;
+            await this.plugin.pomodoroStore.setFilePath(trimmed);
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.style.width = "300px";
+      });
+
+    // ============================================================
     // Target Allocations
     // ============================================================
     containerEl.createEl("h3", { text: t("settings.targetAllocation") });

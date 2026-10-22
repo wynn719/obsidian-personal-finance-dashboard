@@ -157,6 +157,25 @@ export interface EtfPremiumRow {
   updatedAt: string;
 }
 
+// ============================================================
+// Pomodoro (focus sessions, Misc Data)
+// ============================================================
+
+/**
+ * One day's completed pomodoros, aggregated per day.
+ * Storing a row per day (instead of per session) keeps Misc.md compact —
+ * a year of heavy use is ~365 rows — while still supporting the today /
+ * this-week statistics the dashboard shows.
+ */
+export interface PomodoroDay {
+  /** Date in "YYYY-MM-DD" format */
+  date: string;
+  /** Number of completed focus sessions that day */
+  count: number;
+  /** Total focused minutes that day */
+  minutes: number;
+}
+
 /** Container for the standalone Misc data file (extensible: one `#` section per data type) */
 export interface MiscData {
   stockHoldings: StockHolding[];
@@ -193,6 +212,8 @@ export interface FinanceSettings {
   dataFolderPath: string;
   /** Full path to the standalone Markdown file storing non-yearly data (relative to vault root, includes file name) */
   miscDataFilePath: string;
+  /** Full path to the standalone Markdown file storing pomodoro records (relative to vault root, includes file name) */
+  pomodoroDataFilePath: string;
   /** Target asset allocation percentages */
   targetAllocations: TargetAllocation[];
   /** Asset categories */
@@ -207,6 +228,7 @@ export const DEFAULT_SETTINGS: FinanceSettings = {
   locale: "zh",
   dataFolderPath: "Finance",
   miscDataFilePath: "Finance/Misc.md",
+  pomodoroDataFilePath: "Finance/Pomodoro.md",
   targetAllocations: [
     { category: "货币短债", percentage: 25 },
     { category: "中长债", percentage: 20 },

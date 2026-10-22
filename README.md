@@ -23,6 +23,7 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
   - **MA250 strategy signal** — CSI Dividend Low-Volatility 100 (930955): deviation from its 250-day moving average with buy / hold / sell-sweet-spot / overheated zones
   - **High dividend TTM** — 9-stock A-share tracker: latest implemented annual + interim dividend per share ÷ live price
   - **US ETF premium monitor** — 16 Nasdaq / S&P 500 QDII ETFs: live premium vs latest NAV, fee & scale, rows ≤ 3% highlighted (filterable)
+- 🍅 **Pomodoro Timer** — Focus timer at the top of the dashboard (25 / 5 / 15 with a long break every 4 rounds); completed sessions are aggregated per day into a dedicated `Pomodoro.md`, with today / this-week totals and a 7-day bar chart
 - 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
@@ -61,6 +62,27 @@ Every action is also available from the Command Palette:
 | `Add Dividend` | Record dividend income |
 | `Add Stock Holding` | Add a stock holding |
 | `Refresh Finance Data` | Reload data files from disk |
+
+### Workbench & Allocation Tabs
+
+The dashboard is split into two page-level tabs; the active one is remembered across reloads (localStorage).
+
+| Tab | Contents |
+|-----|----------|
+| **Workbench** | Pomodoro timer + the three market-signal modules (MA250 strategy signal, high-dividend TTM, ETF premium) |
+| **Allocation** | Metric cards, allocation vs target, dividend summary, holdings treemap, three charts, monthly overview, cash-flow details |
+
+Two different mounting strategies on purpose: the workbench panel stays mounted when hidden so a running pomodoro keeps counting; the allocation panel is rebuilt on switch so Chart.js measures a real container instead of a `display:none` one.
+
+### Pomodoro Timer
+
+A focus timer sits directly under the metric cards — it is a stand-alone module, unrelated to the financial data.
+
+- **Start / Pause / Resume / Reset / Skip** with a 25-minute focus block, a 5-minute short break and a 15-minute long break after every 4 completed rounds
+- Only **completed** focus sessions are written to a dedicated `Pomodoro.md` (aggregated per day) — resetting or skipping never pollutes the statistics
+- **Today / This week** totals plus a 7-day bar chart (Monday-first, today highlighted)
+- The countdown is driven by an absolute end timestamp, so sleeping the laptop or switching away does not drift the timer
+- A short synthesized chime and a notice fire when a block ends (no audio assets, silently degrades if blocked)
 
 ### Stock Holdings Module
 
@@ -115,6 +137,7 @@ Open **Settings** → **Personal Finance Dashboard** to configure:
 | **Language** | Display language (English / 中文) | 中文 |
 | **Data Folder** | Vault-relative path for data files | `Finance` |
 | **Misc Data File Path** | Vault-relative path of the standalone file for non-yearly data (e.g. stock holdings) | `Finance/Misc.md` |
+| **Pomodoro Data File Path** | Vault-relative path of the dedicated file for pomodoro records | `Finance/Pomodoro.md` |
 | **Asset Categories** | Comma-separated asset category names | 货币短债, 中长债, 黄金, 高股息, 港美A |
 | **Income Categories** | Comma-separated income category names | 工资, 副业, 投资收益, 其他收入 |
 | **Expense Categories** | Comma-separated expense category names | 房租, 餐饮, 交通, 娱乐, 其他支出 |
@@ -134,7 +157,8 @@ your-vault/
     ├── 2024.md
     ├── 2025.md
     ├── 2026.md
-    └── Misc.md      ← non-yearly data (stock holdings)
+    ├── Misc.md      ← non-yearly data (stock holdings, signal caches)
+    └── Pomodoro.md  ← pomodoro records (own file, own write path)
 ```
 
 ### Markdown Format
@@ -228,6 +252,21 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 - `Dividend Yields` — `DivType` is `semi` (annual + interim) or `annual`; an empty `Pending` cell means the latest annual report is already implemented
 - `ETF Premiums` — `Premium%` is vs the latest published NAV (negative = discount); `Scale` is in 100M CNY
 
+**Pomodoro records** — a dedicated file (default `Finance/Pomodoro.md`, configurable), written by the timer only, one aggregated row per day (oldest first):
+
+```markdown
+# Pomodoro
+
+| Date | Count | Minutes |
+|------|-------|---------|
+| 2026-10-20 | 6 | 150 |
+| 2026-10-21 | 3 | 75 |
+```
+
+- `Count` = completed focus sessions that day, `Minutes` = focused minutes (count × 25 by default)
+- Aborted or skipped sessions are not recorded; the file is only created once at least one session completes
+- Kept out of `Misc.md` on purpose: this section is written every 25 minutes, and isolating it narrows both the write radius and the iCloud sync conflict surface
+
 > 💡 **Tip**: Since data is plain Markdown, you can edit it directly in Obsidian or any text editor. The plugin will auto-detect changes and refresh.
 
 ---
@@ -238,6 +277,7 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 src/
 ├── main.ts                     # Plugin entry point & lifecycle
 ├── data-store.ts               # Data persistence (Markdown ↔ memory), incl. Misc.md holdings
+├── pomodoro-store.ts           # Pomodoro records: own file, own parser/serializer/watcher
 ├── calculator.ts               # Pure computation layer
 ├── quote-service.ts            # Live quotes + FX rates (batched, qt.gtimg.cn)
 ├── index-signal-service.ts     # MA250 strategy signal (csindex.com.cn)
@@ -253,7 +293,7 @@ src/
 │   ├── use-finance-data.ts     # Store subscription hook
 │   ├── chart.tsx               # Chart.js wrappers
 │   ├── holdings-chart.tsx      # Holdings treemap
-│   ├── components/             # Metric cards, tables (generic DataTable), market signal sections
+│   ├── components/             # Metric cards, tabs, tables (generic DataTable), market signal + pomodoro sections
 │   ├── forms/                  # Snapshot / cash flow / dividend / holding forms
 │   └── hooks/                  # use-quote-refresh
 ├── views/

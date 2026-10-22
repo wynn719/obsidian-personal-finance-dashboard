@@ -1,4 +1,5 @@
 import type { DataStore } from "../data-store";
+import type { PomodoroStore } from "../pomodoro-store";
 import type { FinanceCalculator } from "../calculator";
 import type {
   FinanceSettings,
@@ -24,6 +25,8 @@ export interface FinanceAppProps {
   store: DataStore;
   calculator: FinanceCalculator;
   settings: FinanceSettings;
+  /** 番茄记录独立 store（自有文件，自有 onChange） */
+  pomodoroStore: PomodoroStore;
   onAddSnapshot: (() => void) | null;
   onAddCashFlow: (() => void) | null;
   onAddDividend: (() => void) | null;
@@ -163,4 +166,21 @@ export interface DividendYieldSectionProps {
 }
 export interface EtfPremiumSectionProps {
   store: DataStore;
+}
+
+// ===== Pomodoro（番茄钟，内嵌于主仪表盘） =====
+export interface PomodoroSectionProps {
+  pomodoroStore: PomodoroStore;
+}
+
+// ===== Tabs（页面级 tab 条） =====
+export interface TabItem {
+  key: string;
+  label: string;
+  icon?: string;
+}
+export interface TabsProps {
+  value: string;
+  onChange: (value: string) => void;
+  items: TabItem[];
 }

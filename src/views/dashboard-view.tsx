@@ -1,6 +1,7 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { createRoot, type Root } from "react-dom/client";
 import { DataStore } from "../data-store";
+import { PomodoroStore } from "../pomodoro-store";
 import { FinanceCalculator } from "../calculator";
 import {
   FinanceSettings,
@@ -16,6 +17,7 @@ export const VIEW_TYPE_FINANCE = "finance-dashboard-view";
 
 export class FinanceDashboardView extends ItemView {
   private store: DataStore;
+  private pomodoroStore: PomodoroStore;
   private calculator: FinanceCalculator;
   private settings: FinanceSettings;
   private root: Root | null = null;
@@ -36,11 +38,13 @@ export class FinanceDashboardView extends ItemView {
     store: DataStore,
     calculator: FinanceCalculator,
     settings: FinanceSettings,
+    pomodoroStore: PomodoroStore,
   ) {
     super(leaf);
     this.store = store;
     this.calculator = calculator;
     this.settings = settings;
+    this.pomodoroStore = pomodoroStore;
   }
 
   getViewType(): string {
@@ -70,6 +74,7 @@ export class FinanceDashboardView extends ItemView {
         store={this.store}
         calculator={this.calculator}
         settings={this.settings}
+        pomodoroStore={this.pomodoroStore}
         onAddSnapshot={this.onAddSnapshot}
         onAddCashFlow={this.onAddCashFlow}
         onAddDividend={this.onAddDividend}

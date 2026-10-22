@@ -23,6 +23,13 @@ echo "   Project root: $PROJECT_ROOT"
 echo "   Plugin dir:   $PLUGIN_DIR"
 echo ""
 
+# 插件目录本身若还是软链（旧方案：整个目录指向 dist/），先摘掉链接本身。
+# 否则下面的逐文件删除会顺着链接删进 dist/，把构建产物删掉。
+if [ -L "$PLUGIN_DIR" ]; then
+  rm "$PLUGIN_DIR"
+  echo "🗑  Removed directory symlink: $PLUGIN_DIR"
+fi
+
 # 确保插件目录存在
 mkdir -p "$PLUGIN_DIR"
 

@@ -10,6 +10,10 @@ interface TranslationStrings {
   "dashboard.btn.refresh": string;
   "dashboard.btn.maskNumbers": string;
 
+  // Page tabs
+  "tab.workbench": string;
+  "tab.assets": string;
+
   // Metric cards
   "metrics.totalAssets": string;
   "metrics.momChange": string;
@@ -222,6 +226,26 @@ interface TranslationStrings {
   "market.refreshFailed": string;
   "market.partialFailed": string;
 
+  // Pomodoro
+  "pomodoro.title": string;
+  "pomodoro.mode.focus": string;
+  "pomodoro.mode.short": string;
+  "pomodoro.mode.long": string;
+  "pomodoro.btn.start": string;
+  "pomodoro.btn.pause": string;
+  "pomodoro.btn.resume": string;
+  "pomodoro.btn.reset": string;
+  "pomodoro.btn.skip": string;
+  "pomodoro.rounds": string;
+  "pomodoro.weekdays": string;
+  "pomodoro.stat.today": string;
+  "pomodoro.stat.week": string;
+  "pomodoro.stat.count": string;
+  "pomodoro.stat.minutes": string;
+  "pomodoro.week.chart": string;
+  "pomodoro.notice.focusDone": string;
+  "pomodoro.notice.breakDone": string;
+
   // Commands & Ribbon
   "command.openDashboard": string;
   "command.addSnapshot": string;
@@ -247,6 +271,9 @@ interface TranslationStrings {
   "settings.miscDataFilePath": string;
   "settings.miscDataFilePathDesc": string;
   "settings.miscDataFilePathInvalid": string;
+  "settings.pomodoroDataFilePath": string;
+  "settings.pomodoroDataFilePathDesc": string;
+  "settings.pomodoroDataFilePathInvalid": string;
   "settings.assetCategories": string;
   "settings.categories": string;
   "settings.categoriesDesc.asset": string;
@@ -265,6 +292,10 @@ const en: TranslationStrings = {
   "dashboard.btn.editHoldings": "Edit Holdings",
   "dashboard.btn.refresh": "Refresh",
   "dashboard.btn.maskNumbers": "Mask",
+
+  // Page tabs
+  "tab.workbench": "Workbench",
+  "tab.assets": "Allocation",
 
   // Metric cards
   "metrics.totalAssets": "Total Assets",
@@ -485,6 +516,26 @@ const en: TranslationStrings = {
   "market.refreshFailed": "Refresh failed — check your network and try again",
   "market.partialFailed": "{count} symbol(s) failed to fetch",
 
+  // Pomodoro
+  "pomodoro.title": "Pomodoro",
+  "pomodoro.mode.focus": "Focus",
+  "pomodoro.mode.short": "Short break",
+  "pomodoro.mode.long": "Long break",
+  "pomodoro.btn.start": "Start",
+  "pomodoro.btn.pause": "Pause",
+  "pomodoro.btn.resume": "Resume",
+  "pomodoro.btn.reset": "Reset",
+  "pomodoro.btn.skip": "Skip",
+  "pomodoro.rounds": "Set {count}/{total}",
+  "pomodoro.weekdays": "M T W T F S S",
+  "pomodoro.stat.today": "Today",
+  "pomodoro.stat.week": "This week",
+  "pomodoro.stat.count": "{count} done",
+  "pomodoro.stat.minutes": "{count} min",
+  "pomodoro.week.chart": "This week",
+  "pomodoro.notice.focusDone": "{minutes} min focus done — take a break",
+  "pomodoro.notice.breakDone": "Break over — ready for the next one",
+
   // Commands & Ribbon
   "command.openDashboard": "Open Finance Dashboard",
   "command.addSnapshot": "Add Asset Snapshot",
@@ -514,6 +565,11 @@ const en: TranslationStrings = {
     "Path to the Markdown file storing non-yearly data such as stock holdings (relative to vault root, e.g. Finance/Misc.md)",
   "settings.miscDataFilePathInvalid":
     "Misc data file path must not be a year-style file (e.g. Finance/2025.md) – it would collide with yearly data files.",
+  "settings.pomodoroDataFilePath": "Pomodoro data file path",
+  "settings.pomodoroDataFilePathDesc":
+    "Path to the Markdown file storing pomodoro records (relative to vault root, e.g. Finance/Pomodoro.md)",
+  "settings.pomodoroDataFilePathInvalid":
+    "Pomodoro data file path must be its own file — not a year-style file, and not the same file as misc data.",
   "settings.assetCategories": "Asset Categories",
   "settings.categories": "Categories",
   "settings.categoriesDesc.asset": "Comma-separated list of asset categories",
@@ -533,6 +589,10 @@ const zh: TranslationStrings = {
   "dashboard.btn.editHoldings": "编辑股票持仓",
   "dashboard.btn.refresh": "刷新",
   "dashboard.btn.maskNumbers": "隐藏金额",
+
+  // Page tabs
+  "tab.workbench": "工作台",
+  "tab.assets": "资产配置",
 
   // Metric cards
   "metrics.totalAssets": "总资产",
@@ -748,6 +808,26 @@ const zh: TranslationStrings = {
   "market.refreshFailed": "刷新失败，请检查网络后重试",
   "market.partialFailed": "{count} 只数据获取失败",
 
+  // Pomodoro
+  "pomodoro.title": "番茄钟",
+  "pomodoro.mode.focus": "专注",
+  "pomodoro.mode.short": "短休",
+  "pomodoro.mode.long": "长休",
+  "pomodoro.btn.start": "开始",
+  "pomodoro.btn.pause": "暂停",
+  "pomodoro.btn.resume": "继续",
+  "pomodoro.btn.reset": "重置",
+  "pomodoro.btn.skip": "跳过",
+  "pomodoro.rounds": "本轮 {count}/{total}",
+  "pomodoro.weekdays": "一 二 三 四 五 六 日",
+  "pomodoro.stat.today": "今日",
+  "pomodoro.stat.week": "本周",
+  "pomodoro.stat.count": "{count} 个",
+  "pomodoro.stat.minutes": "{count} 分钟",
+  "pomodoro.week.chart": "本周分布",
+  "pomodoro.notice.focusDone": "{minutes} 分钟专注完成，休息一下",
+  "pomodoro.notice.breakDone": "休息结束，开始下一个番茄",
+
   // Commands & Ribbon
   "command.openDashboard": "打开财务仪表盘",
   "command.addSnapshot": "添加资产快照",
@@ -777,6 +857,11 @@ const zh: TranslationStrings = {
     "存储非年度数据（如股票持仓）的 Markdown 文件路径（相对于 Vault 根目录，如 Finance/Misc.md）",
   "settings.miscDataFilePathInvalid":
     "杂项数据文件路径不能是年份样式文件（如 Finance/2025.md），会与年度数据文件冲突。",
+  "settings.pomodoroDataFilePath": "番茄数据文件路径",
+  "settings.pomodoroDataFilePathDesc":
+    "存储番茄钟记录的 Markdown 文件路径（相对于 Vault 根目录，如 Finance/Pomodoro.md）",
+  "settings.pomodoroDataFilePathInvalid":
+    "番茄数据必须写入独立文件：不能是年份样式文件，也不能与杂项数据文件相同。",
   "settings.assetCategories": "资产类别",
   "settings.categories": "类别",
   "settings.categoriesDesc.asset": "以逗号分隔的资产类别列表",

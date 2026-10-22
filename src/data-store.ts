@@ -986,6 +986,8 @@ class MarkdownSerializer {
 //
 //   # ETF Premiums
 //   | Code | Name | Price | Premium% | Fee% | Scale | UpdatedAt |
+//
+// Pomodoro records live in their own file — see pomodoro-store.ts.
 // ============================================================
 
 /** Split the misc markdown into `# section` blocks (title + raw lines) */

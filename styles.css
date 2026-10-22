@@ -41,10 +41,10 @@
   /* 移动端一级模块之间的垂直间距（单一事实源）：区块、网格 gap、卡片间距全部取值于此，
      避免出现 8 / 12 / 16 / 20 混用导致节奏不齐。取值对齐设计稿「区块间距 16、组内 0」。 */
   --fd-block-gap: 16px;
-  /* 卡片外观（全端统一，规格取自番茄钟卡）：圆角 18 / 零描边 / 单层轻阴影。
-     与控件圆角 --fd-radius-sm/md 分开维护——按钮、胶囊、输入框不该跟着变 18。
+  /* 卡片外观（全端统一，规格取自番茄钟卡）：圆角 12 / 零描边 / 单层轻阴影。
+     与控件圆角 --fd-radius-sm/md 分开维护——按钮、胶囊、输入框不该跟着变。
      去描边后分块完全依赖这层阴影，所以卡片底色必须与画布灰底有差。 */
-  --fd-card-radius: 18px;
+  --fd-card-radius: 12px;
   --fd-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
   /* 卡片标题 → 内容区的间距（全端统一）：内容区本身不再加内边距，
      这条 8px 是标题和内容之间唯一的呼吸量 */
@@ -54,6 +54,9 @@
   --fd-title-icon-gap: 8px;
   /* 卡片内边距（全端统一）：改这一处，所有卡片一起变 */
   --fd-card-padding: 12px;
+  /* 窄屏底部为 Obsidian 操作栏预留的高度。操作栏是悬浮的，内容必须留出可滚动空间，
+     另外叠加 env(safe-area-inset-bottom) 让出 iPhone 底部 Home 指示条。 */
+  --fd-bottom-reserve: 120px;
   /* 卡片标题（全端统一，规格取自番茄钟卡）：字号 / 行高 / 字重。
      之前用 1.02em + 各模块零散覆盖（mobile 17px、dy/etf 14px、番茄钟 14px），
      同一页里标题大小不一。统一走 token，移动端在 [data-layout] 上改这两个值即可。 */
@@ -1420,10 +1423,15 @@
 }
 
 .finance-dashboard[data-layout="mobile"] {
-  padding: 16px 16px 120px;
+  padding: 16px 16px calc(var(--fd-bottom-reserve) + env(safe-area-inset-bottom, 0px));
   /* 灰底已由 .finance-dashboard 基础规则统一提供，这里只管移动端专属的 padding */
   min-height: 100%;
-  /* 底部预留 120px：让出 Obsidian 移动端底部操作栏 */
+}
+
+/* compact（窄屏 Pad / 手机横屏 / 分栏）同样会撞上 Obsidian 的底部操作栏，
+   原先只有 mobile 留白，宽度一过 768 就没空间了 */
+.finance-dashboard[data-layout="compact"] {
+  padding-bottom: calc(var(--fd-bottom-reserve) + env(safe-area-inset-bottom, 0px));
 }
 
 /* 视图容器本身也要染成同一灰，否则 contentEl 之外的边距仍是主题底色。

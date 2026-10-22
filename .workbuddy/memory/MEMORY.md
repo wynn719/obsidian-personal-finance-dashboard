@@ -52,7 +52,7 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - 数据存 Misc.md，Parser 按 `#` 分节 dispatch（parseTableRowKeepEmpty 保空列）；Serializer 三 section 已 export 便于 round-trip 测试
 
 ## 色口径（2026-10-22 拍板）
-- **卡片外观全端统一（2026-10-22）**：`--fd-card-radius: 18px` + `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。规格取自番茄钟卡，落点 = `.finance-metric-card` / section 壳（4 组选择器）/ `.finance-chart-container` / `.finance-dt-card` / mobile 的 hero·dy·etf·pomodoro·canvas·holdings-empty。**卡片圆角与控件圆角分开**：按钮/胶囊/输入框仍用 `--fd-radius-sm/md`，不要混。padding 曾有三种值（桌面 16、移动 12、番茄钟/dy/etf 16），现统一 12，**移动端不要再给单个模块写 padding**
+- **卡片外观全端统一（2026-10-22）**：`--fd-card-radius: 12px`（18 嫌太圆，已收敛）+ `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。规格取自番茄钟卡，落点 = `.finance-metric-card` / section 壳（4 组选择器）/ `.finance-chart-container` / `.finance-dt-card` / mobile 的 hero·dy·etf·pomodoro·canvas·holdings-empty。**卡片圆角与控件圆角分开**：按钮/胶囊/输入框仍用 `--fd-radius-sm/md`，不要混。padding 曾有三种值（桌面 16、移动 12、番茄钟/dy/etf 16），现统一 12，**移动端不要再给单个模块写 padding**
 - 去描边后**画布必须染灰**：`.finance-dashboard` 与视图容器（`.view-content`）都吃 `--fd-page-bg`，**桌面端也染**（原先只染 mobile）。不染灰 → 白卡在 `--background-primary` 上直接隐形。连带删掉 `.finance-metric-card:hover` / `.finance-chart-container:hover` 的 border-color 反馈（没有描边可高亮）
 - **一个模块只允许一层卡片**（2026-10-22 追加）：卡内不得再出现白框或灰框。为此 `.finance-table-wrapper` 去掉描边与底色、`.finance-empty` 去掉灰底虚线框与内边距、`.finance-section > .finance-table` 去掉描边。表头灰底 + 行分隔线足以撑结构
 - **内容区不带内边距，标题→内容 `--fd-title-content-gap: 8px`**（2026-10-22）：卡片 padding 是唯一缩进线。`.finance-empty` / `.finance-holdings-empty` padding 归零；表格首尾单元格 `padding-left/right: 0`（桌面与移动两套表都做了），这样标题、表头、单元格落在同一条左/右缘线上。各模块原有的 `h2 { margin-bottom }` 覆盖（mobile 2px、番茄钟 10px）已全部删除，统一走 token。唯一保留自带 padding 的是 `.finance-etf-alert`（琥珀提示条是独立色块，不是内容容器）
@@ -68,6 +68,7 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - 新增 `--fd-track` / `--fd-bar`（:root 实色 + .theme-dark 半透明白），tab 条与 ETF 筛选都是「轨道 + 白滑块」
 
 ## 约定与坑
+- **窄屏底部要留出 Obsidian 操作栏空间**：`--fd-bottom-reserve: 120px` + `env(safe-area-inset-bottom)`，同时挂在 `[data-layout="mobile"]` 和 `[data-layout="compact"]` 上。原先只写了 mobile，宽度一过 768 落到 compact 就没留白（横屏 / Pad / 分栏会撞操作栏）。desktop 保持 40px
 - **自定义 `button` 必须显式给 `height` + `min-height: 0`**（2026-10-22 踩过）：Obsidian 主题会给 `button` 设 `--input-height`，只写 padding 的话实际高度不受控——ETF 的「≤3% / 全部」切换按钮就因此比旁边的刷新按钮高一截。凡是要和其它控件对齐的小按钮，都按这个写。**另一个连带症状**：按钮被主题撑高后，`align-items: baseline` 会把文字顶到上方，看着像「不居中」（番茄钟专注/短休/长休就是），必须换 `align-items: center` + `justify-content: center` + `line-height` 收紧
 - **卡片刷新按钮用 `.finance-refresh-btn`**（2026-10-22）：年线 / TTM / ETF / 持仓占比 四处共用，规格取自 TTM 卡（桌面 32×32、移动 22×22、`--fd-radius-sm`、透明底、muted 图标 14px）。**不要再用 `.finance-btn-small`** —— 那是表内编辑/删除行操作按钮的类，两者曾经混用，改一处会牵连另一处。移动端缩放写在 `[data-layout="mobile"] .finance-refresh-btn`
 - **金额精度**：写盘前一律 `utils.roundAmount(v, 2)`（消 `47×1290.88=60671.36000000001` 残留）。落点 updateHoldingQuotes / holdingValue / Serializer / holding-form；Parser 也归一 → 旧文件下次保存自愈。原始 API 值（price/fxRate）本干净，只有算术才残留

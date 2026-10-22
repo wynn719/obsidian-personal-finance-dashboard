@@ -221,7 +221,6 @@ interface TranslationStrings {
   "etfPremium.empty": string;
   "etfPremium.noneLow.title": string;
   "etfPremium.noneLow.body": string;
-  "etfPremium.viewAll": string;
   "etfPremium.btn.refresh": string;
 
   "market.updatedAt": string;
@@ -515,7 +514,6 @@ const en: TranslationStrings = {
   "etfPremium.noneLow.title": "All {count} ETFs are above {threshold}%",
   "etfPremium.noneLow.body":
     "Lowest: {name} +{pct}% — nothing under the threshold.",
-  "etfPremium.viewAll": "View all {count}",
   "etfPremium.btn.refresh": "Refresh ETF premiums",
 
   "market.updatedAt": "Updated {time}",
@@ -810,7 +808,6 @@ const zh: TranslationStrings = {
   "etfPremium.empty": "暂无溢价数据，点击刷新拉取。",
   "etfPremium.noneLow.title": "{count} 只标的溢价率均高于 {threshold}%",
   "etfPremium.noneLow.body": "最低 {name} +{pct}%，暂无符合阈值的标的。",
-  "etfPremium.viewAll": "查看全部 {count} 只标的",
   "etfPremium.btn.refresh": "刷新溢价数据",
 
   "market.updatedAt": "更新于 {time}",

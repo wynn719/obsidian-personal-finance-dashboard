@@ -1953,27 +1953,6 @@
   color: var(--text-muted);
 }
 
-.finance-etf-alert-foot {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 10px;
-}
-
-.finance-etf-viewall {
-  padding: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  color: var(--text-normal);
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.finance-etf-viewall:hover {
-  color: var(--fd-accent-strong);
-}
-
 /* 这两张表的更新时间让位给标题与过滤控件（设计稿也未在此处展示时间） */
 [data-layout="mobile"] .finance-dy-section .finance-quote-time,
 [data-layout="mobile"] .finance-etf-section .finance-quote-time {

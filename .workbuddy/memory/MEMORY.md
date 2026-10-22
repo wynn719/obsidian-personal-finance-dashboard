@@ -42,10 +42,12 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - 计时用结束时间戳 `endAt` + `remainingRef`，interval 只依赖 `[running]` → 不漂移；不分叉 DOM，切布局不丢状态
 - 数据独立文件 `Finance/Pomodoro.md`（`pomodoroDataFilePath`），`src/pomodoro-store.ts` 自带 Parser/Serializer/watcher；格式 `# Pomodoro` + `Date | Count | Minutes`。只记**完成**的番茄
 - 组件自己订阅 `pomodoroStore.onChange`，不走 DataStore
-- 样式在「13.6 番茄钟模块」，**必须排在 mobile 段之后**，否则压不过 `[data-layout="mobile"] .finance-btn` 的 26px 方块约束
+- 样式在「13.6 番茄钟模块」，**必须排在 mobile 段之后**，否则压不过 `[data-layout="mobile"] .finance-btn` 的 26px 方块约束。**按钮字号已改固定 px**（桌面 mode 14.5 / min 14 / toggle 15；移动 mode 12 / min 12 / toggle 15 / icon-btn 12）——原先用 0.78em/0.85em，会被父级字号带着漂，且整体偏小
 - 移动端 `grid-template-areas: "dial panel" / "trend trend"`，环 96；panel 用 `display:contents` 把 actions/stats 提成网格项。改 `.finance-pomodoro-mode-btn` 必须保留 `flex: 1 1 0`
 
 ## 市场信号：三个 service 的硬口径
+- **打开视图自动拉一遍**（2026-10-22）：`src/market-refresh.ts` 是四项远程数据的唯一入口（年线 / TTM / ETF / 持仓行情），`FinanceApp` 挂载时 `useEffect` 调 `autoRefreshAll(store)`。四步**串行**执行（避免并发写 Misc.md 互相覆盖），单项失败只 `console.error`，页面继续用缓存值。`AUTO_REFRESH_MIN_INTERVAL = 5min` 做去重，避免反复开关视图狂刷接口；`running` 保证同一时刻只有一轮
+- 卡片刷新按钮仍保留（强制刷新），但四个组件与 `useQuoteRefresh` 都已改为调 market-refresh 的 helper，**不要再在组件里直接调 service 的 fetch**
 - 年线信号：中证官网 index-perf（UA/Referer 优先，失败降级默认头）；MA250/偏离度端上算；区间 buy<0 / hold 0–3 / sell 3–6 / overheat>6；按「OHLC 四价全同」剔休市行
 - TTM 股息率：东财 RPT_SHAREBONUS_DET 批量 in + quote-service 现价；口径 1:1 复刻 ttm_yield.py（实施分配+有除权日、最近年报+最近中期、pending 检测）。与 westock 实测一致（招行 2.016）
 - ETF 溢价：腾讯 qt.gtimg.cn 批量 16 只；字段 **[44]=规模(亿) [77]=溢价率(%) [78]=IOPV**
@@ -68,7 +70,7 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - 新增 `--fd-track` / `--fd-bar`（:root 实色 + .theme-dark 半透明白），tab 条与 ETF 筛选都是「轨道 + 白滑块」
 
 ## 约定与坑
-- **窄屏底部要留出 Obsidian 操作栏空间**：`--fd-bottom-reserve: 120px` + `env(safe-area-inset-bottom)`，同时挂在 `[data-layout="mobile"]` 和 `[data-layout="compact"]` 上。原先只写了 mobile，宽度一过 768 落到 compact 就没留白（横屏 / Pad / 分栏会撞操作栏）。desktop 保持 40px
+- **窄屏底部要留出 Obsidian 操作栏空间**：`--fd-bottom-reserve: 160px`（原 120，实测偏紧后调大）+ `env(safe-area-inset-bottom)`，同时挂在 `[data-layout="mobile"]` 和 `[data-layout="compact"]` 上。原先只写了 mobile，宽度一过 768 落到 compact 就没留白（横屏 / Pad / 分栏会撞操作栏）。desktop 保持 40px
 - **自定义 `button` 必须显式给 `height` + `min-height: 0`**（2026-10-22 踩过）：Obsidian 主题会给 `button` 设 `--input-height`，只写 padding 的话实际高度不受控——ETF 的「≤3% / 全部」切换按钮就因此比旁边的刷新按钮高一截。凡是要和其它控件对齐的小按钮，都按这个写。**另一个连带症状**：按钮被主题撑高后，`align-items: baseline` 会把文字顶到上方，看着像「不居中」（番茄钟专注/短休/长休就是），必须换 `align-items: center` + `justify-content: center` + `line-height` 收紧
 - **卡片刷新按钮用 `.finance-refresh-btn`**（2026-10-22）：年线 / TTM / ETF / 持仓占比 四处共用，规格取自 TTM 卡（桌面 32×32、移动 22×22、`--fd-radius-sm`、透明底、muted 图标 14px）。**不要再用 `.finance-btn-small`** —— 那是表内编辑/删除行操作按钮的类，两者曾经混用，改一处会牵连另一处。移动端缩放写在 `[data-layout="mobile"] .finance-refresh-btn`
 - **金额精度**：写盘前一律 `utils.roundAmount(v, 2)`（消 `47×1290.88=60671.36000000001` 残留）。落点 updateHoldingQuotes / holdingValue / Serializer / holding-form；Parser 也归一 → 旧文件下次保存自愈。原始 API 值（price/fxRate）本干净，只有算术才残留

@@ -205,6 +205,7 @@ interface TranslationStrings {
   "dividendYield.col.price": string;
   "dividendYield.col.yield": string;
   "dividendYield.pending": string;
+  "dividendYield.sortNote": string;
   "dividendYield.empty": string;
   "dividendYield.btn.refresh": string;
 
@@ -218,7 +219,9 @@ interface TranslationStrings {
   "etfPremium.filter.low": string;
   "etfPremium.filter.all": string;
   "etfPremium.empty": string;
-  "etfPremium.noneLow": string;
+  "etfPremium.noneLow.title": string;
+  "etfPremium.noneLow.body": string;
+  "etfPremium.viewAll": string;
   "etfPremium.btn.refresh": string;
 
   "market.updatedAt": string;
@@ -496,6 +499,7 @@ const en: TranslationStrings = {
   "dividendYield.pending":
     "The latest annual report ({period}) is not yet implemented; the annual part uses the previous implemented plan.",
   "dividendYield.empty": "No dividend yield data. Click refresh to fetch.",
+  "dividendYield.sortNote": "Sorted by yield · 5% and above highlighted",
   "dividendYield.btn.refresh": "Refresh dividend yields",
 
   "etfPremium.title": "US ETF Premium Monitor",
@@ -508,7 +512,10 @@ const en: TranslationStrings = {
   "etfPremium.filter.low": "≤3%",
   "etfPremium.filter.all": "All",
   "etfPremium.empty": "No premium data. Click refresh to fetch.",
-  "etfPremium.noneLow": "All {count} ETFs are above 3%; lowest: {name} +{pct}%",
+  "etfPremium.noneLow.title": "All {count} ETFs are above {threshold}%",
+  "etfPremium.noneLow.body":
+    "Lowest: {name} +{pct}% — nothing under the threshold.",
+  "etfPremium.viewAll": "View all {count}",
   "etfPremium.btn.refresh": "Refresh ETF premiums",
 
   "market.updatedAt": "Updated {time}",
@@ -788,6 +795,7 @@ const zh: TranslationStrings = {
   "dividendYield.pending":
     "最新年报（{period}）尚未实施，年报部分取更早一期已实施方案。",
   "dividendYield.empty": "暂无股息率数据，点击刷新拉取。",
+  "dividendYield.sortNote": "按股息率降序 · 5% 以上标红",
   "dividendYield.btn.refresh": "刷新股息率",
 
   "etfPremium.title": "美股 ETF 溢价监控",
@@ -800,7 +808,9 @@ const zh: TranslationStrings = {
   "etfPremium.filter.low": "≤3%",
   "etfPremium.filter.all": "全部",
   "etfPremium.empty": "暂无溢价数据，点击刷新拉取。",
-  "etfPremium.noneLow": "{count} 只标的溢价率均 > 3%，最低：{name} +{pct}%",
+  "etfPremium.noneLow.title": "{count} 只标的溢价率均高于 {threshold}%",
+  "etfPremium.noneLow.body": "最低 {name} +{pct}%，暂无符合阈值的标的。",
+  "etfPremium.viewAll": "查看全部 {count} 只标的",
   "etfPremium.btn.refresh": "刷新溢价数据",
 
   "market.updatedAt": "更新于 {time}",

@@ -14,6 +14,10 @@ import type { DividendYieldSectionProps } from "../types";
  * （最近一次已实施年报 + 最近一次已实施中期）。
  * 手动刷新，结果缓存于 Misc.md。
  */
+
+/** 高股息线：股息率 ≥ 5% 才标红，与表头说明文案保持一致 */
+const DIVIDEND_YIELD_HIGHLIGHT = 5;
+
 export function DividendYieldSection({
   store,
   maskNumbers,
@@ -87,7 +91,18 @@ export function DividendYieldSection({
       header: t("dividendYield.col.yield"),
       numeric: true,
       className: "finance-dy-yield",
-      cell: (r) => `${r.yieldPct.toFixed(2)}%`,
+      cell: (r) => (
+        // 只有够到高股息线才标红：全表标红等于没有层级（设计稿 2026-10-22）
+        <span
+          className={
+            r.yieldPct >= DIVIDEND_YIELD_HIGHLIGHT
+              ? "finance-dy-yield-high"
+              : undefined
+          }
+        >
+          {r.yieldPct.toFixed(2)}%
+        </span>
+      ),
     },
   ];
 
@@ -103,11 +118,6 @@ export function DividendYieldSection({
           ) : null}
         </span>
         <span className="finance-market-head-right">
-          {lastUpdated ? (
-            <span className="finance-quote-time">
-              {t("market.updatedAt", { time: formatClockTime(lastUpdated) })}
-            </span>
-          ) : null}
           <button
             className={`finance-btn-small${
               refreshing ? " finance-btn-spinning" : ""
@@ -120,6 +130,17 @@ export function DividendYieldSection({
           </button>
         </span>
       </h2>
+
+      {rows.length > 0 ? (
+        <div className="finance-dy-meta">
+          <span>{t("dividendYield.sortNote")}</span>
+          {lastUpdated ? (
+            <span className="finance-dy-updated">
+              {formatClockTime(lastUpdated)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <DataTable
         columns={columns}

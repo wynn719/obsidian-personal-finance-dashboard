@@ -43,6 +43,10 @@
   --fd-block-gap: 16px;
   /* 移动端分块阴影：设计稿要求去描边，只靠极轻阴影维持白卡与灰底的边界 */
   --fd-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  /* 分段控件轨道 / 柱状填充：不复用 --background-secondary——
+     主题间差异太大，白卡上常常看不出「轨道」这一层 */
+  --fd-track: #e8eaee;
+  --fd-bar: #dde1e7;
 
   /* 间距（8px 基） */
   --fd-space-1: 4px;
@@ -102,6 +106,8 @@
   --fd-link: #6aa9ff;
   --fd-page-bg: #161616;
   --fd-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --fd-track: rgba(255, 255, 255, 0.07);
+  --fd-bar: rgba(255, 255, 255, 0.16);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -429,17 +435,41 @@
   display: none;
 }
 
-/* mobile：两个 tab 均分整行 */
+/* tab 面板内的卡片也算一级模块，间距与其它区块同源 */
+[data-layout="mobile"] .finance-tab-panel > .finance-section {
+  margin-bottom: var(--fd-block-gap);
+}
+
+/* mobile：两个 tab 收成一颗分段控件（轨道 + 白色选中块），下划线只在桌面保留 */
 [data-layout="mobile"] .finance-tabs {
-  gap: 0;
+  gap: 3px;
+  padding: 3px;
+  border-bottom: none;
+  border-radius: 10px;
+  background: var(--fd-track);
   margin-bottom: var(--fd-block-gap);
 }
 
 [data-layout="mobile"] .finance-tab {
   flex: 1 1 0;
   justify-content: center;
-  padding: 10px 8px 11px;
-  font-size: 14px;
+  margin-bottom: 0;
+  padding: 7px 8px;
+  border-bottom: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+[data-layout="mobile"] .finance-tab.is-active {
+  border-bottom-color: transparent;
+  background: var(--background-primary);
+  box-shadow: var(--fd-shadow-sm);
+}
+
+/* 两个中文标签已经够认，图标塞进分段控件只会挤 */
+[data-layout="mobile"] .finance-tab svg {
+  display: none;
 }
 
 /* 资产配置 + 股息汇总 + 股票持仓 三栏并排 */
@@ -1085,10 +1115,30 @@
   white-space: nowrap;
 }
 
-/* TTM 股息率列：A 股口径正数用红（水平值，非涨跌） */
+/* TTM 股息率列：只有够到高股息线才标红（阈值见 dividend-yield.tsx）。
+   全表标红等于没有层级——红只留给「值得看」的那几行。 */
 .finance-dy-yield {
-  color: var(--fd-up);
   font-weight: 600;
+}
+
+.finance-dy-yield-high {
+  color: var(--fd-up);
+}
+
+/* 排序与口径说明行：接在卡片标题下，时间靠右（原先是塞进 h2 右侧） */
+.finance-dy-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
+  margin: 4px 0 2px;
+  font-size: 0.72em;
+  color: var(--text-faint);
+}
+
+.finance-dy-updated {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* —— 指数策略信号卡 —— */
@@ -1112,8 +1162,9 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* 区间色与偏离度同色系：跌破年线是绿（便宜）、过热是红，桌面移动一致 */
 .finance-signal-buy {
-  color: var(--fd-accent);
+  color: var(--fd-down);
 }
 
 .finance-signal-hold {
@@ -1139,8 +1190,8 @@
 }
 
 .finance-zone-buy {
-  color: var(--fd-accent-strong);
-  background: var(--fd-accent-bg);
+  color: var(--fd-down);
+  background: var(--fd-down-bg);
 }
 
 .finance-zone-hold {
@@ -1537,9 +1588,9 @@
   text-overflow: ellipsis;
 }
 
-/* —— 市场信号条：两行紧凑排版 —— */
+/* —— 市场信号条：标题行 / 距年线大数值 + 区间 chip / 数据脚注 —— */
 [data-layout="mobile"] .finance-market-grid > .finance-section {
-  padding: 14px 16px;
+  padding: 16px;
   border: none;
   border-radius: 18px;
   box-shadow: var(--fd-card-shadow);
@@ -1548,31 +1599,39 @@
 [data-layout="mobile"] .finance-signal-compact {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
   min-width: 0;
 }
 
-[data-layout="mobile"] .finance-signal-line {
+[data-layout="mobile"] .finance-signal-head,
+[data-layout="mobile"] .finance-signal-foot {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
 
+[data-layout="mobile"] .finance-signal-foot {
+  gap: 12px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
 [data-layout="mobile"] .finance-signal-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-normal);
   white-space: nowrap;
 }
 
 [data-layout="mobile"] .finance-signal-chip {
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: 9px;
+  line-height: 1.7;
   color: var(--text-muted);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  padding: 0 4px;
+  background: var(--fd-track);
+  border: none;
+  border-radius: 5px;
+  padding: 0 5px;
   white-space: nowrap;
 }
 
@@ -1582,35 +1641,49 @@
 }
 
 [data-layout="mobile"] .finance-signal-k {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
+/* 偏离度是这张卡的答案，做成主数值；区间 chip 跟着它同一基线站 */
+[data-layout="mobile"] .finance-signal-hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+[data-layout="mobile"] .finance-signal-hero-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
 [data-layout="mobile"] .finance-signal-dev {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-/* 区间 chip 压到微标签档（10px 触底，不再往下压） */
+[data-layout="mobile"] .finance-signal-dev.is-up {
+  color: var(--fd-up);
+}
+
+[data-layout="mobile"] .finance-signal-dev.is-down {
+  color: var(--fd-down);
+}
+
+/* 区间 chip 与偏离度同色系：跌破年线是绿（便宜），过热是红 */
 [data-layout="mobile"] .finance-signal-compact .finance-zone-badge {
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.7;
-  padding: 0 6px;
-  border-radius: 4px;
-}
-
-/* 买入区对齐设计稿的 iOS 蓝 */
-[data-layout="mobile"] .finance-signal-compact .finance-zone-buy {
-  color: var(--fd-link);
-  background: rgba(0, 102, 204, 0.1);
-}
-
-[data-layout="mobile"] .finance-signal-line-sub {
-  gap: 12px;
   font-size: 11px;
-  color: var(--text-muted);
+  font-weight: 600;
+  line-height: 1.6;
+  padding: 1px 9px;
+  border-radius: 7px;
+  margin-bottom: 3px;
 }
 
 [data-layout="mobile"] .finance-signal-kv b {
@@ -1626,24 +1699,25 @@
 }
 
 /* —— 市场信号区两张数据表（TTM 股息率 / ETF 溢价）——
-   共用同一套结构：标题压在灰底上、表格自己是一张无外框白卡。
+   与信号条、番茄钟统一为「一张白卡装标题 + 内容」，标题不再浮在灰底上。
    特异性需高于 .finance-market-grid > .finance-section，否则卡片 padding 会残留。 */
 [data-layout="mobile"] .finance-market-grid > .finance-dy-section,
 [data-layout="mobile"] .finance-market-grid > .finance-etf-section {
-  background: transparent;
+  background: var(--background-primary);
   border: none;
-  box-shadow: none;
-  padding: 0;
+  box-shadow: var(--fd-card-shadow);
+  border-radius: 18px;
+  padding: 16px;
   /* 与相邻模块的间距交给 .finance-market-grid 的 gap，这里不再叠加 margin */
   margin-bottom: 0;
 }
 
 [data-layout="mobile"] .finance-dy-section h2,
 [data-layout="mobile"] .finance-etf-section h2 {
-  /* 标题与卡片左边缘对齐（页面 padding 处），不再额外缩进 */
+  /* 标题已在白卡内，与表头左缘同一缩进线 */
   padding: 0;
-  margin-bottom: 8px;
-  font-size: 17px;
+  margin-bottom: 2px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -1652,25 +1726,25 @@
   gap: 8px;
 }
 
+/* 表格自身不再是卡片：外层 section 已经是白卡了，再套一层会出现双层内边距 */
 [data-layout="mobile"] .finance-dy-section .finance-table-wrapper,
 [data-layout="mobile"] .finance-etf-section .finance-table-wrapper {
-  /* border-box 必须显式声明：wrapper 默认 content-box，padding 0 4px 会把
-     100% 宽度再撑出 8px，白卡右缘出血到其它卡片之外 */
   box-sizing: border-box;
-  background: var(--background-primary);
+  background: transparent;
   border: none;
-  border-radius: 18px;
-  box-shadow: var(--fd-card-shadow);
+  border-radius: 0;
+  box-shadow: none;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* —— 移动端数据表通用骨架：58px 行高、hairline 行分隔、名称+代码双行 —— */
+/* —— 移动端数据表通用骨架：44px 行高、hairline 行分隔、名称+代码双行 —— */
 [data-layout="mobile"] .finance-mobile-table {
-  font-size: 15px;
+  font-size: 13px;
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
+  margin-top: 2px;
 }
 
 /* 列宽按设计稿比例固定，避免 auto layout 把数字列挤成内容宽度 */
@@ -1686,12 +1760,12 @@
 
 [data-layout="mobile"] .finance-dy-table th:nth-child(3),
 [data-layout="mobile"] .finance-dy-table td:nth-child(3) {
-  width: 26%;
+  width: 22%;
 }
 
 [data-layout="mobile"] .finance-dy-table th:nth-child(4),
 [data-layout="mobile"] .finance-dy-table td:nth-child(4) {
-  width: 16%;
+  width: 20%;
 }
 
 /* ETF 三列：名称占比更大（名称长），两个数值列均分 */
@@ -1711,17 +1785,17 @@
 }
 
 [data-layout="mobile"] .finance-mobile-table th {
-  height: 30px;
+  height: 26px;
   padding: 0 8px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
-  color: var(--text-muted);
+  color: var(--text-faint);
   background: transparent;
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
 [data-layout="mobile"] .finance-mobile-table td {
-  height: 58px;
+  height: 44px;
   padding: 0 8px;
   color: var(--text-normal);
   border-bottom: 1px solid var(--background-modifier-border);
@@ -1733,14 +1807,15 @@
   border-bottom: none;
 }
 
+/* 卡片已经有 16px 内边距，单元格不再重复缩进 */
 [data-layout="mobile"] .finance-mobile-table th:first-child,
 [data-layout="mobile"] .finance-mobile-table td:first-child {
-  padding-left: 16px;
+  padding-left: 0;
 }
 
 [data-layout="mobile"] .finance-mobile-table th:last-child,
 [data-layout="mobile"] .finance-mobile-table td:last-child {
-  padding-right: 16px;
+  padding-right: 0;
 }
 
 /* 名称列：名与代码上下两行，避免横向挤占 */
@@ -1748,33 +1823,37 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1px;
+  gap: 0;
+  font-size: 13px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 [data-layout="mobile"] .finance-mobile-table .finance-holding-symbol {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 400;
   letter-spacing: 0.02em;
   padding: 0;
   background: none;
   opacity: 0.55;
+  line-height: 1.2;
 }
 
-/* 现价 / TTM 属次级数值，降到 13px 一档 */
-/* 次级数值降到 13px */
+/* 现价 / TTM 属次级数值：12px、弱化到 muted，让股息率站出来 */
 [data-layout="mobile"] .finance-mobile-table td.finance-number {
-  font-size: 13px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-/* 读表主锚点列保持 15px：TTM 的股息率、ETF 的溢价率（同特异性靠后定义胜出） */
+/* 读表主锚点列：TTM 的股息率、ETF 的溢价率 */
 [data-layout="mobile"] .finance-mobile-table td.finance-dy-yield,
 [data-layout="mobile"] .finance-mobile-table td.finance-bold {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text-normal);
 }
 
-[data-layout="mobile"] .finance-mobile-table td.finance-dy-yield {
+[data-layout="mobile"] .finance-mobile-table td.finance-dy-yield .finance-dy-yield-high {
   color: var(--fd-up);
 }
 
@@ -1817,11 +1896,82 @@
   max-height: 320px;
 }
 
-/* ETF 过滤切换收成微标签档，避免和标题抢宽度 */
+/* ETF 过滤切换：描边小药丸 → 分段控件（轨道 + 白色选中块），与 tab 条同一语言 */
+[data-layout="mobile"] .finance-etf-filter {
+  gap: 2px;
+  padding: 2px;
+  background: var(--fd-track);
+  border-radius: 8px;
+}
+
 [data-layout="mobile"] .finance-etf-filter button {
-  font-size: 11px;
+  font-size: 10px;
   padding: 0 7px;
   line-height: 1.7;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+[data-layout="mobile"] .finance-etf-filter button.finance-etf-filter-active {
+  background: var(--background-primary);
+  border-color: transparent;
+  color: var(--text-normal);
+  box-shadow: var(--fd-shadow-sm);
+}
+
+/* —— ETF 空态：全部越线用警示条讲结论，不再是一段灰字躺在空白卡里 —— */
+.finance-etf-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--fd-warning-bg);
+}
+
+.finance-etf-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fd-warning);
+}
+
+.finance-etf-alert-head .finance-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.finance-etf-alert-body {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.finance-etf-alert-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+
+.finance-etf-viewall {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-normal);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.finance-etf-viewall:hover {
+  color: var(--fd-accent-strong);
 }
 
 /* 这两张表的更新时间让位给标题与过滤控件（设计稿也未在此处展示时间） */
@@ -1830,14 +1980,14 @@
   display: none;
 }
 
-/* 空状态同样落成白卡，不留 dashed 边框在灰底上 */
+/* 空状态与卡片同色同圆角：不能再叠一层白卡 + 阴影 */
 [data-layout="mobile"] .finance-dy-section .finance-empty,
 [data-layout="mobile"] .finance-etf-section .finance-empty {
-  background: var(--background-primary);
+  background: transparent;
   border: none;
-  border-radius: 18px;
-  box-shadow: var(--fd-card-shadow);
-  padding: 24px 16px;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 20px 8px;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1940,6 +2090,12 @@
   min-width: 0;
 }
 
+/* 宽屏下控制台列不能被内容压塌：否则「今日」会孤零零挂在按钮下方 */
+[data-layout="full"] .finance-pomodoro-panel,
+[data-layout="compact"] .finance-pomodoro-panel {
+  min-width: 240px;
+}
+
 .finance-pomodoro-modes {
   display: inline-flex;
   align-self: flex-start;
@@ -1989,6 +2145,7 @@
 
 /* 复用 .finance-btn-cta 的实心口径，但去掉 modal CTA 的边距约定 */
 .finance-pomodoro-toggle {
+  flex: 1 1 auto;
   align-self: center;
   margin-top: 0;
   min-width: 96px;
@@ -2002,6 +2159,11 @@
   justify-content: center;
 }
 
+/* 桌面是纯图标按钮；移动端（见 13.7）换成文字链，标签默认不占位 */
+.finance-pomodoro-btn-label {
+  display: none;
+}
+
 /* —— 本周 7 日柱状 —— */
 .finance-pomodoro-trend {
   display: flex;
@@ -2012,9 +2174,38 @@
   min-width: 0;
 }
 
+.finance-pomodoro-trend-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
+}
+
 .finance-pomodoro-trend-label {
   font-size: 0.72em;
   color: var(--text-muted);
+}
+
+/* 本周合计：跟着柱状图的标题走，不再和「今日」挤在一个统计块里 */
+.finance-pomodoro-trend-total {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-pomodoro-trend-total em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.finance-pomodoro-trend-total em::before {
+  content: "·";
+  margin: 0 4px;
+  color: var(--text-faint);
 }
 
 .finance-pomodoro-week {
@@ -2126,66 +2317,238 @@
   font-size: 1.7em;
 }
 
-/* mobile：单列，计时器居中，按钮回到可点尺寸 */
+/* mobile：环（96）与操作列左右站位，本周分布独占一行 —— 整张卡从 ~370 压到 ~250 */
 [data-layout="mobile"] .finance-pomodoro-section {
-  padding: 14px 16px;
+  padding: 16px;
   border: none;
   border-radius: 18px;
   box-shadow: var(--fd-card-shadow);
 }
 
 [data-layout="mobile"] .finance-pomodoro-body {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-areas:
+    "dial panel"
+    "trend trend";
+  gap: 14px 16px;
+  align-items: start;
   justify-content: stretch;
 }
 
-[data-layout="mobile"] .finance-pomodoro-trend {
-  max-width: none;
-}
-
 [data-layout="mobile"] .finance-pomodoro-dial {
-  width: 140px;
-  height: 140px;
-  justify-self: center;
+  grid-area: dial;
+  width: 96px;
+  height: 96px;
+  justify-self: start;
 }
 
 [data-layout="mobile"] .finance-pomodoro-clock {
-  font-size: 32px;
+  font-size: 22px;
+}
+
+[data-layout="mobile"] .finance-pomodoro-mode-label {
+  font-size: 10px;
+}
+
+/* 操作列自身排成网格：切换 / 主按钮各占一行，今日 + 重置·跳过 收在一行 */
+[data-layout="mobile"] .finance-pomodoro-panel {
+  grid-area: panel;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "modes modes modes"
+    "cta cta cta"
+    "today reset skip";
+  align-items: center;
+  gap: 10px 8px;
 }
 
 [data-layout="mobile"] .finance-pomodoro-modes {
+  grid-area: modes;
   align-self: stretch;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--fd-track);
 }
 
 [data-layout="mobile"] .finance-pomodoro-mode-btn {
   flex: 1 1 0;
   justify-content: center;
-  padding: 8px;
-  font-size: 13px;
+  padding: 6px 4px;
+  border-radius: 7px;
+  font-size: 10px;
+  gap: 3px;
 }
 
-/* 覆盖 mobile 下 .finance-btn 的 26px 方块约束：主按钮要带文字 */
+/* 选中段用「反色实心」而不是描边：白卡上看不出描边，反色最省事也最明确 */
+[data-layout="mobile"] .finance-pomodoro-mode-btn.is-active {
+  background: var(--text-normal);
+  color: var(--background-primary);
+  box-shadow: none;
+}
+
+[data-layout="mobile"] .finance-pomodoro-mode-min {
+  font-size: 10px;
+  color: inherit;
+  opacity: 0.72;
+}
+
+/* display:contents：把三个按钮直接提为 panel 的网格项，DOM 结构不用为移动端重排 */
+[data-layout="mobile"] .finance-pomodoro-actions {
+  display: contents;
+}
+
 [data-layout="mobile"] .finance-pomodoro-toggle {
-  flex: 1 1 auto;
-  width: auto;
+  grid-area: cta;
+  width: 100%;
   min-width: 0;
   height: 40px;
   min-height: 40px;
-  padding: 0 14px;
-  font-size: 15px;
+  padding: 0 12px;
+  gap: 6px;
+  font-size: 13px;
+  border: none;
+  border-radius: 10px;
+  background: var(--text-normal);
+  color: var(--background-primary);
+  box-shadow: none;
+}
+
+[data-layout="mobile"] .finance-pomodoro-toggle:hover {
+  background: var(--text-normal);
+  color: var(--background-primary);
+}
+
+/* 重置 / 跳过 降为文字链：主按钮才能独占一行 */
+[data-layout="mobile"] .finance-pomodoro-icon-btn {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+[data-layout="mobile"] .finance-pomodoro-reset {
+  grid-area: reset;
+}
+
+[data-layout="mobile"] .finance-pomodoro-skip {
+  grid-area: skip;
+}
+
+[data-layout="mobile"] .finance-pomodoro-icon-btn svg {
+  display: none;
+}
+
+[data-layout="mobile"] .finance-pomodoro-btn-label {
+  display: inline;
+}
+
+/* 两个文字链之间的中点分隔（不占 DOM，避免用 spacer 打乱网格） */
+[data-layout="mobile"] .finance-pomodoro-skip::before {
+  content: "·";
+  margin-right: 4px;
+  color: var(--text-faint);
+}
+
+[data-layout="mobile"] .finance-pomodoro-stats {
+  display: contents;
+}
+
+[data-layout="mobile"] .finance-pomodoro-stat {
+  grid-area: today;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+}
+
+[data-layout="mobile"] .finance-pomodoro-stat-label,
+[data-layout="mobile"] .finance-pomodoro-stat-value {
+  font-size: 10px;
+  gap: 2px;
+}
+
+[data-layout="mobile"] .finance-pomodoro-stat-value em::before {
+  content: "·";
+  margin-right: 4px;
+  color: var(--text-faint);
+}
+
+[data-layout="mobile"] .finance-pomodoro-trend {
+  grid-area: trend;
+  max-width: none;
   gap: 6px;
 }
 
-[data-layout="mobile"] .finance-pomodoro-icon-btn {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  min-height: 40px;
+[data-layout="mobile"] .finance-pomodoro-trend-label,
+[data-layout="mobile"] .finance-pomodoro-trend-total {
+  font-size: 10px;
 }
 
 [data-layout="mobile"] .finance-pomodoro-week {
-  height: 56px;
+  height: 36px;
+  gap: 6px;
+}
+
+[data-layout="mobile"] .finance-pomodoro-day {
+  gap: 4px;
+}
+
+/* 柱状去色：今天用墨色，其余用浅灰轨道 —— 与设计稿的「只有数字带颜色」一致 */
+[data-layout="mobile"] .finance-pomodoro-bar-track {
+  background: transparent;
+}
+
+[data-layout="mobile"] .finance-pomodoro-bar {
+  background: var(--fd-bar);
+  opacity: 1;
+}
+
+[data-layout="mobile"] .finance-pomodoro-day.is-today .finance-pomodoro-bar {
+  background: var(--text-normal);
+}
+
+[data-layout="mobile"] .finance-pomodoro-dow {
+  font-size: 9px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   13.7 工作台改版补充（对齐 Ardot 739108669130272）
+   - 卡片标题统一到 14px（原 17px 把标题读成了独立分区）
+   - 只数 chip 落成灰底小药丸，与标题同基线
+   - TTM 排序说明压在 10px，与表头同档
+   ════════════════════════════════════════════════════════════ */
+[data-layout="mobile"] .finance-pomodoro-section h2 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+[data-layout="mobile"] .finance-pomodoro-head-meta {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+[data-layout="mobile"] .finance-count-chip {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--fd-track);
+  color: var(--text-muted);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+[data-layout="mobile"] .finance-dy-meta {
+  margin: 4px 0 0;
+  font-size: 10px;
 }
 
 /* 持仓空态 CTA：mobile 下要带文字，不能退化成 26px 图标方块 */

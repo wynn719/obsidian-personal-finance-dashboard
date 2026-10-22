@@ -102,9 +102,9 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
       <h2 className="finance-holdings-title">
         <span>
           <Icon name="scale" /> {t("etfPremium.title")}
-          {visible.length > 0 ? (
+          {rows.length > 0 ? (
             <span className="finance-count-chip">
-              {t("market.count", { count: visible.length })}
+              {t("market.count", { count: rows.length })}
             </span>
           ) : null}
         </span>
@@ -155,13 +155,35 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
       ) : rows.length === 0 ? (
         <p className="finance-empty">{t("etfPremium.empty")}</p>
       ) : (
-        <p className="finance-empty">
-          {t("etfPremium.noneLow", {
-            count: rows.length,
-            name: lowest?.name ?? "",
-            pct: lowest ? lowest.premium.toFixed(2) : "0.00",
-          })}
-        </p>
+        <>
+          {/* 空态不是「没数据」，而是「全部越线」：用警示条把结论和最低值讲清楚，
+              再给一个去看全部的出口，而不是丢一段灰字在空白卡里 */}
+          <div className="finance-etf-alert">
+            <div className="finance-etf-alert-head">
+              <Icon name="alert-triangle" />
+              <span>
+                {t("etfPremium.noneLow.title", {
+                  count: rows.length,
+                  threshold: ETF_PREMIUM_THRESHOLD,
+                })}
+              </span>
+            </div>
+            <p className="finance-etf-alert-body">
+              {t("etfPremium.noneLow.body", {
+                name: lowest?.name ?? "",
+                pct: lowest ? lowest.premium.toFixed(2) : "0.00",
+              })}
+            </p>
+          </div>
+          <div className="finance-etf-alert-foot">
+            <button
+              className="finance-etf-viewall"
+              onClick={() => setShowAll(true)}
+            >
+              {t("etfPremium.viewAll", { count: rows.length })}
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

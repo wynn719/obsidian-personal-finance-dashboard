@@ -57,37 +57,43 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
     </button>
   );
 
-  // 移动端：压成两行——① 指数名 + 年线信号 chip ／ 距年线 + 区间 chip
-  //                      ② 收盘 + MA250 ／ 交易日 + 刷新
-  // 长文案 advice 在移动端省略（区间 chip 已表达结论），桌面端保留。
+  // 移动端：三行——① 指数名 + 年线策略 chip ／ 刷新
+  //                    ② 距年线（说明）+ 偏离度大数值 + 区间 chip
+  //                    ③ 收盘 + MA250 ／ 交易日
+  // 结论（区间 chip）与依据（偏离度）同排，长文案 advice 只在桌面出现。
   if (layout === "mobile") {
     const [name, sub] = t("signal.title").split(" · ");
     return (
       <div className="finance-section finance-market-section">
         {signal ? (
           <div className="finance-signal-compact">
-            <div className="finance-signal-line">
+            <div className="finance-signal-head">
               <span className="finance-signal-name">{name}</span>
               {sub ? (
                 <span className="finance-signal-chip">{sub}</span>
               ) : null}
               <span className="finance-signal-spacer" />
-              <span className="finance-signal-k">
-                {t("signal.col.vsMa")}
-              </span>
-              <span
-                className={`finance-signal-dev ${
-                  signal.deviation >= 0 ? "is-up" : "is-down"
-                }`}
-              >
-                {signal.deviation > 0 ? "+" : ""}
-                {signal.deviation.toFixed(2)}%
+              {refreshBtn}
+            </div>
+            <div className="finance-signal-hero">
+              <span className="finance-signal-hero-col">
+                <span className="finance-signal-k">
+                  {t("signal.col.vsMa")}
+                </span>
+                <span
+                  className={`finance-signal-dev ${
+                    signal.deviation >= 0 ? "is-up" : "is-down"
+                  }`}
+                >
+                  {signal.deviation > 0 ? "+" : ""}
+                  {signal.deviation.toFixed(2)}%
+                </span>
               </span>
               <span className={`finance-zone-badge finance-zone-${signal.zone}`}>
                 {zoneLabels[signal.zone]}
               </span>
             </div>
-            <div className="finance-signal-line finance-signal-line-sub">
+            <div className="finance-signal-foot">
               <span className="finance-signal-kv">
                 {t("signal.col.close")} <b>{signal.close.toFixed(2)}</b>
               </span>
@@ -96,7 +102,6 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
               </span>
               <span className="finance-signal-spacer" />
               <span className="finance-signal-date">{signal.tradeDate}</span>
-              {refreshBtn}
             </div>
           </div>
         ) : (

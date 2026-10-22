@@ -286,23 +286,31 @@ export function PomodoroSection({ pomodoroStore }: PomodoroSectionProps) {
               <span>{toggleLabel}</span>
             </button>
             <button
-              className="finance-btn finance-pomodoro-icon-btn"
+              className="finance-btn finance-pomodoro-icon-btn finance-pomodoro-reset"
               onClick={handleReset}
               title={t("pomodoro.btn.reset")}
               aria-label={t("pomodoro.btn.reset")}
             >
               <Icon name="rotate-ccw" />
+              <span className="finance-pomodoro-btn-label">
+                {t("pomodoro.btn.reset")}
+              </span>
             </button>
             <button
-              className="finance-btn finance-pomodoro-icon-btn"
+              className="finance-btn finance-pomodoro-icon-btn finance-pomodoro-skip"
               onClick={handleSkip}
               title={t("pomodoro.btn.skip")}
               aria-label={t("pomodoro.btn.skip")}
             >
               <Icon name="skip-forward" />
+              <span className="finance-pomodoro-btn-label">
+                {t("pomodoro.btn.skip")}
+              </span>
             </button>
           </div>
 
+          {/* 今日统计与「重置 · 跳过」在移动端同排（设计稿 2026-10-22）；
+              本周合计移到分布标题行，避免同一数字在卡片里出现两次 */}
           <div className="finance-pomodoro-stats">
             <div className="finance-pomodoro-stat">
               <span className="finance-pomodoro-stat-label">
@@ -315,24 +323,19 @@ export function PomodoroSection({ pomodoroStore }: PomodoroSectionProps) {
                 </em>
               </span>
             </div>
-            <div className="finance-pomodoro-stat">
-              <span className="finance-pomodoro-stat-label">
-                {t("pomodoro.stat.week")}
-              </span>
-              <span className="finance-pomodoro-stat-value">
-                {t("pomodoro.stat.count", { count: week.count })}
-                <em>
-                  {t("pomodoro.stat.minutes", { count: week.minutes })}
-                </em>
-              </span>
-            </div>
           </div>
         </div>
 
         <div className="finance-pomodoro-trend">
-          <span className="finance-pomodoro-trend-label">
-            {t("pomodoro.week.chart")}
-          </span>
+          <div className="finance-pomodoro-trend-head">
+            <span className="finance-pomodoro-trend-label">
+              {t("pomodoro.week.chart")}
+            </span>
+            <span className="finance-pomodoro-trend-total">
+              {t("pomodoro.stat.count", { count: week.count })}
+              <em>{t("pomodoro.stat.minutes", { count: week.minutes })}</em>
+            </span>
+          </div>
           <div className="finance-pomodoro-week">
             {weekBars.map((b) => (
               <div

@@ -88,3 +88,9 @@ Obsidian 个人财务仪表盘插件。按年 Markdown 文件存储财务数据�
 - **金额精度约定（2026-10-13）**：所有 amount 在"存储/写盘"前用 `utils.roundAmount(v, 2)` 归一（消除 `47×1290.88=60671.36000000001` 类 IEEE-754 乘法残留）。落点：`updateHoldingQuotes`、`holdingValue`、`MiscMarkdownSerializer`、`holding-form` 计算 amount 处；`MiscMarkdownParser` 解析时同样归一 → 旧文件下次保存自愈。注意：原始 API 数值（price/fxRate）round-trip 干净，只有做算术才会产生残留。
 - 持仓 Treemap tooltip：mobile 布局下关闭（`useLayout()` → `tooltip.enabled: !isMobile`）；其他图表保留（移动端 tooltip 是读精确值的唯一途径）。
 - 原 renderTotalAssetsChart 有 new Chart 未存实例的内存泄漏，React 迁移后由 useRef 自动管理消除
+## 工作台移动端改版落地（2026-10-22，设计稿 Ardot 739108669130272）
+- 四张卡统一「白卡装标题 + 内容」：`.finance-market-grid > .finance-dy-section / .finance-etf-section` 直接白底 16 内边距 18 圆角，`.finance-table-wrapper` 在移动端转透明（此前是「标题压灰底 + 表格自成白卡」）。
+- 番茄钟移动端 = `grid-template-areas: "dial panel" / "trend trend"`，环 96、时钟 22px；panel 内用 **`display:contents`** 把 `.finance-pomodoro-actions` / `.finance-pomodoro-stats` 提成网格项，实现「切换 / 主按钮 / 今日+重置·跳过」三行。改 `.finance-pomodoro-mode-btn` 的移动端规则时必须保留 `flex: 1 1 0`，否则三段塌成内容宽。
+- 新增 token `--fd-track`（分段控件轨道）/ `--fd-bar`（周分布柱），:root 实色 + `.theme-dark` 半透明白。tab 条与 ETF 筛选在移动端都是「轨道 + 白色滑块」，tab 图标移动端隐藏。
+- 色口径统一（本次拍板）：**买入区 = 绿**（`.finance-zone-buy` / `.finance-signal-buy` 全局改 `--fd-down`），与偏离度同色系；高股息线 **5%**（`DIVIDEND_YIELD_HIGHLIGHT`）以上股息率才标红，其余回墨色。
+- 浏览器核对脚手架：`/tmp/pomo-v2/`（app-mock.tsx 绝对路径 import + build.mjs + shot.mjs）。esbuild 必须显式给 `jsx:"automatic"`、`jsxImportSource:"preact"`、`nodePaths:[项目/node_modules]`，否则 React is not defined。

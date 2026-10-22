@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useFinanceData } from "./use-finance-data";
 import { Icon } from "./icon";
 import { PieChart, BarChart, TotalAssetsChart } from "./chart";
@@ -17,6 +17,7 @@ import { MonthlyOverviewTable } from "./components/monthly-overview";
 import { DividendSummaryTable } from "./components/dividend-summary";
 import { CashFlowDetailsTable } from "./components/cash-flow-details";
 import { t } from "../i18n";
+import { autoRefreshAll } from "../market-refresh";
 import type { FinanceAppProps } from "./types";
 
 function ChartContainer({
@@ -73,6 +74,13 @@ export function FinanceApp({
   const [maskNumbers, setMaskNumbers] = useState(false);
   const [tab, setTab] = useState<FinanceTab>(readStoredTab);
   const { refreshing, refreshQuotes } = useQuoteRefresh(store);
+
+  // 打开视图时把所有需要远程拉取的数据各拉一遍：
+  // 年线信号 / TTM 股息率 / ETF 溢价 / 持仓行情。
+  // 5 分钟内重复打开不会重复请求；失败只写日志，页面继续用缓存值。
+  useEffect(() => {
+    void autoRefreshAll(store);
+  }, [store]);
 
   const changeTab = (next: FinanceTab) => {
     setTab(next);

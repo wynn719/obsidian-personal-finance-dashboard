@@ -1,50 +1,36 @@
 import { useCallback, useState } from "react";
 import { Notice } from "obsidian";
 import type { DataStore } from "../../data-store";
-import { fetchQuotes } from "../../quote-service";
+import { refreshHoldingQuotes } from "../../market-refresh";
 import { t } from "../../i18n";
 
 /**
- * 手动刷新行情：一次批量请求拉取所有持仓的实时价格 + 汇率，
+ * 手动刷新行情：批量拉取所有持仓的实时价格 + 汇率，
  * 写回 store（name/price/changePercent/currency/fxRate/quoteTime/amount）
  * 后触发全 UI 刷新，Misc.md 中持仓金额随每次刷新更新。
- * 首期不做轮询，仅由按钮触发。
+ *
+ * 实际拉取逻辑在 market-refresh 里，与「打开视图自动刷新」共用同一份实现，
+ * 这里只负责按钮的 loading 状态与提示文案。
  */
 export function useQuoteRefresh(store: DataStore) {
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshQuotes = useCallback(async () => {
-    const holdings = store.getHoldings().filter((h) => h.symbol);
-    if (holdings.length === 0 || refreshing) return;
+    if (refreshing) return;
+    const total = store.getHoldings().filter((h) => h.symbol).length;
+    if (total === 0) return;
 
     setRefreshing(true);
     try {
-      const { quotes } = await fetchQuotes(holdings);
-      const updates = holdings
-        .filter((h) => h.symbol && quotes.has(h.symbol))
-        .map((h) => {
-          const q = quotes.get(h.symbol!)!;
-          return {
-            id: h.id,
-            name: q.name,
-            price: q.price,
-            changePercent: q.changePercent,
-            currency: q.currency,
-            fxRate: q.fxRate,
-          };
-        });
+      const { updated } = await refreshHoldingQuotes(store);
 
-      if (updates.length > 0) {
-        await store.updateHoldingQuotes(updates);
-      }
-
-      if (quotes.size === 0) {
+      if (updated === 0) {
         new Notice(t("holdings.quoteFailed"));
-      } else if (updates.length < holdings.length) {
+      } else if (updated < total) {
         new Notice(
           t("holdings.quoteUpdated", {
-            success: String(updates.length),
-            total: String(holdings.length),
+            success: String(updated),
+            total: String(total),
           }),
         );
       }

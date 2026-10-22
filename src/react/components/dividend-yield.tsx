@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Notice } from "obsidian";
 import { Icon } from "../icon";
 import { t } from "../../i18n";
-import { fetchDividendYields } from "../../dividend-yield-service";
+import { refreshDividendYields } from "../../market-refresh";
 import { formatClockTime } from "../../utils";
 import { DataTable, type Column } from "./data-table";
 import type { DividendYieldRow } from "../../models";
@@ -36,14 +36,11 @@ export function DividendYieldSection({
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const { rows: next, failed } = await fetchDividendYields();
-      if (next.length > 0) {
-        await store.updateDividendYields(next);
+      const { saved, failed } = await refreshDividendYields(store);
+      if (failed > 0) {
+        new Notice(t("market.partialFailed", { count: failed }));
       }
-      if (failed.length > 0) {
-        new Notice(t("market.partialFailed", { count: failed.length }));
-      }
-      if (next.length === 0) {
+      if (saved === 0) {
         new Notice(t("market.refreshFailed"));
       }
     } catch (e) {

@@ -3,7 +3,7 @@ import { Notice } from "obsidian";
 import { Icon } from "../icon";
 import { useLayout } from "../responsive";
 import { t } from "../../i18n";
-import { fetchIndexSignal } from "../../index-signal-service";
+import { refreshIndexSignal } from "../../market-refresh";
 import { formatClockTime } from "../../utils";
 import type { IndexSignalZone } from "../../models";
 import type { IndexSignalSectionProps } from "../types";
@@ -36,8 +36,7 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const next = await fetchIndexSignal();
-      await store.updateIndexSignal(next);
+      await refreshIndexSignal(store);
     } catch (e) {
       console.error("Finance Dashboard: index signal refresh failed", e);
       new Notice(t("market.refreshFailed"));

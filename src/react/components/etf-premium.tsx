@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Notice } from "obsidian";
 import { Icon } from "../icon";
 import { t } from "../../i18n";
-import {
-  fetchEtfPremiums,
-  ETF_PREMIUM_THRESHOLD,
-} from "../../etf-premium-service";
+import { ETF_PREMIUM_THRESHOLD } from "../../etf-premium-service";
+import { refreshEtfPremiums } from "../../market-refresh";
 import { formatClockTime } from "../../utils";
 import { DataTable, type Column } from "./data-table";
 import type { EtfPremiumRow } from "../../models";
@@ -39,8 +37,7 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const next = await fetchEtfPremiums();
-      await store.updateEtfPremiums(next);
+      await refreshEtfPremiums(store);
     } catch (e) {
       console.error("Finance Dashboard: ETF premium refresh failed", e);
       new Notice(t("market.refreshFailed"));

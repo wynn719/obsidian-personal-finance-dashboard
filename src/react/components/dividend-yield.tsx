@@ -119,7 +119,7 @@ export function DividendYieldSection({
         </span>
         <span className="finance-market-head-right">
           <button
-            className={`finance-btn-small${
+            className={`finance-refresh-btn${
               refreshing ? " finance-btn-spinning" : ""
             }`}
             onClick={handleRefresh}

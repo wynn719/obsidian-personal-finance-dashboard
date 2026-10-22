@@ -48,7 +48,7 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
 
   const refreshBtn = (
     <button
-      className={`finance-btn-small${refreshing ? " finance-btn-spinning" : ""}`}
+      className={`finance-refresh-btn${refreshing ? " finance-btn-spinning" : ""}`}
       onClick={handleRefresh}
       disabled={refreshing}
       title={t("signal.btn.refresh")}
@@ -68,7 +68,11 @@ export function IndexSignalSection({ store }: IndexSignalSectionProps) {
         {signal ? (
           <div className="finance-signal-compact">
             <div className="finance-signal-head">
-              <span className="finance-signal-name">{name}</span>
+              {/* 与其它卡片标题一致：图标 + 名称，间距取 --fd-title-icon-gap */}
+              <span className="finance-signal-title">
+                <Icon name="trending-up" />
+                <span className="finance-signal-name">{name}</span>
+              </span>
               {sub ? (
                 <span className="finance-signal-chip">{sub}</span>
               ) : null}

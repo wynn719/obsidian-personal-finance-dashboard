@@ -131,7 +131,7 @@ export function EtfPremiumSection({ store }: EtfPremiumSectionProps) {
             </span>
           ) : null}
           <button
-            className={`finance-btn-small${
+            className={`finance-refresh-btn${
               refreshing ? " finance-btn-spinning" : ""
             }`}
             onClick={handleRefresh}

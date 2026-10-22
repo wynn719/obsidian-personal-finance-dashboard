@@ -176,7 +176,7 @@ export function FinanceApp({
                 </span>
                 {holdings.length > 0 ? (
                   <button
-                    className={`finance-btn-small${
+                    className={`finance-refresh-btn${
                       refreshing ? " finance-btn-spinning" : ""
                     }`}
                     onClick={refreshQuotes}

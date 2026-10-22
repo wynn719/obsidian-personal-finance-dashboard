@@ -41,8 +41,25 @@
   /* 移动端一级模块之间的垂直间距（单一事实源）：区块、网格 gap、卡片间距全部取值于此，
      避免出现 8 / 12 / 16 / 20 混用导致节奏不齐。取值对齐设计稿「区块间距 16、组内 0」。 */
   --fd-block-gap: 16px;
-  /* 移动端分块阴影：设计稿要求去描边，只靠极轻阴影维持白卡与灰底的边界 */
+  /* 卡片外观（全端统一，规格取自番茄钟卡）：圆角 18 / 零描边 / 单层轻阴影。
+     与控件圆角 --fd-radius-sm/md 分开维护——按钮、胶囊、输入框不该跟着变 18。
+     去描边后分块完全依赖这层阴影，所以卡片底色必须与画布灰底有差。 */
+  --fd-card-radius: 18px;
   --fd-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  /* 卡片标题 → 内容区的间距（全端统一）：内容区本身不再加内边距，
+     这条 8px 是标题和内容之间唯一的呼吸量 */
+  --fd-title-content-gap: 8px;
+  /* 卡片标题里「图标 → 文字」的间距（全端统一）。
+     之前这条间距有三种值：番茄钟 0（图标贴着文字）、市场三卡 4、其余 8。 */
+  --fd-title-icon-gap: 8px;
+  /* 卡片内边距（全端统一）：改这一处，所有卡片一起变 */
+  --fd-card-padding: 12px;
+  /* 卡片标题（全端统一，规格取自番茄钟卡）：字号 / 行高 / 字重。
+     之前用 1.02em + 各模块零散覆盖（mobile 17px、dy/etf 14px、番茄钟 14px），
+     同一页里标题大小不一。统一走 token，移动端在 [data-layout] 上改这两个值即可。 */
+  --fd-card-title-size: 16px;
+  --fd-card-title-weight: 700;
+  --fd-card-title-line: 1.5;
   /* 分段控件轨道 / 柱状填充：不复用 --background-secondary——
      主题间差异太大，白卡上常常看不出「轨道」这一层 */
   --fd-track: #e8eaee;
@@ -120,6 +137,10 @@
   font-family: var(--font-interface);
   line-height: 1.5;
   color: var(--text-normal);
+  /* 灰底画布：卡片已去描边，必须靠「白卡 vs 灰底」的色差 + 阴影来分块。
+     原先只有移动端染灰，桌面端会退化成一片纯白、卡片边界消失。 */
+  background-color: var(--fd-page-bg);
+  min-height: 100%;
 }
 
 .finance-header {
@@ -299,6 +320,56 @@
   margin-left: 6px;
 }
 
+/* ── 卡片标题右侧的刷新按钮 ──
+   年线信号 / TTM 股息率 / ETF 溢价 / 持仓占比 四处共用，规格取自 TTM 卡。
+   与表内行操作按钮（.finance-btn-small）分开维护：两者形态接近，
+   但刷新按钮是卡片级控件，尺寸和移动端缩放口径不一样。 */
+.finance-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--fd-radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--fd-transition-fast),
+    color var(--fd-transition-fast);
+}
+
+.finance-refresh-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.finance-refresh-btn:active {
+  background: var(--background-modifier-hover);
+}
+
+.finance-refresh-btn .finance-icon svg,
+.finance-refresh-btn .finance-icon svg.svg-icon {
+  width: 14px;
+  height: 14px;
+  /* 显式指定而非依赖继承：这个按钮在移动端信号卡里不在 h2 内，
+     主题的 .svg-icon / button 规则都可能有更高特异性把它染成别的色 */
+  color: var(--text-muted);
+}
+
+.finance-refresh-btn:hover .finance-icon svg,
+.finance-refresh-btn:hover .finance-icon svg.svg-icon {
+  color: var(--text-normal);
+}
+
+[data-layout="mobile"] .finance-refresh-btn {
+  width: 22px;
+  height: 22px;
+}
+
 /* ════════════════════════════════════════════════════════════
    4. 指标卡（首屏主角：数字强、标签弱、左对齐扫读）
    ════════════════════════════════════════════════════════════ */
@@ -311,18 +382,13 @@
 
 .finance-metric-card {
   background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-4) var(--fd-space-4) var(--fd-space-3);
+  border: none;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
   text-align: left;
-  box-shadow: var(--fd-shadow-sm);
-  transition: border-color var(--fd-transition-normal);
+  box-shadow: var(--fd-card-shadow);
   position: relative;
   overflow: hidden;
-}
-
-.finance-metric-card:hover {
-  border-color: var(--fd-accent-border);
 }
 
 .finance-metric-label {
@@ -366,26 +432,28 @@
 }
 
 .finance-section h2 {
-  margin: 0 0 var(--fd-space-3);
-  font-size: 1.02em;
-  font-weight: 700;
+  margin: 0 0 var(--fd-title-content-gap);
+  font-size: var(--fd-card-title-size);
+  font-weight: var(--fd-card-title-weight);
+  line-height: var(--fd-card-title-line);
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--fd-title-icon-gap);
   flex-shrink: 0;
 }
 
-/* 仪表盘直系 section、tab 面板内 section、summary-grid / market-grid 内 section：统一的平面卡片壳 */
+/* 仪表盘直系 section、tab 面板内 section、summary-grid / market-grid 内 section：统一的平面卡片壳
+   规格：圆角 18 / 零描边 / 单层轻阴影（与番茄钟卡同源，全端一致） */
 .finance-dashboard > .finance-section,
 .finance-dashboard > .finance-tab-panel > .finance-section,
 .finance-summary-grid > .finance-section,
 .finance-market-grid > .finance-section {
   background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-4);
-  box-shadow: var(--fd-shadow-sm);
+  border: none;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
+  box-shadow: var(--fd-card-shadow);
 }
 
 /* ── 页面级 tab 条（工作台 / 资产配置）── */
@@ -503,11 +571,13 @@
 .finance-empty {
   color: var(--text-muted);
   font-style: italic;
-  padding: var(--fd-space-6) var(--fd-space-3);
+  /* 内容区不带内边距：留白只由卡片 padding + 标题的 8px 间距提供 */
+  padding: 0;
   text-align: center;
-  background: var(--background-secondary);
-  border-radius: var(--fd-radius-md);
-  border: 1px dashed var(--background-modifier-border);
+  /* 空态一律出现在卡片内部，不再自带灰底 + 虚框 —— 否则卡里套框，
+     「一个模块一张卡」的层级就塌了 */
+  background: transparent;
+  border: none;
 }
 
 .finance-rebalance-hold {
@@ -521,9 +591,9 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: var(--fd-radius-sm);
-  border: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary);
+  /* 表格不再自带描边与底色：外层模块卡就是它的容器，
+     留着就成了「卡里套框」。行分隔线和表头灰底足以撑起结构。 */
+  background-color: transparent;
 }
 
 .finance-table {
@@ -534,9 +604,8 @@
   table-layout: auto;
 }
 
-/* 无 wrapper 的表格自带边框 */
+/* 无 wrapper 的表格：同样不再自带描边，交给所在卡片 */
 .finance-section > .finance-table {
-  border: 1px solid var(--background-modifier-border);
   border-radius: var(--fd-radius-sm);
   overflow: hidden;
 }
@@ -560,6 +629,18 @@
   border-bottom: 1px solid var(--background-modifier-border);
   background-color: var(--background-primary);
   transition: background-color var(--fd-transition-fast);
+}
+
+/* 内容区不再自带左右内边距：卡片 padding 是唯一缩进线。
+   首尾单元格归零后，标题、表头、单元格落在同一条左/右缘线上。 */
+.finance-table th:first-child,
+.finance-table td:first-child {
+  padding-left: 0;
+}
+
+.finance-table th:last-child,
+.finance-table td:last-child {
+  padding-right: 0;
 }
 
 .finance-table tbody tr {
@@ -688,18 +769,13 @@
 
 .finance-chart-container {
   background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-4);
-  box-shadow: var(--fd-shadow-sm);
-  transition: border-color var(--fd-transition-normal);
+  border: none;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
+  box-shadow: var(--fd-card-shadow);
   display: flex;
   flex-direction: column;
   margin-bottom: 0; /* grid 内间距由 gap 提供 */
-}
-
-.finance-chart-container:hover {
-  border-color: var(--fd-accent-border);
 }
 
 .finance-chart-container canvas {
@@ -776,6 +852,34 @@
 .finance-btn-small .finance-icon svg {
   width: 14px;
   height: 14px;
+}
+
+/* 标题里的包裹 span 也参与 flex 布局：否则图标在 span 内按基线落位，
+   会比文字低 1~2px（番茄钟的标题没走 .finance-holdings-title，正是这种情况）。
+   gap 用同一个 token，否则「图标→文字」在某些卡里是 0、某些是 4。 */
+.finance-section h2 > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-title-icon-gap);
+}
+
+/* 图标容器不被行高撑高：容器高度 = svg 高度，h2 的 align-items: center
+   才能把图标和文字对齐到同一条中轴（否则图标按基线落位，肉眼偏高） */
+.finance-section h2 .finance-icon,
+.finance-holdings-title .finance-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* 图标颜色一律跟随所在元素的文字色（currentColor = 继承值）。
+   Obsidian 主题里的 .svg-icon 会用自己的 --icon-color 直接给 svg 上色，
+   会顶掉 button/span 继承下来的颜色——信号卡的刷新按钮在移动端不在 h2 内，
+   没有 muted 覆盖，于是和 TTM/ETF 那三个同级按钮不同色。 */
+.finance-icon svg,
+.finance-icon svg.svg-icon {
+  color: currentColor;
 }
 
 .finance-section h2 .finance-icon svg {
@@ -915,10 +1019,10 @@
 
 .finance-dt-card {
   background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--fd-radius-md);
-  padding: var(--fd-space-4);
-  box-shadow: var(--fd-shadow-sm);
+  border: none;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
+  box-shadow: var(--fd-card-shadow);
 }
 
 .finance-dt-card-summary {
@@ -1016,7 +1120,8 @@
 .finance-holdings-title span {
   display: inline-flex;
   align-items: center;
-  gap: var(--fd-space-1);
+  /* 与 h2 同级用同一个间距 token（原来是 4px，比其它卡少一半） */
+  gap: var(--fd-title-icon-gap);
 }
 
 .finance-holding-name {
@@ -1111,7 +1216,7 @@
   font-size: 0.72em;
   font-weight: 400;
   color: var(--text-muted);
-  margin-left: 4px;
+  /* 间距交给父级 flex 的 gap，不再自带 margin-left（否则 chip 会比图标远 4px） */
   white-space: nowrap;
 }
 
@@ -1235,15 +1340,23 @@
 }
 
 .finance-etf-filter button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* 与 .finance-refresh-btn 同高：同一行里的控件高度必须一致，切换按钮不能把标题行撑高。
+     主题会给 button 加 min-height，必须显式清零，否则实际高度不受控（曾比刷新按钮高一截） */
+  height: 32px;
+  min-height: 0;
+  padding: 0 10px;
   border: 1px solid var(--background-modifier-border);
   background: transparent;
   color: var(--text-muted);
   font-size: 0.78em;
   font-family: inherit;
-  padding: 1px 8px;
   border-radius: 999px;
   cursor: pointer;
-  line-height: 1.6;
+  line-height: 1;
   box-shadow: none;
 }
 
@@ -1299,19 +1412,23 @@
 }
 
 /* mobile：整体收紧 */
+/* 移动端卡片标题规格：与番茄钟一致（14 / 600），覆盖 :root 的 16 / 700。
+   放在这里而非各模块内，避免再出现「工作台 14、资产配置 17」这种分叉。 */
+[data-layout="mobile"] {
+  --fd-card-title-size: 14px;
+  --fd-card-title-weight: 600;
+}
+
 .finance-dashboard[data-layout="mobile"] {
   padding: 16px 16px 120px;
-  /* 整屏统一灰底：白卡浮在灰底上，靠色差分块（设计稿手法） */
-  background-color: var(--fd-page-bg);
-  /* 内容不足一屏时也把灰底铺满，避免下方露出视图默认白底 */
+  /* 灰底已由 .finance-dashboard 基础规则统一提供，这里只管移动端专属的 padding */
   min-height: 100%;
   /* 底部预留 120px：让出 Obsidian 移动端底部操作栏 */
 }
 
 /* 视图容器本身也要染成同一灰，否则 contentEl 之外的边距仍是主题底色。
-   必须带 data-layout 条件——否则桌面端会被一起染灰。 */
-.workspace-leaf-content[data-type="finance-dashboard-view"]
-  .view-content[data-layout="mobile"] {
+   2026-10-22 起桌面端也一起染灰：卡片去描边后，画布必须与白卡有差才分得开。 */
+.workspace-leaf-content[data-type="finance-dashboard-view"] .view-content {
   background-color: var(--fd-page-bg);
 }
 
@@ -1347,7 +1464,7 @@
 
 [data-layout="mobile"] .finance-metric-card {
   min-height: 84px;
-  padding: var(--fd-space-3) var(--fd-space-2);
+  padding: var(--fd-card-padding);
 }
 
 [data-layout="mobile"] .finance-metric-value {
@@ -1358,9 +1475,9 @@
   grid-template-columns: 1fr;
 }
 
-/* 卡片（图表 + 表格）统一收紧 padding */
+/* 卡片内边距全端统一走 --fd-card-padding（移动端各模块不再单独覆盖） */
 [data-layout="mobile"] .finance-section {
-  padding: var(--fd-space-3);
+  padding: var(--fd-card-padding);
 }
 
 /* mobile 隐藏整段重表格模块，保留指标卡/图表/持仓 */
@@ -1372,11 +1489,9 @@
 }
 
 [data-layout="mobile"] .finance-section h2 {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: var(--fd-space-2);
+  /* 字号 / 字重统一由 --fd-card-title-* 提供，间距统一由 --fd-title-content-gap 提供 */
   padding-top: 4px;
-  padding-bottom: var(--fd-space-1);
+  padding-bottom: 0;
 }
 
 [data-layout="mobile"] .finance-year-label {
@@ -1464,8 +1579,8 @@
 /* —— 总资产 hero 卡：独占主位，环比收进胶囊徽章 —— */
 [data-layout="mobile"] .finance-hero {
   background: var(--background-primary);
-  border-radius: 18px;
-  padding: 16px 16px 0;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
   margin-bottom: var(--fd-block-gap);
   box-shadow: var(--fd-card-shadow);
 }
@@ -1548,7 +1663,8 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 14px;
-  padding: 12px 0 14px;
+  /* 底部留白由 hero 卡自身的 --fd-card-padding 提供，这里不再叠加 */
+  padding: 12px 0 0;
   border-top: 1px solid var(--background-modifier-border);
 }
 
@@ -1590,9 +1706,9 @@
 
 /* —— 市场信号条：标题行 / 距年线大数值 + 区间 chip / 数据脚注 —— */
 [data-layout="mobile"] .finance-market-grid > .finance-section {
-  padding: 16px;
+  padding: var(--fd-card-padding);
   border: none;
-  border-radius: 18px;
+  border-radius: var(--fd-card-radius);
   box-shadow: var(--fd-card-shadow);
 }
 
@@ -1614,6 +1730,19 @@
 [data-layout="mobile"] .finance-signal-foot {
   gap: 12px;
   font-size: 10px;
+  color: var(--text-muted);
+}
+
+[data-layout="mobile"] .finance-signal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-title-icon-gap);
+  min-width: 0;
+}
+
+[data-layout="mobile"] .finance-signal-title .finance-icon svg {
+  width: 14px;
+  height: 14px;
   color: var(--text-muted);
 }
 
@@ -1706,19 +1835,16 @@
   background: var(--background-primary);
   border: none;
   box-shadow: var(--fd-card-shadow);
-  border-radius: 18px;
-  padding: 16px;
+  border-radius: var(--fd-card-radius);
+  padding: var(--fd-card-padding);
   /* 与相邻模块的间距交给 .finance-market-grid 的 gap，这里不再叠加 margin */
   margin-bottom: 0;
 }
 
 [data-layout="mobile"] .finance-dy-section h2,
 [data-layout="mobile"] .finance-etf-section h2 {
-  /* 标题已在白卡内，与表头左缘同一缩进线 */
+  /* 标题已在白卡内，与表头左缘同一缩进线；与内容区的间距走统一 token */
   padding: 0;
-  margin-bottom: 2px;
-  font-size: 14px;
-  font-weight: 600;
 }
 
 [data-layout="mobile"] .finance-dy-section .finance-market-head-right,
@@ -1861,27 +1987,27 @@
    与 TTM/ETF 同一结构（标题在外、内容成卡），否则「标题到上一模块」会凭空多出
    一个卡片内边距（14px），扫读时整页节奏不是等距的。 */
 [data-layout="mobile"] .finance-chart-container {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
+  /* 图表模块也走「标题包进卡片」：外壳恢复成白卡，画布不再自己充当卡片，
+     否则标题会浮在灰底上，和表格类模块不是一个层级 */
+  background: var(--background-primary);
+  padding: var(--fd-card-padding);
 }
 
 [data-layout="mobile"] .finance-chart-container h2 {
-  /* 与表格模块保持一致：标题贴在页面 padding 处，不再额外缩进 */
+  /* 标题与内容区同一缩进线；间距走统一 token */
   padding: 0;
-  margin-bottom: 8px;
+  margin-bottom: var(--fd-title-content-gap);
 }
 
 [data-layout="mobile"] .finance-chart-container canvas {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  /* 内边距与其它卡片看齐（16px），保证画布内容与表格文字同一缩进线 */
-  padding: 16px;
-  background: var(--background-primary);
-  border-radius: 18px;
-  box-shadow: var(--fd-card-shadow);
+  /* 底色 / 圆角 / 阴影都由卡片外壳承担，画布只负责内容 */
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* 图表高度：单列铺满后压低上限，避免一张图吃掉整屏 */
@@ -1899,17 +2025,23 @@
 /* ETF 过滤切换：描边小药丸 → 分段控件（轨道 + 白色选中块），与 tab 条同一语言 */
 [data-layout="mobile"] .finance-etf-filter {
   gap: 2px;
-  padding: 2px;
+  /* 轨道不再内缩：整体高度 = 按钮高度 = 刷新按钮的 22px */
+  padding: 0;
   background: var(--fd-track);
   border-radius: 8px;
+  overflow: hidden;
 }
 
 [data-layout="mobile"] .finance-etf-filter button {
+  /* 与移动端刷新按钮同高（22px），min-height 必须清零 */
+  height: 22px;
+  min-height: 0;
+  padding: 0 9px;
   font-size: 10px;
-  padding: 0 7px;
-  line-height: 1.7;
+  line-height: 1;
   border: none;
-  border-radius: 6px;
+  /* 与轨道同圆角：激活块四角贴合轨道，不留缺口 */
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   box-shadow: none;
@@ -2086,7 +2218,14 @@
 
 .finance-pomodoro-mode-btn {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  /* 宽度被 flex 撑开时（移动端 flex:1）文字居中，否则靠左 */
+  justify-content: center;
+  box-sizing: border-box;
+  /* 主题会给 button 加 min-height，按钮被撑高后 baseline 对齐会把文字顶到上方，
+     看起来就是「不居中」。清零 + 居中 + 收紧行高三重保证 */
+  min-height: 0;
+  line-height: 1.2;
   gap: 4px;
   padding: 4px 10px;
   border: none;
@@ -2298,9 +2437,9 @@
 
 /* mobile：环（96）与操作列左右站位，本周分布独占一行 —— 整张卡从 ~370 压到 ~250 */
 [data-layout="mobile"] .finance-pomodoro-section {
-  padding: 16px;
+  padding: var(--fd-card-padding);
   border: none;
-  border-radius: 18px;
+  border-radius: var(--fd-card-radius);
   box-shadow: var(--fd-card-shadow);
 }
 
@@ -2506,8 +2645,8 @@
    - TTM 排序说明压在 10px，与表头同档
    ════════════════════════════════════════════════════════════ */
 [data-layout="mobile"] .finance-pomodoro-section h2 {
-  margin-bottom: 10px;
-  font-size: 14px;
+  /* 字号与间距都已统一，番茄钟不再单独覆盖 */
+  margin-bottom: var(--fd-title-content-gap);
 }
 
 [data-layout="mobile"] .finance-pomodoro-head-meta {
@@ -2547,16 +2686,15 @@
   display: inline;
 }
 
-/* 移动端图表卡没有外壳（见 13.x），空态要自己成为一张卡，
-   否则提示语与按钮会直接落在页面灰底上 */
+/* 持仓空态：父级图表卡已提供白底，这里不再自成一张卡（曾因图表外壳透明而必须自带） */
 [data-layout="mobile"] .finance-holdings-empty {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px 16px;
-  background: var(--background-primary);
-  border-radius: 18px;
-  box-shadow: var(--fd-card-shadow);
+  /* 内容区不带内边距，留白交给卡片 padding */
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 [data-layout="mobile"] .finance-holdings-empty .finance-empty {
@@ -2618,7 +2756,8 @@
 @media print {
   .finance-actions,
   .finance-filter-bar,
-  .finance-btn-small {
+  .finance-btn-small,
+  .finance-refresh-btn {
     display: none !important;
   }
 

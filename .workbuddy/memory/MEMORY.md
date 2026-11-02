@@ -5,7 +5,7 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 ## 技术栈要点
 - Preact 10（preact/compat 别名，原 React 18 迁来；类型仍用 @types/react）。settings.ts 仍是原生 Setting
 - **esbuild 0.17 无原生 alias** → 用 `preactAlias` resolve 插件（createRequire 解析绝对路径）。测试可用 `--alias:obsidian=<stub>` 在 node 跑纯函数
-- 产物 main.js 388KB（2026-10-22）
+- 产物 main.js 377KB / styles.css 63KB（2026-11-02，移除番茄钟后）
 
 ## 响应式：顶层下发 data-layout
 - `responsive.tsx` 的 LayoutProvider 用 ResizeObserver 测**容器宽度**（非视口）→ 修掉 Obsidian 分栏时视口宽叶片窄的失配
@@ -24,26 +24,24 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - ⚠️ 用户 Mac 装腾讯企业代理扩展 `com.tencent.NGNAppProxy.NGNAppProxyEx`，DNS 走内网 10.28.0.21。向 10.x 的 DNS 查询被视为「本地网络访问」，**应用须获 系统设置→隐私与安全性→本地网络 授权**；Obsidian 曾因此外部请求全失败。排查：`scutil --dns` / `systemextensionsctl list` / `scutil --proxy` / `curl --noproxy '*'`
 
 ## 分支与提交
-- `main` @ `2092b97`，**领先 origin/main 3 个提交未 push**（0afe099 移动端改版 / fcf6625 memory / 2092b97 删 ETF 空态按钮）；origin/main = ad16f3f
+- `main` @ `4310b76`，**与 origin/main 已同步**（2026-10-22 push 完，含 7 个提交：工作台改版 / 删 ETF 空态按钮 / 卡片体系统一 / 圆角与底部留白 / 打开自动拉取 / 番茄钟字号）
 - 身份：本仓库 local `wynn719 <762671261@qq.com>`（全局是工作身份 wynnezheng@tencent.com，勿混用）
 - Release 由 `.github/workflows/release.yml` 在 push tag 时自动构建。⚠️ tag 已到 v1.0.12，但 manifest version 一直 1.0.0，口径未修
 
 ## 页面 tab：工作台 / 资产配置
 - tab 状态在 `FinanceApp`（localStorage `finance-dashboard:active-tab`，默认 workbench）
-- **首屏顺序已拍板（2026-10-22）：番茄钟在前、市场信号在后，不换位**（打开工作台即「开始干活」的动作入口）。翻过来只需调 JSX 两行顺序
-- 工作台 = 番茄钟 + `.finance-market-grid`（年线 / TTM / ETF）；资产配置 = MetricCards + 图表 + 月度总览 + 现金流
-- **挂载策略不同**：工作台 panel 常驻仅 CSS 隐藏（卸载会丢番茄钟计时）；资产配置 panel 条件渲染（Chart.js 在 display:none 里按 0 宽初始化，切回不自愈）
+- 工作台 = `.finance-market-grid`（年线 / TTM / ETF 三卡，桌面一行三栏）；资产配置 = MetricCards + 图表 + 月度总览 + 现金流
+- **挂载策略不同**：工作台 panel 常驻仅 CSS 隐藏（切回不丢卡内筛选 / 展开状态）；资产配置 panel 条件渲染（Chart.js 在 display:none 里按 0 宽初始化，切回不自愈）
 - ⚠️ 卡片壳选择器多一层：`.finance-dashboard > .finance-tab-panel > .finance-section`，忘写会丢白底/边框/阴影
-- Header（年份 + 全部操作按钮）整体在资产配置 panel 内；工作台顶部只有 tab 条 + 番茄钟 + 三信号卡
-- 整页调试验证：esbuild 把 FinanceApp + obsidian stub 打成浏览器 bundle + playwright 截图。**必须显式给 `jsx:"automatic"`、`jsxImportSource:"preact"`、`nodePaths:[项目/node_modules]`**，否则 React is not defined。脚本在 `/tmp/pomo-v2/`
+- Header（年份 + 全部操作按钮）整体在资产配置 panel 内；工作台顶部只有 tab 条 + 三信号卡
+- 整页调试验证：esbuild 把 FinanceApp + obsidian stub 打成浏览器 bundle + playwright 截图。**必须显式给 `jsx:"automatic"`、`jsxImportSource:"preact"`、`nodePaths:[项目/node_modules]`**，否则 React is not defined。原脚本在 `/tmp/pomo-v2/`（已清，需要时重写）
+- 番茄钟移除后工作台只剩三卡、桌面下方大片留白 → 建议过「把信号区并回单页、去掉 tab」，用户未拍板，保持现状
 
-## 番茄钟
-- `components/pomodoro.tsx`，25/5/15，每 4 个长休
-- 计时用结束时间戳 `endAt` + `remainingRef`，interval 只依赖 `[running]` → 不漂移；不分叉 DOM，切布局不丢状态
-- 数据独立文件 `Finance/Pomodoro.md`（`pomodoroDataFilePath`），`src/pomodoro-store.ts` 自带 Parser/Serializer/watcher；格式 `# Pomodoro` + `Date | Count | Minutes`。只记**完成**的番茄
-- 组件自己订阅 `pomodoroStore.onChange`，不走 DataStore
-- 样式在「13.6 番茄钟模块」，**必须排在 mobile 段之后**，否则压不过 `[data-layout="mobile"] .finance-btn` 的 26px 方块约束。**按钮字号已改固定 px**（桌面 mode 14.5 / min 14 / toggle 15；移动 mode 12 / min 12 / toggle 15 / icon-btn 12）——原先用 0.78em/0.85em，会被父级字号带着漂，且整体偏小
-- 移动端 `grid-template-areas: "dial panel" / "trend trend"`，环 96；panel 用 `display:contents` 把 actions/stats 提成网格项。改 `.finance-pomodoro-mode-btn` 必须保留 `flex: 1 1 0`
+## 番茄钟（2026-11-02 已整体移除，不要再加回）
+- 删掉：`src/react/components/pomodoro.tsx`、`src/pomodoro-store.ts`、`FinanceApp.pomodoroStore` 全链路（main / dashboard-view / types / dashboard-app）、settings 的 `pomodoroDataFilePath`、i18n `pomodoro.*` 与 `settings.pomodoroDataFilePath*`、styles.css 第 13.6 节整段（542 行）
+- 产物变化：main.js 388KB → 377KB，styles.css 76KB → 63KB
+- ⚠️ vault 里的 `Finance/Pomodoro.md` **没删**（历史记录保留，插件不再读写）；要清理得用户自己动手
+- 想恢复：`git show 4310b76` 是移除前最后一个番茄钟相关提交，可整体反查
 
 ## 市场信号：三个 service 的硬口径
 - **打开视图自动拉一遍**（2026-10-22）：`src/market-refresh.ts` 是四项远程数据的唯一入口（年线 / TTM / ETF / 持仓行情），`FinanceApp` 挂载时 `useEffect` 调 `autoRefreshAll(store)`。四步**串行**执行（避免并发写 Misc.md 互相覆盖），单项失败只 `console.error`，页面继续用缓存值。`AUTO_REFRESH_MIN_INTERVAL = 5min` 做去重，避免反复开关视图狂刷接口；`running` 保证同一时刻只有一轮
@@ -54,7 +52,7 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - 数据存 Misc.md，Parser 按 `#` 分节 dispatch（parseTableRowKeepEmpty 保空列）；Serializer 三 section 已 export 便于 round-trip 测试
 
 ## 色口径（2026-10-22 拍板）
-- **卡片外观全端统一（2026-10-22）**：`--fd-card-radius: 12px`（18 嫌太圆，已收敛）+ `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。规格取自番茄钟卡，落点 = `.finance-metric-card` / section 壳（4 组选择器）/ `.finance-chart-container` / `.finance-dt-card` / mobile 的 hero·dy·etf·pomodoro·canvas·holdings-empty。**卡片圆角与控件圆角分开**：按钮/胶囊/输入框仍用 `--fd-radius-sm/md`，不要混。padding 曾有三种值（桌面 16、移动 12、番茄钟/dy/etf 16），现统一 12，**移动端不要再给单个模块写 padding**
+- **卡片外观全端统一（2026-10-22）**：`--fd-card-radius: 12px`（18 嫌太圆，已收敛）+ `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。规格由 token 单点定义（原取自番茄钟卡，该模块已移除），落点 = `.finance-metric-card` / section 壳（4 组选择器）/ `.finance-chart-container` / `.finance-dt-card` / mobile 的 hero·dy·etf·canvas·holdings-empty。**卡片圆角与控件圆角分开**：按钮/胶囊/输入框仍用 `--fd-radius-sm/md`，不要混。padding 曾有三种值（桌面 16、移动 12、番茄钟/dy/etf 16），现统一 12，**移动端不要再给单个模块写 padding**
 - 去描边后**画布必须染灰**：`.finance-dashboard` 与视图容器（`.view-content`）都吃 `--fd-page-bg`，**桌面端也染**（原先只染 mobile）。不染灰 → 白卡在 `--background-primary` 上直接隐形。连带删掉 `.finance-metric-card:hover` / `.finance-chart-container:hover` 的 border-color 反馈（没有描边可高亮）
 - **一个模块只允许一层卡片**（2026-10-22 追加）：卡内不得再出现白框或灰框。为此 `.finance-table-wrapper` 去掉描边与底色、`.finance-empty` 去掉灰底虚线框与内边距、`.finance-section > .finance-table` 去掉描边。表头灰底 + 行分隔线足以撑结构
 - **内容区不带内边距，标题→内容 `--fd-title-content-gap: 8px`**（2026-10-22）：卡片 padding 是唯一缩进线。`.finance-empty` / `.finance-holdings-empty` padding 归零；表格首尾单元格 `padding-left/right: 0`（桌面与移动两套表都做了），这样标题、表头、单元格落在同一条左/右缘线上。各模块原有的 `h2 { margin-bottom }` 覆盖（mobile 2px、番茄钟 10px）已全部删除，统一走 token。唯一保留自带 padding 的是 `.finance-etf-alert`（琥珀提示条是独立色块，不是内容容器）

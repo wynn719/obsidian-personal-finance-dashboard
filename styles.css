@@ -41,7 +41,7 @@
   /* 移动端一级模块之间的垂直间距（单一事实源）：区块、网格 gap、卡片间距全部取值于此，
      避免出现 8 / 12 / 16 / 20 混用导致节奏不齐。取值对齐设计稿「区块间距 16、组内 0」。 */
   --fd-block-gap: 16px;
-  /* 卡片外观（全端统一，规格取自番茄钟卡）：圆角 12 / 零描边 / 单层轻阴影。
+  /* 卡片外观（全端统一）：圆角 12 / 零描边 / 单层轻阴影。
      与控件圆角 --fd-radius-sm/md 分开维护——按钮、胶囊、输入框不该跟着变。
      去描边后分块完全依赖这层阴影，所以卡片底色必须与画布灰底有差。 */
   --fd-card-radius: 12px;
@@ -49,17 +49,15 @@
   /* 卡片标题 → 内容区的间距（全端统一）：内容区本身不再加内边距，
      这条 8px 是标题和内容之间唯一的呼吸量 */
   --fd-title-content-gap: 8px;
-  /* 卡片标题里「图标 → 文字」的间距（全端统一）。
-     之前这条间距有三种值：番茄钟 0（图标贴着文字）、市场三卡 4、其余 8。 */
+  /* 卡片标题里「图标 → 文字」的间距（全端统一），三种历史取值已归一。 */
   --fd-title-icon-gap: 8px;
   /* 卡片内边距（全端统一）：改这一处，所有卡片一起变 */
   --fd-card-padding: 12px;
   /* 窄屏底部为 Obsidian 操作栏预留的高度。操作栏是悬浮的，内容必须留出可滚动空间，
      另外叠加 env(safe-area-inset-bottom) 让出 iPhone 底部 Home 指示条。 */
   --fd-bottom-reserve: 160px;
-  /* 卡片标题（全端统一，规格取自番茄钟卡）：字号 / 行高 / 字重。
-     之前用 1.02em + 各模块零散覆盖（mobile 17px、dy/etf 14px、番茄钟 14px），
-     同一页里标题大小不一。统一走 token，移动端在 [data-layout] 上改这两个值即可。 */
+  /* 卡片标题（全端统一）：字号 / 行高 / 字重。
+     各模块不再单独覆盖，同一页里标题大小一致；移动端在 [data-layout] 上改这几个值即可。 */
   --fd-card-title-size: 16px;
   --fd-card-title-weight: 700;
   --fd-card-title-line: 1.5;
@@ -447,7 +445,7 @@
 }
 
 /* 仪表盘直系 section、tab 面板内 section、summary-grid / market-grid 内 section：统一的平面卡片壳
-   规格：圆角 18 / 零描边 / 单层轻阴影（与番茄钟卡同源，全端一致） */
+   规格：圆角 12 / 零描边 / 单层轻阴影（全端一致，取值见 --fd-card-*） */
 .finance-dashboard > .finance-section,
 .finance-dashboard > .finance-tab-panel > .finance-section,
 .finance-summary-grid > .finance-section,
@@ -501,7 +499,7 @@
   height: 15px;
 }
 
-/* 隐藏面板仍保留在 DOM 中：番茄钟的计时状态依赖这一点 */
+/* 隐藏面板仍保留在 DOM 中：切回时不丢卡内的筛选 / 展开状态 */
 .finance-tab-panel[data-active="false"] {
   display: none;
 }
@@ -857,8 +855,7 @@
   height: 14px;
 }
 
-/* 标题里的包裹 span 也参与 flex 布局：否则图标在 span 内按基线落位，
-   会比文字低 1~2px（番茄钟的标题没走 .finance-holdings-title，正是这种情况）。
+/* 标题里的包裹 span 也参与 flex 布局：否则图标在 span 内按基线落位，会比文字低 1~2px。
    gap 用同一个 token，否则「图标→文字」在某些卡里是 0、某些是 4。 */
 .finance-section h2 > span {
   display: inline-flex;
@@ -1415,7 +1412,7 @@
 }
 
 /* mobile：整体收紧 */
-/* 移动端卡片标题规格：与番茄钟一致（14 / 600），覆盖 :root 的 16 / 700。
+/* 移动端卡片标题规格（14 / 600），覆盖 :root 的 16 / 700。
    放在这里而非各模块内，避免再出现「工作台 14、资产配置 17」这种分叉。 */
 [data-layout="mobile"] {
   --fd-card-title-size: 14px;
@@ -1836,7 +1833,7 @@
 }
 
 /* —— 市场信号区两张数据表（TTM 股息率 / ETF 溢价）——
-   与信号条、番茄钟统一为「一张白卡装标题 + 内容」，标题不再浮在灰底上。
+   与信号条统一为「一张白卡装标题 + 内容」，标题不再浮在灰底上。
    特异性需高于 .finance-market-grid > .finance-section，否则卡片 padding 会残留。 */
 [data-layout="mobile"] .finance-market-grid > .finance-dy-section,
 [data-layout="mobile"] .finance-market-grid > .finance-etf-section {
@@ -2110,563 +2107,11 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   13.6 番茄钟模块（指标卡下方独立卡片）
-   - 配色单点切换：专注/休息只改 --pomodoro-color
-   - 桌面两列（进度环 / 控制台），compact 收窄，mobile 单列
-   - 放在移动端段之后，才能压过 [data-layout="mobile"] .finance-btn 的方块约束
-   ════════════════════════════════════════════════════════════ */
-.finance-pomodoro-section {
-  --pomodoro-color: var(--fd-accent);
-}
-
-.finance-pomodoro-section[data-mode="short"],
-.finance-pomodoro-section[data-mode="long"] {
-  --pomodoro-color: var(--fd-positive);
-}
-
-.finance-pomodoro-section h2 {
-  justify-content: space-between;
-}
-
-.finance-pomodoro-head-meta {
-  font-size: 0.72em;
-  font-weight: 500;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.finance-pomodoro-body {
-  display: grid;
-  /* 三列：进度环 / 控制台 / 本周柱状。列宽都封顶后整体居中，
-     宽屏下左右对称留白，不做拉伸——计时器需要的是聚焦感而非铺满 */
-  grid-template-columns: 148px fit-content(340px) minmax(0, 300px);
-  gap: var(--fd-space-5) var(--fd-space-6);
-  align-items: center;
-  justify-content: center;
-}
-
-/* —— 进度环 —— */
-.finance-pomodoro-dial {
-  position: relative;
-  width: 148px;
-  height: 148px;
-  justify-self: center;
-}
-
-.finance-pomodoro-ring {
-  display: block;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.finance-pomodoro-ring-track,
-.finance-pomodoro-ring-progress {
-  fill: none;
-  stroke-width: 6;
-}
-
-.finance-pomodoro-ring-track {
-  stroke: var(--background-modifier-border);
-}
-
-.finance-pomodoro-ring-progress {
-  stroke: var(--pomodoro-color);
-  stroke-linecap: round;
-  transition: stroke-dashoffset 240ms linear, stroke var(--fd-transition-normal);
-}
-
-.finance-pomodoro-dial-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  pointer-events: none;
-}
-
-.finance-pomodoro-clock {
-  font-size: 1.9em;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-normal);
-  line-height: 1.1;
-}
-
-.finance-pomodoro-mode-label {
-  font-size: 0.72em;
-  color: var(--text-muted);
-}
-
-/* —— 控制台 —— */
-.finance-pomodoro-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-space-3);
-  min-width: 0;
-}
-
-/* 宽屏下控制台列不能被内容压塌：否则「今日」会孤零零挂在按钮下方 */
-[data-layout="full"] .finance-pomodoro-panel,
-[data-layout="compact"] .finance-pomodoro-panel {
-  min-width: 240px;
-}
-
-.finance-pomodoro-modes {
-  display: inline-flex;
-  align-self: flex-start;
-  gap: 2px;
-  padding: 2px;
-  background: var(--background-secondary);
-  border-radius: var(--fd-radius-sm);
-}
-
-.finance-pomodoro-mode-btn {
-  display: inline-flex;
-  align-items: center;
-  /* 宽度被 flex 撑开时（移动端 flex:1）文字居中，否则靠左 */
-  justify-content: center;
-  box-sizing: border-box;
-  /* 主题会给 button 加 min-height，按钮被撑高后 baseline 对齐会把文字顶到上方，
-     看起来就是「不居中」。清零 + 居中 + 收紧行高三重保证 */
-  min-height: 0;
-  line-height: 1.2;
-  gap: 4px;
-  padding: 4px 10px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-muted);
-  /* 固定 px 而非 em：番茄钟的按钮字号整体比其它控件大一档（+2px），
-     用 em 会被父级字号带着漂移 */
-  font-size: 14.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color var(--fd-transition-fast),
-    color var(--fd-transition-fast);
-}
-
-.finance-pomodoro-mode-btn:hover {
-  color: var(--text-normal);
-}
-
-.finance-pomodoro-mode-btn.is-active {
-  background: var(--background-primary);
-  color: var(--text-normal);
-  box-shadow: var(--fd-shadow-sm);
-}
-
-.finance-pomodoro-mode-min {
-  /* 原来 0.85em（约 12px），同步 +2px */
-  font-size: 14px;
-  color: var(--text-faint);
-  font-variant-numeric: tabular-nums;
-}
-
-.finance-pomodoro-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
-
-/* 复用 .finance-btn-cta 的实心口径，但去掉 modal CTA 的边距约定 */
-.finance-pomodoro-toggle {
-  flex: 1 1 auto;
-  align-self: center;
-  margin-top: 0;
-  min-width: 96px;
-  justify-content: center;
-  /* 原继承 .finance-btn 的 0.8em（12.8px），+2px */
-  font-size: 15px;
-}
-
-.finance-pomodoro-icon-btn {
-  width: 34px;
-  min-width: 34px;
-  padding: 0;
-  justify-content: center;
-}
-
-/* 桌面是纯图标按钮；移动端（见 13.7）换成文字链，标签默认不占位 */
-.finance-pomodoro-btn-label {
-  display: none;
-}
-
-/* —— 本周 7 日柱状 —— */
-.finance-pomodoro-trend {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  max-width: 300px;
-  min-width: 0;
-}
-
-.finance-pomodoro-trend-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--fd-space-2);
-}
-
-.finance-pomodoro-trend-label {
-  font-size: 0.72em;
-  color: var(--text-muted);
-}
-
-/* 本周合计：跟着柱状图的标题走，不再和「今日」挤在一个统计块里 */
-.finance-pomodoro-trend-total {
-  display: inline-flex;
-  align-items: baseline;
-  font-size: 0.78em;
-  font-weight: 600;
-  color: var(--text-normal);
-  font-variant-numeric: tabular-nums;
-}
-
-.finance-pomodoro-trend-total em {
-  font-style: normal;
-  font-weight: 400;
-  color: var(--text-muted);
-}
-
-.finance-pomodoro-trend-total em::before {
-  content: "·";
-  margin: 0 4px;
-  color: var(--text-faint);
-}
-
-.finance-pomodoro-week {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-  align-items: end;
-  height: 56px;
-  padding-top: 2px;
-}
-
-.finance-pomodoro-day {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 3px;
-  height: 100%;
-  min-width: 0;
-}
-
-.finance-pomodoro-bar-track {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  height: 100%;
-  border-radius: 3px;
-  background: var(--background-secondary);
-  overflow: hidden;
-}
-
-.finance-pomodoro-bar {
-  width: 100%;
-  background: var(--pomodoro-color);
-  border-radius: 3px;
-  opacity: 0.55;
-  transition: height var(--fd-transition-normal);
-}
-
-.finance-pomodoro-day.is-today .finance-pomodoro-bar {
-  opacity: 1;
-}
-
-.finance-pomodoro-day.is-future .finance-pomodoro-bar-track {
-  opacity: 0.45;
-}
-
-.finance-pomodoro-dow {
-  font-size: 0.68em;
-  color: var(--text-faint);
-  text-align: center;
-  line-height: 1;
-}
-
-.finance-pomodoro-day.is-today .finance-pomodoro-dow {
-  color: var(--text-normal);
-  font-weight: 600;
-}
-
-/* —— 今日 / 本周 —— */
-.finance-pomodoro-stats {
-  display: flex;
-  gap: var(--fd-space-5);
-  padding-top: var(--fd-space-2);
-  border-top: 1px solid var(--background-modifier-border);
-}
-
-.finance-pomodoro-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.finance-pomodoro-stat-label {
-  font-size: 0.72em;
-  color: var(--text-muted);
-}
-
-.finance-pomodoro-stat-value {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 0.92em;
-  font-weight: 600;
-  color: var(--text-normal);
-  font-variant-numeric: tabular-nums;
-}
-
-.finance-pomodoro-stat-value em {
-  font-style: normal;
-  font-weight: 400;
-  font-size: 0.85em;
-  color: var(--text-muted);
-}
-
-/* compact：环收窄，趋势列压到 200 */
-[data-layout="compact"] .finance-pomodoro-body {
-  grid-template-columns: 128px fit-content(300px) minmax(0, 200px);
-  gap: var(--fd-space-4);
-}
-
-[data-layout="compact"] .finance-pomodoro-dial {
-  width: 128px;
-  height: 128px;
-}
-
-/* 环变小后时钟跟着降一档，否则 25:00 会顶到环内壁 */
-[data-layout="compact"] .finance-pomodoro-clock {
-  font-size: 1.7em;
-}
-
-/* mobile：环（96）与操作列左右站位，本周分布独占一行 —— 整张卡从 ~370 压到 ~250 */
-[data-layout="mobile"] .finance-pomodoro-section {
-  padding: var(--fd-card-padding);
-  border: none;
-  border-radius: var(--fd-card-radius);
-  box-shadow: var(--fd-card-shadow);
-}
-
-[data-layout="mobile"] .finance-pomodoro-body {
-  grid-template-columns: 96px minmax(0, 1fr);
-  grid-template-areas:
-    "dial panel"
-    "trend trend";
-  gap: 14px 16px;
-  align-items: start;
-  justify-content: stretch;
-}
-
-[data-layout="mobile"] .finance-pomodoro-dial {
-  grid-area: dial;
-  width: 96px;
-  height: 96px;
-  justify-self: start;
-}
-
-[data-layout="mobile"] .finance-pomodoro-clock {
-  font-size: 22px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-mode-label {
-  font-size: 10px;
-}
-
-/* 操作列自身排成网格：切换 / 主按钮各占一行，今日 + 重置·跳过 收在一行 */
-[data-layout="mobile"] .finance-pomodoro-panel {
-  grid-area: panel;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  grid-template-areas:
-    "modes modes modes"
-    "cta cta cta"
-    "today reset skip";
-  align-items: center;
-  gap: 10px 8px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-modes {
-  grid-area: modes;
-  align-self: stretch;
-  gap: 3px;
-  padding: 3px;
-  border-radius: 9px;
-  background: var(--fd-track);
-}
-
-[data-layout="mobile"] .finance-pomodoro-mode-btn {
-  flex: 1 1 0;
-  justify-content: center;
-  padding: 6px 4px;
-  border-radius: 7px;
-  font-size: 12px;
-  gap: 3px;
-}
-
-/* 选中段用「反色实心」而不是描边：白卡上看不出描边，反色最省事也最明确 */
-[data-layout="mobile"] .finance-pomodoro-mode-btn.is-active {
-  background: var(--text-normal);
-  color: var(--background-primary);
-  box-shadow: none;
-}
-
-[data-layout="mobile"] .finance-pomodoro-mode-min {
-  font-size: 12px;
-  color: inherit;
-  opacity: 0.72;
-}
-
-/* display:contents：把三个按钮直接提为 panel 的网格项，DOM 结构不用为移动端重排 */
-[data-layout="mobile"] .finance-pomodoro-actions {
-  display: contents;
-}
-
-[data-layout="mobile"] .finance-pomodoro-toggle {
-  grid-area: cta;
-  width: 100%;
-  min-width: 0;
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  gap: 6px;
-  font-size: 15px;
-  border: none;
-  border-radius: 10px;
-  background: var(--text-normal);
-  color: var(--background-primary);
-  box-shadow: none;
-}
-
-[data-layout="mobile"] .finance-pomodoro-toggle:hover {
-  background: var(--text-normal);
-  color: var(--background-primary);
-}
-
-/* 重置 / 跳过 降为文字链：主按钮才能独占一行 */
-[data-layout="mobile"] .finance-pomodoro-icon-btn {
-  width: auto;
-  min-width: 0;
-  height: auto;
-  min-height: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-}
-
-[data-layout="mobile"] .finance-pomodoro-reset {
-  grid-area: reset;
-}
-
-[data-layout="mobile"] .finance-pomodoro-skip {
-  grid-area: skip;
-}
-
-[data-layout="mobile"] .finance-pomodoro-icon-btn svg {
-  display: none;
-}
-
-[data-layout="mobile"] .finance-pomodoro-btn-label {
-  display: inline;
-}
-
-/* 两个文字链之间的中点分隔（不占 DOM，避免用 spacer 打乱网格） */
-[data-layout="mobile"] .finance-pomodoro-skip::before {
-  content: "·";
-  margin-right: 4px;
-  color: var(--text-faint);
-}
-
-[data-layout="mobile"] .finance-pomodoro-stats {
-  display: contents;
-}
-
-[data-layout="mobile"] .finance-pomodoro-stat {
-  grid-area: today;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 4px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-stat-label,
-[data-layout="mobile"] .finance-pomodoro-stat-value {
-  font-size: 10px;
-  gap: 2px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-stat-value em::before {
-  content: "·";
-  margin-right: 4px;
-  color: var(--text-faint);
-}
-
-[data-layout="mobile"] .finance-pomodoro-trend {
-  grid-area: trend;
-  max-width: none;
-  gap: 6px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-trend-label,
-[data-layout="mobile"] .finance-pomodoro-trend-total {
-  font-size: 10px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-week {
-  height: 36px;
-  gap: 6px;
-}
-
-[data-layout="mobile"] .finance-pomodoro-day {
-  gap: 4px;
-}
-
-/* 柱状去色：今天用墨色，其余用浅灰轨道 —— 与设计稿的「只有数字带颜色」一致 */
-[data-layout="mobile"] .finance-pomodoro-bar-track {
-  background: transparent;
-}
-
-[data-layout="mobile"] .finance-pomodoro-bar {
-  background: var(--fd-bar);
-  opacity: 1;
-}
-
-[data-layout="mobile"] .finance-pomodoro-day.is-today .finance-pomodoro-bar {
-  background: var(--text-normal);
-}
-
-[data-layout="mobile"] .finance-pomodoro-dow {
-  font-size: 9px;
-}
-
-/* ════════════════════════════════════════════════════════════
    13.7 工作台改版补充（对齐 Ardot 739108669130272）
    - 卡片标题统一到 14px（原 17px 把标题读成了独立分区）
    - 只数 chip 落成灰底小药丸，与标题同基线
    - TTM 排序说明压在 10px，与表头同档
    ════════════════════════════════════════════════════════════ */
-[data-layout="mobile"] .finance-pomodoro-section h2 {
-  /* 字号与间距都已统一，番茄钟不再单独覆盖 */
-  margin-bottom: var(--fd-title-content-gap);
-}
-
-[data-layout="mobile"] .finance-pomodoro-head-meta {
-  font-size: 10px;
-  font-weight: 500;
-}
-
 [data-layout="mobile"] .finance-count-chip {
   margin-left: 6px;
   padding: 1px 5px;
@@ -2714,10 +2159,6 @@
   padding: 0;
   background: transparent;
   border: none;
-}
-
-[data-layout="mobile"] .finance-pomodoro-stats {
-  gap: var(--fd-space-6);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -2774,11 +2215,7 @@
     display: none !important;
   }
 
-  /* 计时器不属于财务档案，打印时整体略过 */
-  .finance-pomodoro-section {
-    display: none !important;
-  }
-
+  /* 打印时去掉卡片阴影，改用细描边划界 */
   .finance-metric-card,
   .finance-chart-container {
     box-shadow: none;

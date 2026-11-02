@@ -8,7 +8,6 @@ import { LayoutProvider } from "./responsive";
 import { Header } from "./components/header";
 import { Tabs } from "./components/tabs";
 import { MetricCards } from "./components/metric-cards";
-import { PomodoroSection } from "./components/pomodoro";
 import { IndexSignalSection } from "./components/index-signal";
 import { DividendYieldSection } from "./components/dividend-yield";
 import { EtfPremiumSection } from "./components/etf-premium";
@@ -59,7 +58,6 @@ export function FinanceApp({
   store,
   calculator,
   settings,
-  pomodoroStore,
   onAddSnapshot,
   onAddCashFlow,
   onAddDividend,
@@ -135,11 +133,9 @@ export function FinanceApp({
         ]}
       />
 
-      {/* 工作台：番茄钟 + 三个市场信号模块。
-          这里刻意「常驻挂载、靠 CSS 隐藏」——卸载会丢掉正在跑的计时器状态。 */}
+      {/* 工作台：三个市场信号模块。
+          常驻挂载、靠 CSS 隐藏 —— 切回时不丢各卡的筛选/展开状态。 */}
       <div className="finance-tab-panel" data-active={tab === "workbench"}>
-        <PomodoroSection pomodoroStore={pomodoroStore} />
-
         {/* 市场信号区：红利低波年线信号 / TTM 股息率 / ETF 溢价监控（各自独立模块，手动刷新） */}
         <div className="finance-market-grid">
           <IndexSignalSection store={store} />

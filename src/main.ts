@@ -8,7 +8,6 @@ import {
   StockHolding,
 } from "./models";
 import { DataStore } from "./data-store";
-import { PomodoroStore } from "./pomodoro-store";
 import { FinanceCalculator } from "./calculator";
 import {
   FinanceDashboardView,
@@ -25,7 +24,6 @@ import { setLocale, t } from "./i18n";
 export default class FinanceDashboardPlugin extends Plugin {
   settings: FinanceSettings = DEFAULT_SETTINGS;
   dataStore: DataStore = null!;
-  pomodoroStore: PomodoroStore = null!;
   calculator: FinanceCalculator = null!;
 
   async onload(): Promise<void> {
@@ -41,14 +39,6 @@ export default class FinanceDashboardPlugin extends Plugin {
     await this.dataStore.load();
     this.dataStore.startWatching();
 
-    // Initialize pomodoro store (own file, own lifecycle)
-    this.pomodoroStore = new PomodoroStore(
-      this,
-      this.settings.pomodoroDataFilePath,
-    );
-    await this.pomodoroStore.load();
-    this.pomodoroStore.startWatching();
-
     // Initialize calculator
     this.calculator = new FinanceCalculator(this.dataStore);
 
@@ -59,7 +49,6 @@ export default class FinanceDashboardPlugin extends Plugin {
         this.dataStore,
         this.calculator,
         this.settings,
-        this.pomodoroStore,
       );
 
       // Wire up modal callbacks
@@ -134,7 +123,6 @@ export default class FinanceDashboardPlugin extends Plugin {
 
   onunload(): void {
     this.dataStore.stopWatching();
-    this.pomodoroStore.stopWatching();
   }
 
   // ============================================================

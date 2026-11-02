@@ -4,7 +4,7 @@ import type { TabsProps } from "../types";
 /**
  * 页面级 tab 条（下划线式）。
  * 只负责渲染与回调，状态由调用方持有 —— 因为切 tab 时要决定
- * 哪些面板保持挂载（番茄钟必须常驻，否则计时器状态会丢）。
+ * 哪些面板保持挂载（保持挂载才不会丢面板内的筛选/展开状态）。
  */
 export function Tabs({ value, onChange, items }: TabsProps) {
   return (

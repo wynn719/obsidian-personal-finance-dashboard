@@ -1,4 +1,5 @@
 import { requestUrl } from "obsidian";
+import { marketPrefixFor } from "./market-code";
 import type { HoldingCurrency, StockHolding } from "./models";
 
 /**
@@ -13,9 +14,10 @@ import type { HoldingCurrency, StockHolding } from "./models";
  *   is decoded manually via TextDecoder("gbk").
  *
  * Symbol → Tencent code + currency rules (first char disambiguates market):
- *   A-share 600xxx/601xxx/603xxx/605xxx/688xxx/689xxx → sh<code>, CNY
- *   A-share 000xxx/001xxx/002xxx/003xxx/300xxx/301xxx → sz<code>, CNY
- *   4/8-digit starting with 0/4/8 (Beijing SE etc.) → bj<code>, CNY
+ *   A-share 6-digit → prefix by segment table in `market-code.ts`
+ *     沪 60/68/90 + 11/50/51/52/56/58 (ETF/LOF/转债) → sh, CNY
+ *     深 00/30/20/39 + 12/15/16/18 (ETF/LOF/转债)   → sz, CNY
+ *     北 43/83/87/88/92                              → bj, CNY
  *   5-digit all-numeric → hk<code> (HK), HKD
  *   Otherwise (letters) → us<code> (US), USD
  */
@@ -44,10 +46,8 @@ export function resolveSymbol(symbol: string): ResolvedSymbol | null {
   if (/^\d+$/.test(s)) {
     if (s.length === 5) return { code: `hk${s}`, currency: "HKD" };
     if (s.length !== 6) return null;
-    if (/^(60|68)/.test(s)) return { code: `sh${s}`, currency: "CNY" };
-    if (/^(00|30)/.test(s)) return { code: `sz${s}`, currency: "CNY" };
-    if (/^(43|83|87|88|92)/.test(s)) return { code: `bj${s}`, currency: "CNY" };
-    return { code: `sh${s}`, currency: "CNY" };
+    const prefix = marketPrefixFor(s);
+    return prefix ? { code: `${prefix}${s}`, currency: "CNY" } : null;
   }
 
   // Letters → US ticker

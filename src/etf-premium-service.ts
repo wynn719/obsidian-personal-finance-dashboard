@@ -1,4 +1,5 @@
 import { requestUrl } from "obsidian";
+import { marketPrefixFor } from "./market-code";
 import type { EtfPremiumRow } from "./models";
 import { roundAmount } from "./utils";
 
@@ -47,9 +48,10 @@ export const ETF_PREMIUM_THRESHOLD = 3;
 
 const QUOTE_API = "https://qt.gtimg.cn/q=";
 
-/** 159xxx → 深市，513xxx → 沪市 */
+/** 交易所前缀统一走 market-code.ts，避免与持仓行情出现两套口径 */
 function marketPrefix(code: string): "sh" | "sz" {
-  return code.startsWith("15") ? "sz" : "sh";
+  const prefix = marketPrefixFor(code);
+  return prefix === "sz" ? "sz" : "sh";
 }
 
 /**

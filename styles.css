@@ -629,7 +629,6 @@
   padding: 9px var(--fd-space-2);
   border-bottom: 1px solid var(--background-modifier-border);
   background-color: var(--background-primary);
-  transition: background-color var(--fd-transition-fast);
 }
 
 /* 内容区不再自带左右内边距：卡片 padding 是唯一缩进线。
@@ -646,11 +645,12 @@
 
 .finance-table tbody tr {
   background-color: var(--background-primary);
-  transition: background-color var(--fd-transition-fast);
 }
 
+/* 表格行不做 hover 高亮：整行保持静态底色，不提供视觉反馈。
+   选择器保留是为了压住主题层可能存在的 tbody tr:hover 覆盖。 */
 .finance-table tbody tr:hover td {
-  background-color: var(--background-modifier-hover);
+  background-color: var(--background-primary);
 }
 
 .finance-table tbody tr:last-child td {

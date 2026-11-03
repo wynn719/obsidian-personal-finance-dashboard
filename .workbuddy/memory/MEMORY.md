@@ -67,6 +67,13 @@ Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处�
 - UI 主体近黑单色，红绿琥珀只给数据。A 股 token `--fd-up #D0372B` / `--fd-down #0E8A5F` / `--fd-link #0066CC` 与账本语义 `--fd-positive/negative`（绿正红负）**两套并存未统一**
 - 新增 `--fd-track` / `--fd-bar`（:root 实色 + .theme-dark 半透明白），tab 条与 ETF 筛选都是「轨道 + 白滑块」
 
+## 网络请求层（2026-11-03 曾改造，**已回滚，不要重加**）
+- **所有远程请求用 `requestUrl`**（Obsidian 官方通道）。当天试过 `src/http-client.ts` 的 `httpGet()` 双通道（requestUrl 失败 → 本会话永久降级 Node `https`），**iOS 上直接把插件搞挂，已整体回滚**
+- iOS 崩因：移动端是 Capacitor 壳，**没有 Node 内置模块**。`import * as https from "https"` 在移动端加载即失败；桌面端 `require` 能用 ≠ 移动端能用
+- 回滚口径（2026-11-03 14:47）：删 `http-client.ts`，四个 service（quote / etf-premium / index-signal / dividend-yield）恢复 `requestUrl`。**同时保留** `market-code.ts` 前缀表与表格 hover 样式，别一起退回
+- 若要重做，硬门槛：`Platform.isDesktopApp` 门控 + 惰性 require，移动端永不进 Node 分支。另有语义坑：`requestUrl` 非 2xx 会 **throw**，`httpGet` 只回 status —— index-signal 正是靠这个 throw 降级到默认头
+- 桌面端 TLS 全挂（`ERR_SSL_PROTOCOL_ERROR`）的根因仍在，属 Obsidian Chromium 栈问题，插件修不了
+
 ## 约定与坑
 - **窄屏底部要留出 Obsidian 操作栏空间**：`--fd-bottom-reserve: 160px`（原 120，实测偏紧后调大）+ `env(safe-area-inset-bottom)`，同时挂在 `[data-layout="mobile"]` 和 `[data-layout="compact"]` 上。原先只写了 mobile，宽度一过 768 落到 compact 就没留白（横屏 / Pad / 分栏会撞操作栏）。desktop 保持 40px
 - **自定义 `button` 必须显式给 `height` + `min-height: 0`**（2026-10-22 踩过）：Obsidian 主题会给 `button` 设 `--input-height`，只写 padding 的话实际高度不受控——ETF 的「≤3% / 全部」切换按钮就因此比旁边的刷新按钮高一截。凡是要和其它控件对齐的小按钮，都按这个写。**另一个连带症状**：按钮被主题撑高后，`align-items: baseline` 会把文字顶到上方，看着像「不居中」（番茄钟专注/短休/长休就是），必须换 `align-items: center` + `justify-content: center` + `line-height` 收紧

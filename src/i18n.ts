@@ -228,6 +228,223 @@ interface TranslationStrings {
   "market.refreshFailed": string;
   "market.partialFailed": string;
 
+  // Accumulation (position tracker)
+  "acc.title": string;
+  "acc.btn.all": string;
+  "acc.btn.new": string;
+  "acc.btn.back": string;
+  "acc.empty": string;
+  "acc.empty.text": string;
+  "acc.card.invested": string;
+  "acc.card.next": string;
+  "acc.card.done": string;
+  "acc.card.pnl": string;
+  "acc.warning.broken": string;
+  "acc.warning.incomplete": string;
+  "acc.warning.overBudget": string;
+  "acc.warning.overInvested": string;
+  "acc.warning.unallocated": string;
+  "acc.warning.parse": string;
+
+  "acc.list.title": string;
+  "acc.list.empty": string;
+  "acc.list.col.name": string;
+  "acc.list.col.market": string;
+  "acc.list.col.assetType": string;
+  "acc.list.col.price": string;
+  "acc.list.col.avgCost": string;
+  "acc.list.col.invested": string;
+  "acc.list.col.remaining": string;
+  "acc.list.col.pnl": string;
+  "acc.list.col.progress": string;
+  "acc.list.col.next": string;
+  "acc.list.col.status": string;
+  "acc.list.col.actions": string;
+  "acc.list.total": string;
+  "acc.filter.market": string;
+  "acc.filter.assetType": string;
+  "acc.filter.status": string;
+  "acc.filter.all": string;
+  "acc.sort.label": string;
+  "acc.sort.pnl": string;
+  "acc.sort.usage": string;
+  "acc.sort.updatedAt": string;
+  "acc.sort.nextTrigger": string;
+
+  "acc.plan.status.pending": string;
+  "acc.plan.status.active": string;
+  "acc.plan.status.completed": string;
+  "acc.plan.status.archived": string;
+  "acc.stage.status.pending": string;
+  "acc.stage.status.triggered": string;
+  "acc.stage.status.partial": string;
+  "acc.stage.status.completed": string;
+  "acc.stage.status.skipped": string;
+  "acc.stage.status.voided": string;
+  "acc.stage.kind.first": string;
+  "acc.stage.kind.left": string;
+  "acc.stage.kind.right": string;
+  "acc.stage.mode.drop": string;
+  "acc.stage.mode.target": string;
+  "acc.stage.col.trigger": string;
+  "acc.stage.col.planned": string;
+  "acc.stage.col.actual": string;
+  "acc.stage.col.status": string;
+  "acc.stage.col.tradeDate": string;
+  "acc.stage.col.reached": string;
+  "acc.stage.reached.yes": string;
+  "acc.stage.reached.no": string;
+
+  "acc.market.CN": string;
+  "acc.market.HK": string;
+  "acc.market.US": string;
+  "acc.market.OTHER": string;
+  "acc.assetType.stock": string;
+  "acc.assetType.etf": string;
+  "acc.assetType.fund": string;
+  "acc.assetType.bond": string;
+  "acc.assetType.other": string;
+
+  "acc.form.titleCreate": string;
+  "acc.form.titleEdit": string;
+  "acc.form.section.basic": string;
+  "acc.form.section.budget": string;
+  "acc.form.section.strategy": string;
+  "acc.form.section.text": string;
+  "acc.form.name": string;
+  "acc.form.symbol": string;
+  "acc.form.market": string;
+  "acc.form.assetType": string;
+  "acc.form.currency": string;
+  "acc.form.createdAt": string;
+  "acc.form.totalBudget": string;
+  "acc.form.refPrice": string;
+  "acc.form.currentPrice": string;
+  "acc.form.reserveRatio": string;
+  "acc.form.triggerMode": string;
+  "acc.form.amountMode": string;
+  "acc.form.amountMode.fixed": string;
+  "acc.form.amountMode.ladder": string;
+  "acc.form.amountMode.custom": string;
+  "acc.form.requireConfirm": string;
+  "acc.form.logic": string;
+  "acc.form.review": string;
+  "acc.form.stage.add": string;
+  "acc.form.stage.remove": string;
+  "acc.form.stage.label": string;
+  "acc.form.stage.kind": string;
+  "acc.form.stage.drop": string;
+  "acc.form.stage.target": string;
+  "acc.form.stage.planned": string;
+  "acc.form.template": string;
+  "acc.form.templateHint": string;
+  "acc.form.reserved": string;
+  "acc.form.deployable": string;
+  "acc.form.allocated": string;
+  "acc.form.unallocated": string;
+  "acc.form.stageRatio": string;
+  "acc.form.overBudgetConfirm": string;
+  "acc.form.err.name": string;
+  "acc.form.err.symbol": string;
+  "acc.form.err.budget": string;
+  "acc.form.err.refPrice": string;
+  "acc.form.err.stageAmount": string;
+  "acc.form.err.stageEmpty": string;
+  "acc.form.saved": string;
+  "acc.form.save": string;
+  "acc.form.cancel": string;
+
+  "acc.detail.metric.totalBudget": string;
+  "acc.detail.metric.invested": string;
+  "acc.detail.metric.remaining": string;
+  "acc.detail.metric.usage": string;
+  "acc.detail.metric.shares": string;
+  "acc.detail.metric.avgCost": string;
+  "acc.detail.metric.price": string;
+  "acc.detail.metric.marketValue": string;
+  "acc.detail.metric.pnl": string;
+  "acc.detail.metric.pnlRate": string;
+  "acc.detail.next.title": string;
+  "acc.detail.next.stage": string;
+  "acc.detail.next.trigger": string;
+  "acc.detail.next.distance": string;
+  "acc.detail.next.planned": string;
+  "acc.detail.next.remaining": string;
+  "acc.detail.next.reached": string;
+  "acc.detail.next.confirmHint": string;
+  "acc.detail.next.btn.trade": string;
+  "acc.detail.next.btn.skip": string;
+  "acc.detail.next.btn.confirm": string;
+  "acc.detail.next.waitingLeft": string;
+  "acc.detail.next.below": string;
+  "acc.detail.next.above": string;
+  "acc.detail.maxLoss": string;
+  "acc.detail.maxGain": string;
+  "acc.detail.next.none": string;
+  "acc.detail.stages": string;
+  "acc.detail.compare": string;
+  "acc.detail.trades": string;
+  "acc.detail.adjustments": string;
+  "acc.detail.logic": string;
+  "acc.detail.review": string;
+  "acc.detail.price.title": string;
+  "acc.detail.price.date": string;
+  "acc.detail.price.value": string;
+  "acc.detail.price.note": string;
+  "acc.detail.price.save": string;
+  "acc.detail.price.saved": string;
+  "acc.detail.textEdit": string;
+  "acc.detail.textSave": string;
+  "acc.detail.textSaved": string;
+  "acc.detail.overview": string;
+
+  "acc.compare.col.stage": string;
+  "acc.compare.col.planned": string;
+  "acc.compare.col.actual": string;
+  "acc.compare.col.deviation": string;
+  "acc.compare.col.planUsage": string;
+  "acc.compare.col.actualUsage": string;
+  "acc.compare.total": string;
+  "acc.compare.unassigned": string;
+
+  "acc.trade.titleCreate": string;
+  "acc.trade.titleEdit": string;
+  "acc.trade.date": string;
+  "acc.trade.stage": string;
+  "acc.trade.side": string;
+  "acc.trade.price": string;
+  "acc.trade.qty": string;
+  "acc.trade.amount": string;
+  "acc.trade.fee": string;
+  "acc.trade.note": string;
+  "acc.trade.autoAmount": string;
+  "acc.trade.deleteConfirm": string;
+  "acc.trade.err.price": string;
+  "acc.trade.err.qty": string;
+  "acc.trade.saved": string;
+  "acc.trade.side.buy": string;
+  "acc.trade.side.sell": string;
+
+  "acc.action.archive": string;
+  "acc.action.archiveConfirm": string;
+  "acc.action.archived": string;
+  "acc.action.delete": string;
+  "acc.action.deleteConfirm": string;
+  "acc.action.deleteFailed": string;
+  "acc.action.skip": string;
+  "acc.action.skipPrompt": string;
+  "acc.action.markConfirmed": string;
+  "acc.action.editPlan": string;
+  "acc.action.openFile": string;
+  "acc.action.addTrade": string;
+
+  "acc.err.writeFailed": string;
+  "acc.err.brokenPlan": string;
+  "acc.err.saveFailed": string;
+
+  "acc.review.title": string;
+  "acc.review.empty": string;
+
   // Commands & Ribbon
   "command.openDashboard": string;
   "command.addSnapshot": string;
@@ -235,6 +452,7 @@ interface TranslationStrings {
   "command.addDividend": string;
   "command.refreshData": string;
   "command.addHolding": string;
+  "command.addAccumulationPlan": string;
   "ribbon.openDashboard": string;
 
   // Year selector
@@ -253,6 +471,12 @@ interface TranslationStrings {
   "settings.miscDataFilePath": string;
   "settings.miscDataFilePathDesc": string;
   "settings.miscDataFilePathInvalid": string;
+  "settings.accumulationFolderPath": string;
+  "settings.accumulationFolderPathDesc": string;
+  "settings.fxRates": string;
+  "settings.fxRatesDesc": string;
+  "settings.fxRate.hkd": string;
+  "settings.fxRate.usd": string;
   "settings.assetCategories": string;
   "settings.categories": string;
   "settings.categoriesDesc.asset": string;
@@ -498,6 +722,223 @@ const en: TranslationStrings = {
   "market.refreshFailed": "Refresh failed — check your network and try again",
   "market.partialFailed": "{count} symbol(s) failed to fetch",
 
+  // Accumulation (position tracker)
+  "acc.title": "Position Tracker",
+  "acc.btn.all": "All",
+  "acc.btn.new": "New plan",
+  "acc.btn.back": "Back",
+  "acc.empty": "No accumulation plan yet",
+  "acc.empty.text": "Nothing here yet",
+  "acc.card.invested": "Invested",
+  "acc.card.next": "Next at {price}",
+  "acc.card.done": "All stages settled",
+  "acc.card.pnl": "Unrealized P/L",
+  "acc.warning.broken": "File could not be parsed — editing is frozen",
+  "acc.warning.incomplete": "Incomplete data",
+  "acc.warning.overBudget": "Stage amounts exceed the budget",
+  "acc.warning.overInvested": "Invested more than the total budget",
+  "acc.warning.unallocated": "{amount} left unallocated",
+  "acc.warning.parse": "{count} line(s) could not be parsed and were kept as-is",
+
+  "acc.list.title": "Accumulation Plans",
+  "acc.list.empty": "No plan matches the current filters",
+  "acc.list.col.name": "Symbol",
+  "acc.list.col.market": "Market",
+  "acc.list.col.assetType": "Type",
+  "acc.list.col.price": "Price",
+  "acc.list.col.avgCost": "Avg cost",
+  "acc.list.col.invested": "Invested",
+  "acc.list.col.remaining": "Remaining",
+  "acc.list.col.pnl": "P/L",
+  "acc.list.col.progress": "Progress",
+  "acc.list.col.next": "Next buy",
+  "acc.list.col.status": "Status",
+  "acc.list.col.actions": "Actions",
+  "acc.list.total": "Total (CNY)",
+  "acc.filter.market": "Market",
+  "acc.filter.assetType": "Type",
+  "acc.filter.status": "Status",
+  "acc.filter.all": "All",
+  "acc.sort.label": "Sort",
+  "acc.sort.pnl": "P/L",
+  "acc.sort.usage": "Budget used",
+  "acc.sort.updatedAt": "Updated",
+  "acc.sort.nextTrigger": "Next trigger",
+
+  "acc.plan.status.pending": "Not started",
+  "acc.plan.status.active": "In progress",
+  "acc.plan.status.completed": "Completed",
+  "acc.plan.status.archived": "Archived",
+  "acc.stage.status.pending": "Pending",
+  "acc.stage.status.triggered": "Triggered",
+  "acc.stage.status.partial": "Partial",
+  "acc.stage.status.completed": "Done",
+  "acc.stage.status.skipped": "Skipped",
+  "acc.stage.status.voided": "Void",
+  "acc.stage.kind.first": "Initial buy",
+  "acc.stage.kind.left": "Add on dip",
+  "acc.stage.kind.right": "Right-side confirm",
+  "acc.stage.mode.drop": "Drawdown",
+  "acc.stage.mode.target": "Target price",
+  "acc.stage.col.trigger": "Trigger",
+  "acc.stage.col.planned": "Planned",
+  "acc.stage.col.actual": "Actual",
+  "acc.stage.col.status": "Status",
+  "acc.stage.col.tradeDate": "Date",
+  "acc.stage.col.reached": "Reached",
+  "acc.stage.reached.yes": "Reached",
+  "acc.stage.reached.no": "Waiting",
+
+  "acc.market.CN": "A-share",
+  "acc.market.HK": "HK",
+  "acc.market.US": "US",
+  "acc.market.OTHER": "Other",
+  "acc.assetType.stock": "Stock",
+  "acc.assetType.etf": "ETF",
+  "acc.assetType.fund": "Fund",
+  "acc.assetType.bond": "Bond",
+  "acc.assetType.other": "Other",
+
+  "acc.form.titleCreate": "New Accumulation Plan",
+  "acc.form.titleEdit": "Edit Accumulation Plan",
+  "acc.form.section.basic": "Basics",
+  "acc.form.section.budget": "Capital",
+  "acc.form.section.strategy": "Strategy",
+  "acc.form.section.text": "Notes",
+  "acc.form.name": "Name",
+  "acc.form.symbol": "Symbol",
+  "acc.form.market": "Market",
+  "acc.form.assetType": "Asset type",
+  "acc.form.currency": "Currency",
+  "acc.form.createdAt": "Created",
+  "acc.form.totalBudget": "Total budget",
+  "acc.form.refPrice": "Reference buy price",
+  "acc.form.currentPrice": "Current price",
+  "acc.form.reserveRatio": "Reserved %",
+  "acc.form.triggerMode": "Trigger mode",
+  "acc.form.amountMode": "Amount mode",
+  "acc.form.amountMode.fixed": "Fixed",
+  "acc.form.amountMode.ladder": "Increasing",
+  "acc.form.amountMode.custom": "Custom",
+  "acc.form.requireConfirm": "Manual confirm by default",
+  "acc.form.logic": "Thesis",
+  "acc.form.review": "Review",
+  "acc.form.stage.add": "Add stage",
+  "acc.form.stage.remove": "Remove",
+  "acc.form.stage.label": "Label",
+  "acc.form.stage.kind": "Kind",
+  "acc.form.stage.drop": "Drop %",
+  "acc.form.stage.target": "Target",
+  "acc.form.stage.planned": "Amount",
+  "acc.form.template": "Use template",
+  "acc.form.templateHint": "0 / -8 / -15 / -25 / -35% then right-side confirm",
+  "acc.form.reserved": "Reserved",
+  "acc.form.deployable": "Deployable",
+  "acc.form.allocated": "Allocated",
+  "acc.form.unallocated": "Unallocated",
+  "acc.form.stageRatio": "Stage share",
+  "acc.form.overBudgetConfirm": "Stage amounts exceed the deployable budget. Save anyway?",
+  "acc.form.err.name": "Name is required",
+  "acc.form.err.symbol": "Symbol is required",
+  "acc.form.err.budget": "Total budget must be greater than 0",
+  "acc.form.err.refPrice": "Reference price must be greater than 0",
+  "acc.form.err.stageAmount": "Every stage needs a non-negative amount",
+  "acc.form.err.stageEmpty": "At least one stage is required",
+  "acc.form.saved": "Plan saved",
+  "acc.form.save": "Save",
+  "acc.form.cancel": "Cancel",
+
+  "acc.detail.metric.totalBudget": "Budget",
+  "acc.detail.metric.invested": "Invested",
+  "acc.detail.metric.remaining": "Remaining",
+  "acc.detail.metric.usage": "Used",
+  "acc.detail.metric.shares": "Shares",
+  "acc.detail.metric.avgCost": "Avg cost",
+  "acc.detail.metric.price": "Price",
+  "acc.detail.metric.marketValue": "Market value",
+  "acc.detail.metric.pnl": "Unrealized",
+  "acc.detail.metric.pnlRate": "Return",
+  "acc.detail.next.title": "Next Entry",
+  "acc.detail.next.stage": "Stage",
+  "acc.detail.next.trigger": "Trigger price",
+  "acc.detail.next.distance": "Distance",
+  "acc.detail.next.planned": "Planned",
+  "acc.detail.next.remaining": "Remaining budget",
+  "acc.detail.next.reached": "Price condition met — confirm before you buy",
+  "acc.detail.next.confirmHint": "Right-side confirm is manual only. Price crossing never counts.",
+  "acc.detail.next.btn.trade": "Record trade",
+  "acc.detail.next.btn.skip": "Skip stage",
+  "acc.detail.next.btn.confirm": "Mark confirmed",
+  "acc.detail.next.waitingLeft": "Waiting for the left-side stages to settle",
+  "acc.detail.next.below": "below {pct}",
+  "acc.detail.next.above": "above {pct}",
+  "acc.detail.maxLoss": "Max drawdown",
+  "acc.detail.maxGain": "Max gain",
+  "acc.detail.next.none": "All stages settled",
+  "acc.detail.stages": "Stage Timeline",
+  "acc.detail.compare": "Plan vs Actual",
+  "acc.detail.trades": "Trades",
+  "acc.detail.adjustments": "Plan Changes",
+  "acc.detail.logic": "Thesis",
+  "acc.detail.review": "Review",
+  "acc.detail.price.title": "Update Price",
+  "acc.detail.price.date": "Date",
+  "acc.detail.price.value": "Price",
+  "acc.detail.price.note": "Note",
+  "acc.detail.price.save": "Save price",
+  "acc.detail.price.saved": "Price updated",
+  "acc.detail.textEdit": "Edit",
+  "acc.detail.textSave": "Save text",
+  "acc.detail.textSaved": "Text saved",
+  "acc.detail.overview": "Overview",
+
+  "acc.compare.col.stage": "Stage",
+  "acc.compare.col.planned": "Planned",
+  "acc.compare.col.actual": "Actual",
+  "acc.compare.col.deviation": "Deviation",
+  "acc.compare.col.planUsage": "Plan %",
+  "acc.compare.col.actualUsage": "Actual %",
+  "acc.compare.total": "Total",
+  "acc.compare.unassigned": "Unassigned trades",
+
+  "acc.trade.titleCreate": "Record Trade",
+  "acc.trade.titleEdit": "Edit Trade",
+  "acc.trade.date": "Date",
+  "acc.trade.stage": "Stage",
+  "acc.trade.side": "Side",
+  "acc.trade.price": "Price",
+  "acc.trade.qty": "Quantity",
+  "acc.trade.amount": "Amount",
+  "acc.trade.fee": "Fee",
+  "acc.trade.note": "Note",
+  "acc.trade.autoAmount": "Auto-calculated from price × quantity, editable",
+  "acc.trade.deleteConfirm": "Delete this trade?",
+  "acc.trade.err.price": "Price must be greater than 0",
+  "acc.trade.err.qty": "Quantity must be greater than 0",
+  "acc.trade.saved": "Trade saved",
+  "acc.trade.side.buy": "Buy",
+  "acc.trade.side.sell": "Sell",
+
+  "acc.action.archive": "Archive",
+  "acc.action.archiveConfirm": "Archive this plan? It moves to the archive folder.",
+  "acc.action.archived": "Plan archived",
+  "acc.action.delete": "Delete",
+  "acc.action.deleteConfirm": "Delete this plan file? This cannot be undone.",
+  "acc.action.deleteFailed": "Could not delete the plan file",
+  "acc.action.skip": "Skip",
+  "acc.action.skipPrompt": "Why skip this stage?",
+  "acc.action.markConfirmed": "Mark confirmed",
+  "acc.action.editPlan": "Edit plan",
+  "acc.action.openFile": "Open source file",
+  "acc.action.addTrade": "Add trade",
+
+  "acc.err.writeFailed": "Failed to write the plan file",
+  "acc.err.brokenPlan": "This plan file cannot be parsed, so it is read-only",
+  "acc.err.saveFailed": "Save failed",
+
+  "acc.review.title": "Review",
+  "acc.review.empty": "Review lands in the next batch",
+
   // Commands & Ribbon
   "command.openDashboard": "Open Finance Dashboard",
   "command.addSnapshot": "Add Asset Snapshot",
@@ -505,6 +946,7 @@ const en: TranslationStrings = {
   "command.addDividend": "Add Dividend",
   "command.refreshData": "Refresh Finance Data",
   "command.addHolding": "Add Stock Holding",
+  "command.addAccumulationPlan": "New Accumulation Plan",
   "ribbon.openDashboard": "Open Finance Dashboard",
 
   // Year selector
@@ -527,6 +969,14 @@ const en: TranslationStrings = {
     "Path to the Markdown file storing non-yearly data such as stock holdings (relative to vault root, e.g. Finance/Misc.md)",
   "settings.miscDataFilePathInvalid":
     "Misc data file path must not be a year-style file (e.g. Finance/2025.md) – it would collide with yearly data files.",
+  "settings.accumulationFolderPath": "Accumulation Folder",
+  "settings.accumulationFolderPathDesc":
+    "Folder for accumulation plan files, one Markdown file per plan (relative to vault root, e.g. Finance/Investment/Accumulation). Independent of the yearly data folder.",
+  "settings.fxRates": "Reference FX Rates",
+  "settings.fxRatesDesc":
+    "CNY per 1 unit of foreign currency. Used only for cross-currency aggregation once live holding quotes are unavailable.",
+  "settings.fxRate.hkd": "HKD → CNY",
+  "settings.fxRate.usd": "USD → CNY",
   "settings.assetCategories": "Asset Categories",
   "settings.categories": "Categories",
   "settings.categoriesDesc.asset": "Comma-separated list of asset categories",
@@ -767,6 +1217,223 @@ const zh: TranslationStrings = {
   "market.refreshFailed": "刷新失败，请检查网络后重试",
   "market.partialFailed": "{count} 只数据获取失败",
 
+  // Accumulation (position tracker)
+  "acc.title": "分批建仓",
+  "acc.btn.all": "全部",
+  "acc.btn.new": "新建计划",
+  "acc.btn.back": "返回",
+  "acc.empty": "还没有建仓计划",
+  "acc.empty.text": "暂无内容",
+  "acc.card.invested": "已投",
+  "acc.card.next": "下一档 {price}",
+  "acc.card.done": "各档均已了结",
+  "acc.card.pnl": "浮动盈亏",
+  "acc.warning.broken": "文件解析失败，已冻结写入",
+  "acc.warning.incomplete": "数据不完整",
+  "acc.warning.overBudget": "各阶段金额超过可分配预算",
+  "acc.warning.overInvested": "累计投入已超过总预算",
+  "acc.warning.unallocated": "尚有 {amount} 未分配",
+  "acc.warning.parse": "{count} 行无法解析，已原样保留",
+
+  "acc.list.title": "建仓计划",
+  "acc.list.empty": "没有符合筛选条件的计划",
+  "acc.list.col.name": "标的",
+  "acc.list.col.market": "市场",
+  "acc.list.col.assetType": "类型",
+  "acc.list.col.price": "现价",
+  "acc.list.col.avgCost": "持仓均价",
+  "acc.list.col.invested": "累计投入",
+  "acc.list.col.remaining": "剩余预算",
+  "acc.list.col.pnl": "浮动盈亏",
+  "acc.list.col.progress": "建仓进度",
+  "acc.list.col.next": "下一次",
+  "acc.list.col.status": "状态",
+  "acc.list.col.actions": "操作",
+  "acc.list.total": "合计（人民币）",
+  "acc.filter.market": "市场",
+  "acc.filter.assetType": "类型",
+  "acc.filter.status": "状态",
+  "acc.filter.all": "全部",
+  "acc.sort.label": "排序",
+  "acc.sort.pnl": "盈亏",
+  "acc.sort.usage": "预算使用率",
+  "acc.sort.updatedAt": "更新时间",
+  "acc.sort.nextTrigger": "距触发",
+
+  "acc.plan.status.pending": "未开始",
+  "acc.plan.status.active": "进行中",
+  "acc.plan.status.completed": "已完成",
+  "acc.plan.status.archived": "已归档",
+  "acc.stage.status.pending": "待执行",
+  "acc.stage.status.triggered": "已触发",
+  "acc.stage.status.partial": "部分执行",
+  "acc.stage.status.completed": "已完成",
+  "acc.stage.status.skipped": "已跳过",
+  "acc.stage.status.voided": "已失效",
+  "acc.stage.kind.first": "首次建仓",
+  "acc.stage.kind.left": "左侧补仓",
+  "acc.stage.kind.right": "右侧确认",
+  "acc.stage.mode.drop": "跌幅触发",
+  "acc.stage.mode.target": "目标价",
+  "acc.stage.col.trigger": "触发价",
+  "acc.stage.col.planned": "计划",
+  "acc.stage.col.actual": "实际",
+  "acc.stage.col.status": "状态",
+  "acc.stage.col.tradeDate": "成交日期",
+  "acc.stage.col.reached": "触发",
+  "acc.stage.reached.yes": "已达到",
+  "acc.stage.reached.no": "未触发",
+
+  "acc.market.CN": "A股",
+  "acc.market.HK": "港股",
+  "acc.market.US": "美股",
+  "acc.market.OTHER": "其它",
+  "acc.assetType.stock": "个股",
+  "acc.assetType.etf": "ETF",
+  "acc.assetType.fund": "基金",
+  "acc.assetType.bond": "债券",
+  "acc.assetType.other": "其它",
+
+  "acc.form.titleCreate": "新建建仓计划",
+  "acc.form.titleEdit": "编辑建仓计划",
+  "acc.form.section.basic": "基础信息",
+  "acc.form.section.budget": "资金配置",
+  "acc.form.section.strategy": "建仓策略",
+  "acc.form.section.text": "投资逻辑与复盘",
+  "acc.form.name": "标的名称",
+  "acc.form.symbol": "标的代码",
+  "acc.form.market": "市场",
+  "acc.form.assetType": "资产类型",
+  "acc.form.currency": "计价币种",
+  "acc.form.createdAt": "创建日期",
+  "acc.form.totalBudget": "计划总预算",
+  "acc.form.refPrice": "首次参考买入价",
+  "acc.form.currentPrice": "当前市场价格",
+  "acc.form.reserveRatio": "预留资金比例",
+  "acc.form.triggerMode": "触发方式",
+  "acc.form.amountMode": "金额策略",
+  "acc.form.amountMode.fixed": "固定金额",
+  "acc.form.amountMode.ladder": "递增金额",
+  "acc.form.amountMode.custom": "自定义",
+  "acc.form.requireConfirm": "默认需要人工确认",
+  "acc.form.logic": "投资逻辑",
+  "acc.form.review": "复盘",
+  "acc.form.stage.add": "添加阶段",
+  "acc.form.stage.remove": "删除",
+  "acc.form.stage.label": "阶段名称",
+  "acc.form.stage.kind": "类型",
+  "acc.form.stage.drop": "跌幅%",
+  "acc.form.stage.target": "目标价",
+  "acc.form.stage.planned": "计划金额",
+  "acc.form.template": "套用模板",
+  "acc.form.templateHint": "0 / -8 / -15 / -25 / -35% 加右侧确认",
+  "acc.form.reserved": "预留",
+  "acc.form.deployable": "可分配",
+  "acc.form.allocated": "已分配",
+  "acc.form.unallocated": "未分配",
+  "acc.form.stageRatio": "阶段占比",
+  "acc.form.overBudgetConfirm": "各阶段金额已超过可分配预算，仍然保存？",
+  "acc.form.err.name": "请填写标的名称",
+  "acc.form.err.symbol": "请填写标的代码",
+  "acc.form.err.budget": "计划总预算需大于 0",
+  "acc.form.err.refPrice": "参考买入价需大于 0",
+  "acc.form.err.stageAmount": "每个阶段的金额不能为负",
+  "acc.form.err.stageEmpty": "至少需要一个建仓阶段",
+  "acc.form.saved": "计划已保存",
+  "acc.form.save": "保存",
+  "acc.form.cancel": "取消",
+
+  "acc.detail.metric.totalBudget": "计划总预算",
+  "acc.detail.metric.invested": "累计投入",
+  "acc.detail.metric.remaining": "剩余预算",
+  "acc.detail.metric.usage": "预算使用率",
+  "acc.detail.metric.shares": "持仓数量",
+  "acc.detail.metric.avgCost": "持仓均价",
+  "acc.detail.metric.price": "当前价格",
+  "acc.detail.metric.marketValue": "持仓市值",
+  "acc.detail.metric.pnl": "浮动盈亏",
+  "acc.detail.metric.pnlRate": "盈亏比例",
+  "acc.detail.next.title": "下一次建仓",
+  "acc.detail.next.stage": "阶段",
+  "acc.detail.next.trigger": "触发价",
+  "acc.detail.next.distance": "距触发",
+  "acc.detail.next.planned": "计划金额",
+  "acc.detail.next.remaining": "剩余预算",
+  "acc.detail.next.reached": "已达触发价 —— 请确认后再买入",
+  "acc.detail.next.confirmHint": "右侧确认只能手动标记，价格上涨不算触发。",
+  "acc.detail.next.btn.trade": "记录成交",
+  "acc.detail.next.btn.skip": "跳过本阶段",
+  "acc.detail.next.btn.confirm": "标记已确认",
+  "acc.detail.next.waitingLeft": "等待左侧阶段了结",
+  "acc.detail.next.below": "低于 {pct}",
+  "acc.detail.next.above": "高于 {pct}",
+  "acc.detail.maxLoss": "最大浮亏",
+  "acc.detail.maxGain": "最大浮盈",
+  "acc.detail.next.none": "所有阶段均已了结",
+  "acc.detail.stages": "建仓阶段",
+  "acc.detail.compare": "计划与实际",
+  "acc.detail.trades": "实际成交",
+  "acc.detail.adjustments": "计划调整历史",
+  "acc.detail.logic": "投资逻辑",
+  "acc.detail.review": "复盘",
+  "acc.detail.price.title": "更新现价",
+  "acc.detail.price.date": "日期",
+  "acc.detail.price.value": "价格",
+  "acc.detail.price.note": "备注",
+  "acc.detail.price.save": "保存价格",
+  "acc.detail.price.saved": "价格已更新",
+  "acc.detail.textEdit": "编辑",
+  "acc.detail.textSave": "保存正文",
+  "acc.detail.textSaved": "正文已保存",
+  "acc.detail.overview": "总览",
+
+  "acc.compare.col.stage": "阶段",
+  "acc.compare.col.planned": "计划",
+  "acc.compare.col.actual": "实际",
+  "acc.compare.col.deviation": "偏差",
+  "acc.compare.col.planUsage": "计划占比",
+  "acc.compare.col.actualUsage": "实际占比",
+  "acc.compare.total": "合计",
+  "acc.compare.unassigned": "未分配成交",
+
+  "acc.trade.titleCreate": "记录成交",
+  "acc.trade.titleEdit": "修改成交",
+  "acc.trade.date": "成交日期",
+  "acc.trade.stage": "对应阶段",
+  "acc.trade.side": "方向",
+  "acc.trade.price": "成交价格",
+  "acc.trade.qty": "买入数量",
+  "acc.trade.amount": "成交金额",
+  "acc.trade.fee": "手续费",
+  "acc.trade.note": "备注",
+  "acc.trade.autoAmount": "按 价格 × 数量 自动计算，可手动覆盖",
+  "acc.trade.deleteConfirm": "删除这笔成交？",
+  "acc.trade.err.price": "成交价格需大于 0",
+  "acc.trade.err.qty": "成交数量需大于 0",
+  "acc.trade.saved": "成交已保存",
+  "acc.trade.side.buy": "买入",
+  "acc.trade.side.sell": "卖出",
+
+  "acc.action.archive": "归档",
+  "acc.action.archiveConfirm": "归档这个计划？文件会移到 archive 目录。",
+  "acc.action.archived": "计划已归档",
+  "acc.action.delete": "删除",
+  "acc.action.deleteConfirm": "删除这个计划文件？不可撤销。",
+  "acc.action.deleteFailed": "删除计划文件失败",
+  "acc.action.skip": "跳过",
+  "acc.action.skipPrompt": "跳过本阶段的原因？",
+  "acc.action.markConfirmed": "标记已确认",
+  "acc.action.editPlan": "编辑计划",
+  "acc.action.openFile": "打开源文件",
+  "acc.action.addTrade": "新增成交",
+
+  "acc.err.writeFailed": "写入计划文件失败",
+  "acc.err.brokenPlan": "该计划文件无法解析，当前为只读",
+  "acc.err.saveFailed": "保存失败",
+
+  "acc.review.title": "历史复盘",
+  "acc.review.empty": "复盘视图在第二批交付",
+
   // Commands & Ribbon
   "command.openDashboard": "打开财务仪表盘",
   "command.addSnapshot": "添加资产快照",
@@ -774,6 +1441,7 @@ const zh: TranslationStrings = {
   "command.addDividend": "添加股息记录",
   "command.refreshData": "刷新财务数据",
   "command.addHolding": "添加股票持仓",
+  "command.addAccumulationPlan": "新建建仓计划",
   "ribbon.openDashboard": "打开财务仪表盘",
 
   // Year selector
@@ -796,6 +1464,14 @@ const zh: TranslationStrings = {
     "存储非年度数据（如股票持仓）的 Markdown 文件路径（相对于 Vault 根目录，如 Finance/Misc.md）",
   "settings.miscDataFilePathInvalid":
     "杂项数据文件路径不能是年份样式文件（如 Finance/2025.md），会与年度数据文件冲突。",
+  "settings.accumulationFolderPath": "建仓数据文件夹",
+  "settings.accumulationFolderPathDesc":
+    "分批建仓计划的存放目录，每个计划一个 Markdown 文件（相对于 Vault 根目录，如 Finance/Investment/Accumulation）。与年度数据文件夹互相独立。",
+  "settings.fxRates": "参考汇率",
+  "settings.fxRatesDesc":
+    "1 单位外币折合人民币。仅当持仓行情里拿不到汇率时，用于跨币种汇总。",
+  "settings.fxRate.hkd": "港币 → 人民币",
+  "settings.fxRate.usd": "美元 → 人民币",
   "settings.assetCategories": "资产类别",
   "settings.categories": "类别",
   "settings.categoriesDesc.asset": "以逗号分隔的资产类别列表",

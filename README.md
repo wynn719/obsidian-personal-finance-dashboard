@@ -1,6 +1,6 @@
 # 💰 Obsidian Personal Finance Dashboard
 
-A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking personal assets, income, expenses, and dividends — all within your vault, powered by plain Markdown files.
+A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking personal assets, income, expenses, dividends — and staged position building — all within your vault, powered by plain Markdown files.
 
 > 🌐 中文文档见 [README.zh-CN.md](README.zh-CN.md)
 
@@ -23,8 +23,14 @@ A beautifully designed [Obsidian](https://obsidian.md) plugin for tracking perso
   - **MA250 strategy signal** — CSI Dividend Low-Volatility 100 (930955): deviation from its 250-day moving average with buy / hold / sell-sweet-spot / overheated zones
   - **High dividend TTM** — 9-stock A-share tracker: latest implemented annual + interim dividend per share ÷ live price
   - **US ETF premium monitor** — 16 Nasdaq / S&P 500 QDII ETFs: live premium vs latest NAV, fee & scale, rows ≤ 3% highlighted (filterable)
-- 🍅 **Pomodoro Timer** — Focus timer at the top of the dashboard (25 / 5 / 15 with a long break every 4 rounds); completed sessions are aggregated per day into a dedicated `Pomodoro.md`, with today / this-week totals and a 7-day bar chart
-- 📁 **Markdown-First** — All data stored as human-readable Markdown files (one file per year), fully portable and versionable
+- 📦 **Position Tracker (分批建仓)** — Plan a budget, split it into staged entries, and track real fills against the plan:
+  - Two trigger modes per stage: drawdown vs the locked reference buy price, or an explicit target price
+  - Three amount strategies (fixed / increasing / custom) with live budget validation — allocated, unallocated, and per-stage share
+  - Record real trades independently of the plan: multiple fills per stage, partial execution, skipping a stage with a reason
+  - Moving weighted-average cost, unrealized P/L, remaining budget, budget usage, and a per-stage plan-vs-actual deviation table
+  - Manual price updates with a price history, so max drawdown is either genuinely computed or explicitly marked “incomplete”
+  - One Markdown file per plan — hand-editable, round-trip safe, archived instead of deleted
+- 📁 **Markdown-First** — All data stored as human-readable Markdown files, fully portable and versionable
 - 🔒 **Privacy Mode** — One-click toggle to mask all financial numbers with `***`
 - 🌐 **Bilingual** — Full English & Chinese (中文) support
 - 🎨 **Theme-Aware** — Adapts to Obsidian's light/dark themes with a professional fintech design system
@@ -61,6 +67,7 @@ Every action is also available from the Command Palette:
 | `Add Income/Expense` | Log a cash flow record |
 | `Add Dividend` | Record dividend income |
 | `Add Stock Holding` | Add a stock holding |
+| `New Accumulation Plan` | Create a staged position-building plan |
 | `Refresh Finance Data` | Reload data files from disk |
 
 ### Workbench & Allocation Tabs
@@ -69,24 +76,42 @@ The dashboard is split into two page-level tabs; the active one is remembered ac
 
 | Tab | Contents |
 |-----|----------|
-| **Workbench** | Pomodoro timer + the three market-signal modules (MA250 strategy signal, high-dividend TTM, ETF premium) |
+| **Workbench** | Position tracker card + the three market-signal modules (MA250 strategy signal, high-dividend TTM, ETF premium) |
 | **Allocation** | Metric cards, allocation vs target, dividend summary, holdings treemap, three charts, monthly overview, cash-flow details |
 
-Two different mounting strategies on purpose: the workbench panel stays mounted when hidden so a running pomodoro keeps counting; the allocation panel is rebuilt on switch so Chart.js measures a real container instead of a `display:none` one.
+Two different mounting strategies on purpose: the workbench panel stays mounted (only hidden) when you enter the position-tracker view, so each signal card keeps its filters and expanded state on the way back; the allocation panel is rebuilt on switch so Chart.js measures a real container instead of a `display:none` one.
 
-### Pomodoro Timer
+### Position Tracker (分批建仓)
 
-A focus timer sits directly under the metric cards — it is a stand-alone module, unrelated to the financial data.
+The first card on the workbench. Click its title or **All** to open the tracker — it takes over the workbench panel, with a back button in the top-left corner.
 
-- **Start / Pause / Resume / Reset / Skip** with a 25-minute focus block, a 5-minute short break and a 15-minute long break after every 4 completed rounds
-- Only **completed** focus sessions are written to a dedicated `Pomodoro.md` (aggregated per day) — resetting or skipping never pollutes the statistics
-- **Today / This week** totals plus a 7-day bar chart (Monday-first, today highlighted)
-- The countdown is driven by an absolute end timestamp, so sleeping the laptop or switching away does not drift the timer
-- A short synthesized chime and a notice fire when a block ends (no audio assets, silently degrades if blocked)
+**Plan list** — market / asset type / status filters plus four sort keys (P&L, budget used, updated, distance to trigger). Each row shows price, average cost, invested, remaining budget, floating P&L, progress and the next trigger price.
+
+**Creating a plan** — basics (name, symbol, market, asset type, currency, created date), capital (total budget, reference buy price, current price, reserved %), and the strategy:
+
+| Concept | Meaning |
+|---------|---------|
+| **Stage** | One entry: initial buy, add-on-dip, or right-side confirmation |
+| **Trigger mode** | `drawdown` — `reference price × (1 − drop%)`; `target` — an explicit price. Both parameters are kept, so switching modes never loses data |
+| **Amount strategy** | `fixed` (equal split), `increasing` (linear ramp), or `custom` |
+| **Template** | One click fills 0 / −8 / −15 / −25 / −35 % plus a right-side confirmation stage |
+
+Budget validation is live: allocated, unallocated, and each stage's share are recomputed on every keystroke. Unallocated budget is allowed — it does not have to be distributed.
+
+**Detail page** — ten metrics on top (budget, invested, remaining, usage, shares, average cost, current price, market value, unrealized P&L and its rate), then:
+
+- **Next entry** — stage, trigger price, current price, distance (below/above), planned amount, remaining budget. Reaching the trigger is highlighted, but it is **not** a buy signal: record a trade, adjust the amount, or skip the stage yourself. Right-side confirmation only ever triggers on an explicit “mark confirmed”, never on a price rise.
+- **Stage timeline** — planned vs actual per stage, status (pending / triggered / partial / done / skipped / void), trade date
+- **Plan vs actual** — per-stage planned, actual, deviation, and share of budget, including a row for trades not assigned to any stage
+- **Trades** — add / edit / delete; amount auto-computes from price × quantity but stays editable; fees count towards the budget
+- **Price update** — inline, no dialog; also appends a price point (one per day) used for max drawdown
+- **Plan changes**, **thesis** and **review** — the latter two are free text you own; the plugin never rewrites them
+
+> Planning never overwrites history: stage status is *derived* from trades + current price, and editing a plan only touches stages that have no fills yet.
 
 ### Stock Holdings Module
 
-- The "Stock Holdings Treemap" section inside the dashboard — no view switching needed
+- The "Stock Holdings Treemap" section inside the allocation tab — no view switching needed
 - Use the **Edit Holdings** button in the dashboard header to open the manage modal; adding a holding only needs:
   - **Stock code**: A-share `600036` / HK `00700` / US `AAPL`
   - **Share count**: number of shares held
@@ -98,7 +123,7 @@ A focus timer sits directly under the metric cards — it is a stand-alone modul
 
 ### Market Signal Modules
 
-Three independent modules sit above the asset-allocation row — each is self-contained with its own refresh button. Nothing polls in the background: data is fetched only when you click 🔄, and the last result is cached in `Misc.md` so it's still visible next time you open the dashboard.
+Three independent modules sit next to the position-tracker card — each is self-contained with its own refresh button. Nothing polls in the background: data is fetched only when you click 🔄, and the last result is cached in `Misc.md` so it's still visible next time you open the dashboard.
 
 | Module | What it shows | Data source |
 |--------|---------------|-------------|
@@ -137,7 +162,8 @@ Open **Settings** → **Personal Finance Dashboard** to configure:
 | **Language** | Display language (English / 中文) | 中文 |
 | **Data Folder** | Vault-relative path for data files | `Finance` |
 | **Misc Data File Path** | Vault-relative path of the standalone file for non-yearly data (e.g. stock holdings) | `Finance/Misc.md` |
-| **Pomodoro Data File Path** | Vault-relative path of the dedicated file for pomodoro records | `Finance/Pomodoro.md` |
+| **Accumulation Folder** | Vault-relative folder holding one Markdown file per position plan | `Finance/Investment/Accumulation` |
+| **Reference FX Rates** | CNY per 1 HKD / USD, used only when live holding quotes have no rate | 0.92 / 7.10 |
 | **Asset Categories** | Comma-separated asset category names | 货币短债, 中长债, 黄金, 高股息, 港美A |
 | **Income Categories** | Comma-separated income category names | 工资, 副业, 投资收益, 其他收入 |
 | **Expense Categories** | Comma-separated expense category names | 房租, 餐饮, 交通, 娱乐, 其他支出 |
@@ -147,7 +173,7 @@ Open **Settings** → **Personal Finance Dashboard** to configure:
 
 ## 📄 Data Format
 
-All data is stored as plain Markdown files in your vault under the configured data folder (default: `Finance/`). Each year gets its own file (e.g., `Finance/2025.md`).
+All data is stored as plain Markdown files in your vault under the configured data folder (default: `Finance/`). Each year gets its own file (e.g., `Finance/2025.md`); each position plan gets its own file too.
 
 ### File Structure
 
@@ -157,8 +183,11 @@ your-vault/
     ├── 2024.md
     ├── 2025.md
     ├── 2026.md
-    ├── Misc.md      ← non-yearly data (stock holdings, signal caches)
-    └── Pomodoro.md  ← pomodoro records (own file, own write path)
+    ├── Misc.md                        ← non-yearly data (holdings, signal caches)
+    └── Investment/
+        └── Accumulation/
+            ├── plans/                 ← one file per plan, e.g. 600519-pl_7f3k2m9q.md
+            └── archive/               ← archived plans live here
 ```
 
 ### Markdown Format
@@ -252,20 +281,66 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 - `Dividend Yields` — `DivType` is `semi` (annual + interim) or `annual`; an empty `Pending` cell means the latest annual report is already implemented
 - `ETF Premiums` — `Premium%` is vs the latest published NAV (negative = discount); `Scale` is in 100M CNY
 
-**Pomodoro records** — a dedicated file (default `Finance/Pomodoro.md`, configurable), written by the timer only, one aggregated row per day (oldest first):
+#### Accumulation plans — one file per plan
+
+A plan file is a flat YAML frontmatter plus four tables and two free-text sections:
 
 ```markdown
-# Pomodoro
+---
+id: pl_sample01
+name: 贵州茅台
+symbol: 600519
+market: CN
+assetType: stock
+currency: CNY
+createdAt: 2026-09-01
+totalBudget: 125000.00
+referencePrice: 1500
+currentPrice: 1290.88
+reserveRatio: 0
+amountMode: custom
+requireConfirmDefault: true
+---
 
-| Date | Count | Minutes |
-|------|-------|---------|
-| 2026-10-20 | 6 | 150 |
-| 2026-10-21 | 3 | 75 |
+# Stages
+
+| Order | Label | Kind | Mode | Anchor | Drop% | Target | Trigger | Planned | Confirm | ConfirmedAt | SkippedAt | SkipReason | VoidedAt |
+|------|------|------|----------|--------|-------|--------|--------|----------|--------|--------|----------|----------|----------|
+| 1 | 首次建仓 | first | drop | 1500 | 0.00 |  | 1500 | 10000.00 | true | 2026-09-12 |  |  |  |
+| 2 | 左侧补仓 -8% | left | drop | 1500 | 8.00 |  | 1380 | 15000.00 | false |  |  |  |  |
+
+# Trades
+
+| ID | Date | Stage | Side | Price | Quantity | Amount | Fee | Note |
+|----|------|------|------|------|----------|--------|-----|------|
+| pl_t0001 | 2026-09-12 | 1 | buy | 1402.5 | 7 | 9817.50 | 5.00 | 提前建仓 |
+
+# Prices
+
+| Date | Price | Note |
+|------|-------|------|
+| 2026-09-12 | 1402.5 | 建仓日 |
+
+# Adjustments
+
+| Date | Stage | Field | Before | After | Note |
+|------|------|-------|--------|--------|------|
+| 2026-10-25 | 3 | planned | 18000.00 | 20000.00 | 加深档位 |
+
+# Investment Thesis
+
+高股息 + 强现金流，20 倍以下分批建仓。
+
+# Review
+
+右侧确认未触发，未走到最深一档。
 ```
 
-- `Count` = completed focus sessions that day, `Minutes` = focused minutes (count × 25 by default)
-- Aborted or skipped sessions are not recorded; the file is only created once at least one session completes
-- Kept out of `Misc.md` on purpose: this section is written every 25 minutes, and isolating it narrows both the write radius and the iCloud sync conflict surface
+- Money is written with 2 decimals and **no thousands separators**; the currency lives in frontmatter
+- The `Trigger` column is a **read-only derived column** — it is always recomputed from `Anchor × (1 − Drop%)` (or `Target`), so editing it by hand has no effect. Anchor prices are locked at creation, which is why fills never shift the plan
+- Stage status (`pending` / `triggered` / `partial` / `completed`) is **derived** from trades + current price; only `SkippedAt`, `VoidedAt` and `ConfirmedAt` are persisted
+- Unknown frontmatter keys, unknown `#` sections and the two free-text sections are preserved verbatim
+- A file the parser cannot understand is reported and frozen (never overwritten) — see [docs/ACCUMULATION.md](docs/ACCUMULATION.md) for the full format, hand-editing rules and calculation definitions
 
 > 💡 **Tip**: Since data is plain Markdown, you can edit it directly in Obsidian or any text editor. The plugin will auto-detect changes and refresh.
 
@@ -276,25 +351,39 @@ Non-yearly data lives in a standalone file (default `Finance/Misc.md`). Each `#`
 ```
 src/
 ├── main.ts                     # Plugin entry point & lifecycle
-├── data-store.ts               # Data persistence (Markdown ↔ memory), incl. Misc.md holdings
-├── pomodoro-store.ts           # Pomodoro records: own file, own parser/serializer/watcher
-├── calculator.ts               # Pure computation layer
+├── data-store.ts               # Year files + Misc.md (holdings & signal caches)
+├── calculator.ts               # Pure computation layer for the yearly data
 ├── quote-service.ts            # Live quotes + FX rates (batched, qt.gtimg.cn)
 ├── index-signal-service.ts     # MA250 strategy signal (csindex.com.cn)
 ├── etf-premium-service.ts      # Nasdaq/S&P QDII ETF premiums (qt.gtimg.cn)
 ├── dividend-yield-service.ts   # TTM dividend yields (East Money + quotes)
+├── market-refresh.ts           # Single entry point for the four remote refreshes
+├── market-code.ts              # A-share exchange prefix table
 ├── models.ts                   # TypeScript interfaces & defaults
 ├── settings.ts                 # Obsidian settings tab
 ├── i18n.ts                     # Internationalization (en/zh)
 ├── utils.ts                    # Formatting & helper utilities
+├── accumulation/               # Position tracker — pure TS, no obsidian import
+│   ├── types.ts                # Plan / stage / trade / price models (integer cents)
+│   ├── money.ts                # Cent arithmetic & comma-free formatting
+│   ├── table.ts                # Markdown table I/O (empty cells preserved)
+│   ├── parser.ts               # frontmatter + sections → plan (tolerant)
+│   ├── serializer.ts           # plan → Markdown (round-trip safe)
+│   ├── calc.ts                 # Cost basis, budget, triggers, plan-vs-actual, drawdown
+│   ├── template.ts             # Default stage template & amount strategies
+│   ├── store.ts                # AccumulationStore: adapter IO, write queue, hash dedupe
+│   └── stats.ts                # Portfolio review statistics (batch 2, placeholder)
 ├── react/                      # Preact UI layer
-│   ├── dashboard-app.tsx       # Top-level dashboard component
+│   ├── dashboard-app.tsx       # Top-level dashboard component & tab state
 │   ├── responsive.tsx          # Container-driven layout (LayoutProvider / useLayout)
-│   ├── use-finance-data.ts     # Store subscription hook
+│   ├── masonry.tsx             # Desktop masonry grid (measured row spans)
+│   ├── use-finance-data.ts     # Yearly store subscription hook
+│   ├── use-accumulation-data.ts# Accumulation store subscription hook
 │   ├── chart.tsx               # Chart.js wrappers
 │   ├── holdings-chart.tsx      # Holdings treemap
-│   ├── components/             # Metric cards, tabs, tables (generic DataTable), market signal + pomodoro sections
-│   ├── forms/                  # Snapshot / cash flow / dividend / holding forms
+│   ├── components/             # Tabs, generic DataTable, metric cards, market signals,
+│   │                           #   and components/accumulation/* (card, list, detail, timeline…)
+│   ├── forms/                  # Snapshot / cash flow / dividend / holding / accumulation forms
 │   └── hooks/                  # use-quote-refresh
 ├── views/
 │   └── dashboard-view.tsx      # ItemView shell (createRoot mount)
@@ -303,17 +392,22 @@ src/
     ├── cash-flow-modal.tsx
     ├── dividend-modal.tsx
     ├── holding-modal.tsx
-    └── holdings-manage-modal.tsx
+    ├── holdings-manage-modal.tsx
+    ├── accumulation-plan-modal.tsx
+    └── accumulation-trade-modal.tsx
 ```
 
 ### Key Design Decisions
 
 - **Markdown as Source of Truth** — No proprietary database; data stays portable and human-readable
-- **Per-Year Files** — Keeps files manageable and allows easy year-over-year comparison
+- **Per-Year Files, Per-Plan Files** — Yearly data stays comparable year over year; a plan is its own file so hand-editing, archiving and diffing stay trivial
 - **Preact UI Layer** — Components are written with React-style JSX and run on Preact (esbuild aliases `react` → `preact/compat`); the view/modal shells stay native Obsidian (`ItemView` / `Modal` + `createRoot`)
 - **Container-Driven Responsive Layout** — A `ResizeObserver` on the view container derives a `full` / `compact` / `mobile` layout and dispatches it via a `data-layout` attribute + context; components consume that instead of guessing from the viewport (fixes the Obsidian split-pane mismatch)
-- **Observer Pattern** — `DataStore` notifies the UI on any data change for automatic re-rendering
+- **Observer Pattern** — `DataStore` and `AccumulationStore` each notify the UI on any data change for automatic re-rendering
 - **Manual Refresh, Cached to Disk** — Market data modules (quotes, index signal, dividend yields, ETF premiums) fetch only on demand and persist their last result to `Misc.md`, so the view stays current without background polling
+- **No Live Prices in the Tracker** — The position tracker deliberately takes manual prices only. It never places orders, and “price hit the trigger” is never treated as a buy signal
+- **Integer Cents** — All money in the tracker is stored as integer cents, rounded only at the parse/write boundary, so Markdown never accumulates float artefacts
+- **Derived Stage State** — Trades are the single source of truth: stage status is recomputed on read, which is what makes plan edits unable to corrupt history
 - **Cross-Year Writes** — Adding records to a different year automatically handles file switching
 
 ---
@@ -335,9 +429,9 @@ npm install
 npm run build
 ```
 
-The `fixture/` directory is a ready-to-use Obsidian vault with sample financial data (`Finance/2025.md`, `Finance/2026.md`, `Finance/Misc.md`). Open it as a vault in Obsidian and enable the plugin to start testing.
+The `fixture/` directory is a ready-to-use Obsidian vault with sample financial data (`Finance/2025.md`, `Finance/2026.md`, `Finance/Misc.md`) plus a sample position plan (`Finance/Investment/Accumulation/plans/600519-pl_sample01.md`). Open it as a vault in Obsidian and enable the plugin to start testing.
 
-> 💡 The vault's plugin folder (`fixture/.obsidian/plugins/personal-finance-dashboard`) is a symlink to `dist/`, so **`npm run build` is what refreshes the test vault** — reload the plugin in Obsidian afterwards to pick up the change. `npm run dev` only rebuilds the repo-root `main.js` in watch mode, which the fixture vault does not read. If you want watch-driven iteration, run `npm run setup-fixture` once — it re-points the fixture's plugin files directly at the repo-root build output (the next `npm run build` resets them back to `dist/`).
+> 💡 `npm run setup-fixture` points the fixture vault's three plugin files (`main.js` / `manifest.json` / `styles.css`) at the **repo-root build output** with file-level symlinks, so `npm run dev` alone is enough for watch-driven iteration — reload the plugin in Obsidian (Cmd/Ctrl+R) to pick up a rebuild. Never symlink the whole plugin folder: that has twice ended up pointing at `dist/` and silently loading a stale bundle.
 
 ### Build Commands
 
@@ -345,8 +439,13 @@ The `fixture/` directory is a ready-to-use Obsidian vault with sample financial 
 |---------|-------------|
 | `npm run build` | Production build — type check + minified bundle + copy to `dist/` |
 | `npm run dev` | Watch mode — incremental rebuild of the repo-root `main.js` |
+| `npm test` | Unit tests — bundles the pure modules with esbuild, then runs `node --test` |
 | `npm run setup-fixture` | Re-point the fixture vault's plugin files at the repo-root build output |
 | `npx tsc -noEmit -skipLibCheck` | Type checking only |
+
+### Tests
+
+`npm test` needs no test framework: `scripts/test.mjs` bundles the pure modules (`accumulation/*`, no `obsidian` import) into a temporary ESM bundle, then hands it to Node's built-in test runner. Covered: money parsing/formatting, moving weighted-average cost (partial sells, full liquidation, oversell), budget boundaries, stage status derivation, right-side confirmation, trigger-price anchoring, next-entry hints, insufficient-drawdown samples, cross-currency FX fallbacks, frontmatter tolerance, empty-cell column integrity, escaped pipes, unknown-key preservation, serialization idempotency, and `AccumulationStore` CRUD against an in-memory adapter.
 
 ### Releasing
 
@@ -359,6 +458,7 @@ Push a tag (e.g. `git tag v1.0.13 && git push origin v1.0.13`) — the [release 
 - **esbuild** — fast bundling (watch mode + minified production builds)
 - **Chart.js** 4 — interactive charts, plus `chartjs-chart-treemap` for the holdings treemap
 - **Obsidian API** — plugin framework (declared as an external module)
+- **node:test** — unit tests, no extra dependency
 
 ---
 

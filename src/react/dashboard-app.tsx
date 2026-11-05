@@ -5,6 +5,7 @@ import { PieChart, BarChart, TotalAssetsChart } from "./chart";
 import { HoldingsTreemapChart } from "./holdings-chart";
 import { useQuoteRefresh } from "./hooks/use-quote-refresh";
 import { LayoutProvider } from "./responsive";
+import { Masonry } from "./masonry";
 import { Header } from "./components/header";
 import { Tabs } from "./components/tabs";
 import { MetricCards } from "./components/metric-cards";
@@ -15,6 +16,8 @@ import { AssetAllocationTable } from "./components/asset-allocation";
 import { MonthlyOverviewTable } from "./components/monthly-overview";
 import { DividendSummaryTable } from "./components/dividend-summary";
 import { CashFlowDetailsTable } from "./components/cash-flow-details";
+import { AccumulationCard } from "./components/accumulation/accumulation-card";
+import { AccumulationModule, type AccScreen } from "./components/accumulation/accumulation-module";
 import { t } from "../i18n";
 import { autoRefreshAll } from "../market-refresh";
 import type { FinanceAppProps } from "./types";
@@ -67,10 +70,16 @@ export function FinanceApp({
   onEditDividend,
   onEditHolding,
   onRefreshData,
+  accumulationStore,
+  onAddAccumulationPlan,
+  onEditAccumulationPlan,
+  onOpenAccumulationTrade,
 }: FinanceAppProps) {
   const { currentMonth, currentYear } = useFinanceData(store);
   const [maskNumbers, setMaskNumbers] = useState(false);
   const [tab, setTab] = useState<FinanceTab>(readStoredTab);
+  // 工作台内的视图栈：null = 市场信号瀑布流；否则是建仓视图（list / detail）
+  const [accScreen, setAccScreen] = useState<AccScreen | null>(null);
   const { refreshing, refreshQuotes } = useQuoteRefresh(store);
 
   // 打开视图时把所有需要远程拉取的数据各拉一遍：
@@ -133,16 +142,45 @@ export function FinanceApp({
         ]}
       />
 
-      {/* 工作台：三个市场信号模块。
-          常驻挂载、靠 CSS 隐藏 —— 切回时不丢各卡的筛选/展开状态。 */}
-      <div className="finance-tab-panel" data-active={tab === "workbench"}>
-        {/* 市场信号区：红利低波年线信号 / TTM 股息率 / ETF 溢价监控（各自独立模块，手动刷新） */}
-        <div className="finance-market-grid">
+      {/* 工作台：市场信号瀑布流 + 建仓卡。
+          常驻挂载、靠 CSS 隐藏 —— 切回时不丢各卡的筛选/展开状态。
+          点建仓卡进入建仓视图时，整块面板换成视图栈（list / detail），左上角返回。 */}
+      <div
+        className="finance-tab-panel"
+        data-active={tab === "workbench" && accScreen === null}
+      >
+        <Masonry maxCols={3}>
+          <AccumulationCard
+            store={accumulationStore}
+            maskNumbers={maskNumbers}
+            holdings={holdings}
+            fxReferenceRates={settings.fxReferenceRates}
+            onOpenAll={() => setAccScreen({ kind: "list" })}
+            onOpenPlan={(planId) => setAccScreen({ kind: "detail", planId })}
+            onCreate={() => onAddAccumulationPlan?.()}
+          />
           <IndexSignalSection store={store} />
           <DividendYieldSection store={store} maskNumbers={maskNumbers} />
           <EtfPremiumSection store={store} />
-        </div>
+        </Masonry>
       </div>
+
+      {/* 建仓视图覆盖整个工作台面板：信号卡只被隐藏、不卸载，
+          返回时筛选/展开状态还在。无 Chart.js，不必担心 0 宽画布。 */}
+      {tab === "workbench" && accScreen !== null ? (
+        <AccumulationModule
+          store={accumulationStore}
+          screen={accScreen}
+          maskNumbers={maskNumbers}
+          holdings={holdings}
+          fxReferenceRates={settings.fxReferenceRates}
+          onNavigate={setAccScreen}
+          onBack={() => setAccScreen(null)}
+          onEditPlan={(plan) => onEditAccumulationPlan?.(plan)}
+          onOpenTrade={(planId, trade) => onOpenAccumulationTrade?.(planId, trade)}
+          onCreate={() => onAddAccumulationPlan?.()}
+        />
+      ) : null}
 
       {/* 资产配置：条件渲染而非隐藏 —— 三张 Chart 在 display:none 容器里会以
           0 宽初始化，切回来未必能自动 resize，重建更稳妥。
@@ -162,10 +200,11 @@ export function FinanceApp({
             onRefresh={() => onRefreshData?.()}
           />
 
-          <MetricCards metrics={metrics} maskNumbers={maskNumbers} />
+          {/* 桌面瀑布流：hero 占两栏，其余卡片按高度自动分配列；
+              两张宽表（月度总览 / 现金流）列数太多，放在瀑布流下方整行铺满。 */}
+          <Masonry maxCols={3}>
+            <MetricCards metrics={metrics} maskNumbers={maskNumbers} />
 
-          {/* 资产配置 + 股息汇总 + 股票持仓 Treemap 同一行 */}
-          <div className="finance-summary-grid">
             <AssetAllocationTable rows={allocRows} maskNumbers={maskNumbers} />
             <DividendSummaryTable
               year={currentYear}
@@ -213,10 +252,7 @@ export function FinanceApp({
                 </div>
               )}
             </div>
-          </div>
 
-          {/* 三个图表放在表格下方 */}
-          <div className="finance-charts-row">
             <ChartContainer icon="pie-chart" title={t("chart.assetDistribution")}>
               <PieChart snapshot={snapshot} maskNumbers={maskNumbers} />
             </ChartContainer>
@@ -235,7 +271,7 @@ export function FinanceApp({
                 maskNumbers={maskNumbers}
               />
             </ChartContainer>
-          </div>
+          </Masonry>
 
           <MonthlyOverviewTable
             rows={overviewRows}

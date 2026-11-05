@@ -90,6 +90,61 @@ export class FinanceSettingTab extends PluginSettingTab {
       });
 
     // ============================================================
+    // Accumulation folder (one Markdown file per plan)
+    // ============================================================
+    new Setting(containerEl)
+      .setName(t("settings.accumulationFolderPath"))
+      .setDesc(t("settings.accumulationFolderPathDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("Finance/Investment/Accumulation")
+          .setValue(settings.accumulationFolderPath)
+          .onChange(async (value) => {
+            const trimmed = value.trim();
+            if (trimmed.length === 0) return;
+            // 计划文件绝不能长成 2025.md，否则会被 DataStore 当年份文件重载
+            if (/(\d{4})\.md$/i.test(trimmed)) {
+              new Notice(t("settings.miscDataFilePathInvalid"));
+              return;
+            }
+            settings.accumulationFolderPath = trimmed;
+            this.plugin.accumulationStore.setFolderPath(trimmed);
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.style.width = "300px";
+      });
+
+    // ============================================================
+    // Reference FX rates (only used when holding quotes have no rate)
+    // ============================================================
+    containerEl.createEl("h3", { text: t("settings.fxRates") });
+    containerEl.createEl("p", {
+      text: t("settings.fxRatesDesc"),
+      cls: "setting-item-description",
+    });
+
+    const fxFields: Array<{ key: "HKD" | "USD"; labelKey: "settings.fxRate.hkd" | "settings.fxRate.usd" }> = [
+      { key: "HKD", labelKey: "settings.fxRate.hkd" },
+      { key: "USD", labelKey: "settings.fxRate.usd" },
+    ];
+    for (const field of fxFields) {
+      new Setting(containerEl).setName(t(field.labelKey)).addText((text) => {
+        text
+          .setValue(String(settings.fxReferenceRates[field.key]))
+          .onChange(async (value) => {
+            const num = parseFloat(value);
+            if (!isNaN(num) && num > 0) {
+              settings.fxReferenceRates[field.key] = num;
+              await this.plugin.saveSettings();
+            }
+          });
+        text.inputEl.type = "number";
+        text.inputEl.step = "0.01";
+        text.inputEl.style.width = "100px";
+      });
+    }
+
+    // ============================================================
     // Target Allocations
     // ============================================================
     containerEl.createEl("h3", { text: t("settings.targetAllocation") });

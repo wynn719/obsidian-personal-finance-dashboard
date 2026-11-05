@@ -10,6 +10,8 @@ import {
   StockHolding,
 } from "../models";
 import { FinanceApp } from "../react/dashboard-app";
+import type { AccumulationStore } from "../accumulation/store";
+import type { AccumulationPlan, AccumulationTrade } from "../accumulation/types";
 import { t } from "../i18n";
 
 export const VIEW_TYPE_FINANCE = "finance-dashboard-view";
@@ -18,6 +20,7 @@ export class FinanceDashboardView extends ItemView {
   private store: DataStore;
   private calculator: FinanceCalculator;
   private settings: FinanceSettings;
+  private accumulationStore: AccumulationStore;
   private root: Root | null = null;
 
   // Callbacks for opening modals (injected from main plugin)
@@ -30,17 +33,24 @@ export class FinanceDashboardView extends ItemView {
   public onEditDividend: ((record: DividendRecord) => void) | null = null;
   public onEditHolding: ((holding: StockHolding) => void) | null = null;
   public onRefreshData: (() => Promise<void>) | null = null;
+  public onAddAccumulationPlan: (() => void) | null = null;
+  public onEditAccumulationPlan: ((plan: AccumulationPlan) => void) | null = null;
+  public onOpenAccumulationTrade:
+    | ((planId: string, trade?: AccumulationTrade) => void)
+    | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
     store: DataStore,
     calculator: FinanceCalculator,
     settings: FinanceSettings,
+    accumulationStore: AccumulationStore,
   ) {
     super(leaf);
     this.store = store;
     this.calculator = calculator;
     this.settings = settings;
+    this.accumulationStore = accumulationStore;
   }
 
   getViewType(): string {
@@ -79,6 +89,10 @@ export class FinanceDashboardView extends ItemView {
         onEditDividend={this.onEditDividend}
         onEditHolding={this.onEditHolding}
         onRefreshData={this.onRefreshData}
+        accumulationStore={this.accumulationStore}
+        onAddAccumulationPlan={this.onAddAccumulationPlan}
+        onEditAccumulationPlan={this.onEditAccumulationPlan}
+        onOpenAccumulationTrade={this.onOpenAccumulationTrade}
       />,
     );
   }

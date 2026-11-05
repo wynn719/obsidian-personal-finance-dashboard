@@ -1,5 +1,7 @@
 import type { DataStore } from "../data-store";
 import type { FinanceCalculator } from "../calculator";
+import type { AccumulationStore } from "../accumulation/store";
+import type { AccumulationPlan, AccumulationTrade } from "../accumulation/types";
 import type {
   FinanceSettings,
   AssetSnapshot,
@@ -33,6 +35,11 @@ export interface FinanceAppProps {
   onEditDividend: ((r: DividendRecord) => void) | null;
   onEditHolding: ((h: StockHolding) => void) | null;
   onRefreshData: (() => Promise<void>) | null;
+  /** 分批建仓（Position Tracker） */
+  accumulationStore: AccumulationStore;
+  onAddAccumulationPlan: (() => void) | null;
+  onEditAccumulationPlan: ((plan: AccumulationPlan) => void) | null;
+  onOpenAccumulationTrade: ((planId: string, trade?: AccumulationTrade) => void) | null;
 }
 
 // ===== Header =====

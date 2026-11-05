@@ -9,6 +9,8 @@ import {
 } from "./models";
 import { DataStore } from "./data-store";
 import { FinanceCalculator } from "./calculator";
+import { AccumulationStore } from "./accumulation/store";
+import type { AccumulationPlan, AccumulationTrade } from "./accumulation/types";
 import {
   FinanceDashboardView,
   VIEW_TYPE_FINANCE,
@@ -18,6 +20,8 @@ import { CashFlowModal } from "./modals/cash-flow-modal";
 import { DividendModal } from "./modals/dividend-modal";
 import { HoldingModal } from "./modals/holding-modal";
 import { HoldingsManageModal } from "./modals/holdings-manage-modal";
+import { AccumulationPlanModal } from "./modals/accumulation-plan-modal";
+import { AccumulationTradeModal } from "./modals/accumulation-trade-modal";
 import { FinanceSettingTab } from "./settings";
 import { setLocale, t } from "./i18n";
 
@@ -25,6 +29,7 @@ export default class FinanceDashboardPlugin extends Plugin {
   settings: FinanceSettings = DEFAULT_SETTINGS;
   dataStore: DataStore = null!;
   calculator: FinanceCalculator = null!;
+  accumulationStore: AccumulationStore = null!;
 
   async onload(): Promise<void> {
     // Load settings
@@ -39,6 +44,14 @@ export default class FinanceDashboardPlugin extends Plugin {
     await this.dataStore.load();
     this.dataStore.startWatching();
 
+    // Initialize the accumulation (position tracker) store
+    this.accumulationStore = new AccumulationStore(
+      this,
+      this.settings.accumulationFolderPath,
+    );
+    await this.accumulationStore.load();
+    this.accumulationStore.startWatching();
+
     // Initialize calculator
     this.calculator = new FinanceCalculator(this.dataStore);
 
@@ -49,6 +62,7 @@ export default class FinanceDashboardPlugin extends Plugin {
         this.dataStore,
         this.calculator,
         this.settings,
+        this.accumulationStore,
       );
 
       // Wire up modal callbacks
@@ -67,7 +81,13 @@ export default class FinanceDashboardPlugin extends Plugin {
       view.onRefreshData = async () => {
         await this.dataStore.reload();
         await this.dataStore.reloadMisc();
+        await this.accumulationStore.reload();
       };
+      view.onAddAccumulationPlan = () => this.openAccumulationPlanModal();
+      view.onEditAccumulationPlan = (plan: AccumulationPlan) =>
+        this.openAccumulationPlanModal(plan);
+      view.onOpenAccumulationTrade = (planId: string, trade?: AccumulationTrade) =>
+        this.openAccumulationTradeModal(planId, trade);
 
       return view;
     });
@@ -109,6 +129,12 @@ export default class FinanceDashboardPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "add-accumulation-plan",
+      name: t("command.addAccumulationPlan"),
+      callback: () => this.openAccumulationPlanModal(),
+    });
+
+    this.addCommand({
       id: "refresh-finance-data",
       name: t("command.refreshData"),
       callback: async () => {
@@ -123,6 +149,7 @@ export default class FinanceDashboardPlugin extends Plugin {
 
   onunload(): void {
     this.dataStore.stopWatching();
+    this.accumulationStore.stopWatching();
   }
 
   // ============================================================
@@ -132,6 +159,18 @@ export default class FinanceDashboardPlugin extends Plugin {
   async loadSettings(): Promise<void> {
     const savedData = await this.loadData();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData);
+
+    // fxReferenceRates 是嵌套对象：Object.assign 是浅合并，会让设置页的修改
+    // 直接写进 DEFAULT_SETTINGS 的同一个对象里，旧用户升级也拿不到完整默认值。
+    const savedFx = (savedData as { fxReferenceRates?: Partial<Record<"HKD" | "USD", number>> } | null)
+      ?.fxReferenceRates;
+    this.settings.fxReferenceRates = {
+      HKD: savedFx?.HKD ?? DEFAULT_SETTINGS.fxReferenceRates.HKD,
+      USD: savedFx?.USD ?? DEFAULT_SETTINGS.fxReferenceRates.USD,
+    };
+    if (!this.settings.accumulationFolderPath) {
+      this.settings.accumulationFolderPath = DEFAULT_SETTINGS.accumulationFolderPath;
+    }
 
     // Migrate old dataFilePath to dataFolderPath
     if (
@@ -209,5 +248,16 @@ export default class FinanceDashboardPlugin extends Plugin {
     new HoldingsManageModal(this.app, this.dataStore, (holding) =>
       this.openHoldingModal(holding),
     ).open();
+  }
+
+  private openAccumulationPlanModal(existingPlan?: AccumulationPlan): void {
+    new AccumulationPlanModal(this.app, this.accumulationStore, existingPlan).open();
+  }
+
+  private openAccumulationTradeModal(
+    planId: string,
+    existingTrade?: AccumulationTrade,
+  ): void {
+    new AccumulationTradeModal(this.app, this.accumulationStore, planId, existingTrade).open();
   }
 }

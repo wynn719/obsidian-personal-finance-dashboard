@@ -193,6 +193,10 @@ export interface FinanceSettings {
   dataFolderPath: string;
   /** Full path to the standalone Markdown file storing non-yearly data (relative to vault root, includes file name) */
   miscDataFilePath: string;
+  /** Folder for accumulation plan files (one Markdown file per plan) */
+  accumulationFolderPath: string;
+  /** Fallback CNY-per-unit FX rates for cross-currency aggregation */
+  fxReferenceRates: { HKD: number; USD: number };
   /** Target asset allocation percentages */
   targetAllocations: TargetAllocation[];
   /** Asset categories */
@@ -207,6 +211,8 @@ export const DEFAULT_SETTINGS: FinanceSettings = {
   locale: "zh",
   dataFolderPath: "Finance",
   miscDataFilePath: "Finance/Misc.md",
+  accumulationFolderPath: "Finance/Investment/Accumulation",
+  fxReferenceRates: { HKD: 0.92, USD: 7.1 },
   targetAllocations: [
     { category: "货币短债", percentage: 25 },
     { category: "中长债", percentage: 20 },

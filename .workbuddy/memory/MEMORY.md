@@ -2,84 +2,95 @@
 
 Obsidian 个人财务仪表盘插件。架构基础见 `CODEBUDDY.md`，此处只记**决策、坑、操作口径**。
 
-## 技术栈要点
-- Preact 10（preact/compat 别名，原 React 18 迁来；类型仍用 @types/react）。settings.ts 仍是原生 Setting
-- **esbuild 0.17 无原生 alias** → 用 `preactAlias` resolve 插件（createRequire 解析绝对路径）。测试可用 `--alias:obsidian=<stub>` 在 node 跑纯函数
-- 产物 main.js 377KB / styles.css 63KB（2026-11-02，移除番茄钟后）
+## 技术栈
+- Preact 10（preact/compat 别名；类型仍用 @types/react）。settings.ts 仍是原生 Setting
+- esbuild 0.17 无原生 alias → `preactAlias` resolve 插件。测试可用 `--alias:obsidian=<stub>` 在 node 跑纯函数
+- 产物：main.js / styles.css 在仓库根，`npm run build` 后 cp 进 dist/
 
 ## 响应式：顶层下发 data-layout
-- `responsive.tsx` 的 LayoutProvider 用 ResizeObserver 测**容器宽度**（非视口）→ 修掉 Obsidian 分栏时视口宽叶片窄的失配
+- `responsive.tsx` 的 LayoutProvider 用 ResizeObserver 测**容器宽度**（非视口）→ 修掉分栏时视口宽叶片窄的失配
 - 派生 `full|compact|mobile` → 根节点 `data-layout`（CSS）+ Context（`useLayout()`，JS 行为）
-- 断点（容器宽）：full ≥1100 / compact 768–1099 / mobile <768，常量集中一处
+- 断点（容器宽）：full ≥1100 / compact 768–1099 / mobile <768
 - CSS **无宽度类 @media**，全用 `[data-layout="x"]`；只留 hover:none / reduced-motion / print
-- 通用表 `components/data-table.tsx`：`DataTable<T>` 列模型驱动，四张表复用，内部自己消费 useLayout
+- 通用表 `components/data-table.tsx`：`DataTable<T>` 列模型驱动，内部自己消费 useLayout
+
+## 大屏瀑布流
+- `.finance-masonry`：`grid-auto-rows:1px; grid-auto-flow:row dense`，`masonry.tsx` 逐项量高写 `gridRowEnd`；gutter 烘进跨度、子项 `margin:0`（手机端才恢复 16）
+- **列数 = clamp(1, floor((W+16)/(MIN_COL+16)), 3)**，`MIN_COL = 460`。阈值：≥1412 三列 / 936–1411 两列 / 否则一列
+- MIN_COL 不能再低：资产配置表 6 列需约 430px 内容宽 → 卡 ≥454；ETF 桌面 5 列需约 420
+- hero（`data-span="2"`）跨两栏；跨栏在 JS 里判 `cols>=2`（CSS span 2 在 1 列网格会生成隐式列）
+- 宽度 0 守卫：隐藏 panel 里 `clientWidth===0` 跳过；两张宽表（月度总览 / 现金流）不进 masonry
+- 新增卡片：放进 `<Masonry maxCols={3}>`，`.finance-section` 自带卡片壳；**不要给子项写 margin**
 
 ## 日常开发环境（重要）
-- fixture 用**三个文件级软链**（`npm run setup-fixture`）：main.js / manifest.json / styles.css → 仓库根。日常只开 `npm run dev`，改完 Obsidian 里 Cmd+R 即生效，**不用 build 不用 cp**
-- ⚠️ **dev 没跑时改源码，`main.js` 不会更新，但 `styles.css` 是直读源文件** → 会看到「样式生效、JS 旧版」的假象。核对产物新旧先看 `ls -la main.js` mtime vs 源码 mtime
-- ⚠️ **esbuild 默认 charset=ASCII，中文被转义成 `\uXXXX`** → 用中文字串 grep 产物必然 0 命中。核对要用 i18n key / class 名 / 函数名等 ASCII 标识（如 `etfPremium.viewAll`、`finance-etf-viewall`）
-- ⚠️ 别用「整个目录软链」（曾两次指向 dist，读的不是当前输出）。脚本已加保护：遇目录软链先摘链接本身
-- 本 worktree 的 fixture **未在 Obsidian 注册**，首次需 Open folder as vault；已注册那个指向 `~/Codes/githubcode/...`（另一个 checkout）
-- **typora 真实 vault 不做自动同步**（用户明确要求），需要时用户自己复制过去（iCloud vault 不适合软链）
-- ⚠️ 用户 Mac 装腾讯企业代理扩展 `com.tencent.NGNAppProxy.NGNAppProxyEx`，DNS 走内网 10.28.0.21。向 10.x 的 DNS 查询被视为「本地网络访问」，**应用须获 系统设置→隐私与安全性→本地网络 授权**；Obsidian 曾因此外部请求全失败。排查：`scutil --dns` / `systemextensionsctl list` / `scutil --proxy` / `curl --noproxy '*'`
+- fixture 用**三个文件级软链**（`npm run setup-fixture`）：main.js / manifest.json / styles.css → 仓库根。日常只开 `npm run dev`，Obsidian 里 Cmd+R 生效
+- ⚠️ **dev 没跑时改源码，`main.js` 不更新，但 `styles.css` 直读源文件** → 「样式生效、JS 旧版」假象。核对看 mtime
+- ⚠️ **esbuild charset=ASCII，中文转义成 `\uXXXX`** → 中文字串 grep 产物必然 0 命中，要用 i18n key / class 名核对
+- ⚠️ 别用「整个目录软链」（曾两次指向 dist）。脚本已加保护
+- 本 worktree 的 fixture **未在 Obsidian 注册**，首次需 Open folder as vault
+- **typora vault 不自动同步**：他说「同步到 Typora」时手动 cp 三产物到 `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/typora/.obsidian/plugins/personal-finance-dashboard/`，**不动 data.json**，cp 后 md5 校验，不软链
+- ⚠️ 腾讯企业代理扩展 `com.tencent.NGNAppProxy.NGNAppProxyEx`，DNS 走 10.28.0.21；向 10.x 查询视为「本地网络访问」，应用须获 系统设置→隐私与安全性→本地网络 授权。Obsidian 曾因此外部请求全失败
 
 ## 分支与提交
-- `main` @ `4310b76`，**与 origin/main 已同步**（2026-10-22 push 完，含 7 个提交：工作台改版 / 删 ETF 空态按钮 / 卡片体系统一 / 圆角与底部留白 / 打开自动拉取 / 番茄钟字号）
-- 身份：本仓库 local `wynn719 <762671261@qq.com>`（全局是工作身份 wynnezheng@tencent.com，勿混用）
-- Release 由 `.github/workflows/release.yml` 在 push tag 时自动构建。⚠️ tag 已到 v1.0.12，但 manifest version 一直 1.0.0，口径未修
+- `main` 与 origin/main 已同步。身份：本仓库 local `wynn719 <762671261@qq.com>`（全局是工作身份，勿混用）
+- Release 由 `.github/workflows/release.yml` 在 push tag 时构建。⚠️ tag 已到 v1.0.12，manifest version 一直 1.0.0，口径未修
 
 ## 页面 tab：工作台 / 资产配置
 - tab 状态在 `FinanceApp`（localStorage `finance-dashboard:active-tab`，默认 workbench）
-- 工作台 = `.finance-market-grid`（年线 / TTM / ETF 三卡，桌面一行三栏）；资产配置 = MetricCards + 图表 + 月度总览 + 现金流
-- **挂载策略不同**：工作台 panel 常驻仅 CSS 隐藏（切回不丢卡内筛选 / 展开状态）；资产配置 panel 条件渲染（Chart.js 在 display:none 里按 0 宽初始化，切回不自愈）
-- ⚠️ 卡片壳选择器多一层：`.finance-dashboard > .finance-tab-panel > .finance-section`，忘写会丢白底/边框/阴影
-- Header（年份 + 全部操作按钮）整体在资产配置 panel 内；工作台顶部只有 tab 条 + 三信号卡
-- 整页调试验证：esbuild 把 FinanceApp + obsidian stub 打成浏览器 bundle + playwright 截图。**必须显式给 `jsx:"automatic"`、`jsxImportSource:"preact"`、`nodePaths:[项目/node_modules]`**，否则 React is not defined。原脚本在 `/tmp/pomo-v2/`（已清，需要时重写）
-- 番茄钟移除后工作台只剩三卡、桌面下方大片留白 → 建议过「把信号区并回单页、去掉 tab」，用户未拍板，保持现状
-
-## 番茄钟（2026-11-02 已整体移除，不要再加回）
-- 删掉：`src/react/components/pomodoro.tsx`、`src/pomodoro-store.ts`、`FinanceApp.pomodoroStore` 全链路（main / dashboard-view / types / dashboard-app）、settings 的 `pomodoroDataFilePath`、i18n `pomodoro.*` 与 `settings.pomodoroDataFilePath*`、styles.css 第 13.6 节整段（542 行）
-- 产物变化：main.js 388KB → 377KB，styles.css 76KB → 63KB
-- ⚠️ vault 里的 `Finance/Pomodoro.md` **没删**（历史记录保留，插件不再读写）；要清理得用户自己动手
-- 想恢复：`git show 4310b76` 是移除前最后一个番茄钟相关提交，可整体反查
+- 工作台 = `.finance-masonry` 内三张信号卡；资产配置 = Header + masonry（hero 跨两栏 → 资产配置 → 股息汇总 → 持仓 Treemap → 三图表）+ 月度总览 + 现金流
+- **挂载策略不同**：工作台 panel 常驻仅 CSS 隐藏（切回不丢卡内状态）；资产配置条件渲染（Chart.js 在 display:none 里按 0 宽初始化，切回不自愈）
+- **卡片壳已全局化**：挂在 `.finance-section` 上，不依赖容器。Header（年份 + 全部操作按钮）在资产配置 panel 内
 
 ## 市场信号：三个 service 的硬口径
-- **打开视图自动拉一遍**（2026-10-22）：`src/market-refresh.ts` 是四项远程数据的唯一入口（年线 / TTM / ETF / 持仓行情），`FinanceApp` 挂载时 `useEffect` 调 `autoRefreshAll(store)`。四步**串行**执行（避免并发写 Misc.md 互相覆盖），单项失败只 `console.error`，页面继续用缓存值。`AUTO_REFRESH_MIN_INTERVAL = 5min` 做去重，避免反复开关视图狂刷接口；`running` 保证同一时刻只有一轮
-- 卡片刷新按钮仍保留（强制刷新），但四个组件与 `useQuoteRefresh` 都已改为调 market-refresh 的 helper，**不要再在组件里直接调 service 的 fetch**
-- 年线信号：中证官网 index-perf（UA/Referer 优先，失败降级默认头）；MA250/偏离度端上算；区间 buy<0 / hold 0–3 / sell 3–6 / overheat>6；按「OHLC 四价全同」剔休市行
-- TTM 股息率：东财 RPT_SHAREBONUS_DET 批量 in + quote-service 现价；口径 1:1 复刻 ttm_yield.py（实施分配+有除权日、最近年报+最近中期、pending 检测）。与 westock 实测一致（招行 2.016）
-- ETF 溢价：腾讯 qt.gtimg.cn 批量 16 只；字段 **[44]=规模(亿) [77]=溢价率(%) [78]=IOPV**
-- 数据存 Misc.md，Parser 按 `#` 分节 dispatch（parseTableRowKeepEmpty 保空列）；Serializer 三 section 已 export 便于 round-trip 测试
+- `src/market-refresh.ts` 是四项远程数据的唯一入口（年线 / TTM / ETF / 持仓行情），`FinanceApp` 挂载时 `autoRefreshAll(store)`。四步**串行**（避免并发写 Misc.md 互相覆盖），单项失败只 `console.error`。`AUTO_REFRESH_MIN_INTERVAL = 5min` 去重
+- 卡片刷新按钮保留（强制刷新），但组件与 `useQuoteRefresh` 都改调 market-refresh 的 helper，**不要再在组件里直接调 service 的 fetch**
+- 年线信号：中证官网 index-perf；MA250/偏离度端上算；buy<0 / hold 0–3 / sell 3–6 / overheat>6；按「OHLC 四价全同」剔休市行
+- TTM 股息率：东财 RPT_SHAREBONUS_DET + quote-service 现价；1:1 复刻 ttm_yield.py
+- ETF 溢价：腾讯 qt.gtimg.cn 批量；字段 **[44]=规模(亿) [77]=溢价率(%) [78]=IOPV**
+- 数据存 Misc.md，Parser 按 `#` 分节 dispatch（`parseTableRowKeepEmpty` 保空列）
 
-## 色口径（2026-10-22 拍板）
-- **卡片外观全端统一（2026-10-22）**：`--fd-card-radius: 12px`（18 嫌太圆，已收敛）+ `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。规格由 token 单点定义（原取自番茄钟卡，该模块已移除），落点 = `.finance-metric-card` / section 壳（4 组选择器）/ `.finance-chart-container` / `.finance-dt-card` / mobile 的 hero·dy·etf·canvas·holdings-empty。**卡片圆角与控件圆角分开**：按钮/胶囊/输入框仍用 `--fd-radius-sm/md`，不要混。padding 曾有三种值（桌面 16、移动 12、番茄钟/dy/etf 16），现统一 12，**移动端不要再给单个模块写 padding**
-- 去描边后**画布必须染灰**：`.finance-dashboard` 与视图容器（`.view-content`）都吃 `--fd-page-bg`，**桌面端也染**（原先只染 mobile）。不染灰 → 白卡在 `--background-primary` 上直接隐形。连带删掉 `.finance-metric-card:hover` / `.finance-chart-container:hover` 的 border-color 反馈（没有描边可高亮）
-- **一个模块只允许一层卡片**（2026-10-22 追加）：卡内不得再出现白框或灰框。为此 `.finance-table-wrapper` 去掉描边与底色、`.finance-empty` 去掉灰底虚线框与内边距、`.finance-section > .finance-table` 去掉描边。表头灰底 + 行分隔线足以撑结构
-- **内容区不带内边距，标题→内容 `--fd-title-content-gap: 8px`**（2026-10-22）：卡片 padding 是唯一缩进线。`.finance-empty` / `.finance-holdings-empty` padding 归零；表格首尾单元格 `padding-left/right: 0`（桌面与移动两套表都做了），这样标题、表头、单元格落在同一条左/右缘线上。各模块原有的 `h2 { margin-bottom }` 覆盖（mobile 2px、番茄钟 10px）已全部删除，统一走 token。唯一保留自带 padding 的是 `.finance-etf-alert`（琥珀提示条是独立色块，不是内容容器）
-- **移动端图表卡已改回有壳**：`.finance-chart-container` 在 mobile 恢复白底 + 16 padding，`canvas` 反而去掉底色/圆角/阴影/内边距（此前是外壳透明、canvas 自己当卡 → 标题浮在灰底上）。连带 `[data-layout=mobile] .finance-holdings-empty` 不再自带白卡
-- **卡片标题统一（2026-10-22）**：`--fd-card-title-size / -weight / -line`，桌面 16px/700/1.5、移动端 14px/600/1.5（`[data-layout="mobile"]` 上覆盖 token）。原先 `1.02em` + 各模块零散覆盖（mobile 17px、dy/etf 与番茄钟 14px）导致同页两种字号，现已全部删掉，**不要再给单个模块写 h2 font-size**
-- **标题图标间距统一 `--fd-title-icon-gap: 8px`**（2026-10-22）：h2 与 `h2 > span`、`.finance-holdings-title span` 三处都用这个 token。曾有三种值（番茄钟 0 / 市场三卡 4 / 其余 8）。`.finance-count-chip` 的 `margin-left` 已删，间距交给父级 flex 的 gap
-- **每个卡片标题都必须有 icon**：移动端信号卡的紧凑分支（`.finance-signal-compact`）曾漏掉，标题只有文字；现用 `.finance-signal-title` 包 `Icon + name`，gap 走同一 token。新增卡片标题时记得带上
-- **标题图标垂直居中**：`.finance-icon` 设 `display:inline-flex + line-height:0`（容器高度=svg 高度），且 `.finance-section h2 > span` 也要 `inline-flex`——否则包裹层内图标按基线落位，比文字低 1~2px（番茄钟标题没走 `.finance-holdings-title` 就是这个坑）
-- **图标颜色别依赖继承**（2026-10-22 踩过）：Obsidian 主题的 `.svg-icon`（setIcon 会给 svg 加这个类）会用 `--icon-color` 直接给 svg 上色，把 button/span 继承下来的颜色顶掉。凡是不在 `h2` 内的图标（如移动端信号卡 `.finance-signal-head` 里的刷新按钮）拿不到 `.finance-section h2 .finance-icon svg` 那条 muted 规则，就会和同级按钮不同色。解法：`.finance-icon svg, .finance-icon svg.svg-icon { color: currentColor }` 做兜底，关键控件再显式写 `(0,2,1)` 以上特异性的 color
-- **买入区 = 绿**（`--fd-down`），与偏离度同色系；此前桌面是 accent 蓝导致跨端不一致
-- 高股息线 **5%**（`DIVIDEND_YIELD_HIGHLIGHT`）以上才标红，其余墨色
+## 色口径
+- **卡片外观全端统一**：`--fd-card-radius: 12px` + `--fd-card-shadow` + `--fd-card-padding: 12px`，`border: none`。唯一落点是 `.finance-section`。**卡片圆角与控件圆角分开**（控件用 `--fd-radius-sm/md`）。**任何模块不要单独写 padding**
+- 去描边后**画布必须染灰**：`.finance-dashboard` 与 `.view-content` 都吃 `--fd-page-bg`，桌面端也染
+- **一个模块只允许一层卡片**：卡内不得再出现白框/灰框
+- **内容区不带内边距，标题→内容 `--fd-title-content-gap: 8px`**：表格首尾单元格 `padding-left/right: 0`，标题/表头/单元格同一条缘线
+- **卡片标题统一全端一档**：`--fd-card-title-size/-weight/-line` = 14px / 600 / 1.5，**不要给单个模块写 h2 font-size**
+- **标题图标间距 `--fd-title-icon-gap: 8px`**；`.finance-holdings-title span` 必须写 `> span`（后代选择器会命中 ETF 过滤药丸）
+- **每个卡片标题都必须有 icon**；`.finance-icon` 要 `inline-flex + line-height:0`（否则比文字低 1~2px）
+- **图标颜色别依赖继承**：Obsidian 的 `.svg-icon` 会用 `--icon-color` 顶掉颜色 → `.finance-icon svg { color: currentColor }` 兜底
+- **买入区 = 绿**（`--fd-down`）；高股息线 5% 以上才标红
 - UI 主体近黑单色，红绿琥珀只给数据。A 股 token `--fd-up #D0372B` / `--fd-down #0E8A5F` / `--fd-link #0066CC` 与账本语义 `--fd-positive/negative`（绿正红负）**两套并存未统一**
-- 新增 `--fd-track` / `--fd-bar`（:root 实色 + .theme-dark 半透明白），tab 条与 ETF 筛选都是「轨道 + 白滑块」
+- `--fd-track` / `--fd-bar`（:root 实色 + .theme-dark 半透明白）用于 tab 条与胶囊
 
 ## 网络请求层（2026-11-03 曾改造，**已回滚，不要重加**）
-- **所有远程请求用 `requestUrl`**（Obsidian 官方通道）。当天试过 `src/http-client.ts` 的 `httpGet()` 双通道（requestUrl 失败 → 本会话永久降级 Node `https`），**iOS 上直接把插件搞挂，已整体回滚**
-- iOS 崩因：移动端是 Capacitor 壳，**没有 Node 内置模块**。`import * as https from "https"` 在移动端加载即失败；桌面端 `require` 能用 ≠ 移动端能用
-- 回滚口径（2026-11-03 14:47）：删 `http-client.ts`，四个 service（quote / etf-premium / index-signal / dividend-yield）恢复 `requestUrl`。**同时保留** `market-code.ts` 前缀表与表格 hover 样式，别一起退回
-- 若要重做，硬门槛：`Platform.isDesktopApp` 门控 + 惰性 require，移动端永不进 Node 分支。另有语义坑：`requestUrl` 非 2xx 会 **throw**，`httpGet` 只回 status —— index-signal 正是靠这个 throw 降级到默认头
-- 桌面端 TLS 全挂（`ERR_SSL_PROTOCOL_ERROR`）的根因仍在，属 Obsidian Chromium 栈问题，插件修不了
+- **所有远程请求用 `requestUrl`**。试过 `http-client.ts` 双通道（失败降级 Node `https`）→ **iOS 直接崩，已回滚**
+- iOS 崩因：移动端是 Capacitor 壳，**没有 Node 内置模块**；桌面 `require` 能用 ≠ 移动端能用
+- 若要重做：`Platform.isDesktopApp` 门控 + 惰性 require。另有语义坑：`requestUrl` 非 2xx 会 **throw**
+- 桌面端 TLS 全挂（`ERR_SSL_PROTOCOL_ERROR`）属 Obsidian Chromium 栈问题，插件修不了
 
 ## 约定与坑
-- **窄屏底部要留出 Obsidian 操作栏空间**：`--fd-bottom-reserve: 160px`（原 120，实测偏紧后调大）+ `env(safe-area-inset-bottom)`，同时挂在 `[data-layout="mobile"]` 和 `[data-layout="compact"]` 上。原先只写了 mobile，宽度一过 768 落到 compact 就没留白（横屏 / Pad / 分栏会撞操作栏）。desktop 保持 40px
-- **自定义 `button` 必须显式给 `height` + `min-height: 0`**（2026-10-22 踩过）：Obsidian 主题会给 `button` 设 `--input-height`，只写 padding 的话实际高度不受控——ETF 的「≤3% / 全部」切换按钮就因此比旁边的刷新按钮高一截。凡是要和其它控件对齐的小按钮，都按这个写。**另一个连带症状**：按钮被主题撑高后，`align-items: baseline` 会把文字顶到上方，看着像「不居中」（番茄钟专注/短休/长休就是），必须换 `align-items: center` + `justify-content: center` + `line-height` 收紧
-- **卡片刷新按钮用 `.finance-refresh-btn`**（2026-10-22）：年线 / TTM / ETF / 持仓占比 四处共用，规格取自 TTM 卡（桌面 32×32、移动 22×22、`--fd-radius-sm`、透明底、muted 图标 14px）。**不要再用 `.finance-btn-small`** —— 那是表内编辑/删除行操作按钮的类，两者曾经混用，改一处会牵连另一处。移动端缩放写在 `[data-layout="mobile"] .finance-refresh-btn`
-- **金额精度**：写盘前一律 `utils.roundAmount(v, 2)`（消 `47×1290.88=60671.36000000001` 残留）。落点 updateHoldingQuotes / holdingValue / Serializer / holding-form；Parser 也归一 → 旧文件下次保存自愈。原始 API 值（price/fxRate）本干净，只有算术才残留
-- mobile 持仓空态：父级 `.finance-chart-container` 已是白卡（2026-10-22 改），`.finance-holdings-empty` 只保留 flex 布局与 padding，**不要再给它白底/阴影**（曾是必需，因为当时图表外壳透明）；CTA 用 `.finance-holdings-cta` 恢复 38px 高+文字（否则被 26px 方块规则压成图标）
-- TTM section 是 `.finance-market-grid` 子元素，覆盖 padding 必须写 `[data-layout="mobile"] .finance-market-grid > .finance-dy-section`（0,3,0）
-- 持仓 Treemap tooltip mobile 下关闭；其他图表保留（移动端 tooltip 是读精确值唯一途径）
-- 设计稿：移动端高密度 Ardot 738377014719826 / 工作台 739108669130272。**暗色版未做**；未做还有 header 收纳「···」、Pad 断点
+- **窄屏底部留白**：`--fd-bottom-reserve: 160px` + `env(safe-area-inset-bottom)`，同时挂 mobile 与 compact（只写 mobile 时 768 以上会撞操作栏）
+- ⚠️ **Obsidian 的 `button:not(.clickable-icon)` 特异性是 (0,1,1)，压过单个 class (0,1,0)**：它强制 `background-color: var(--interactive-normal)` + `box-shadow: var(--input-shadow)` + `padding: 4px 16px` + `width: 100%`。自定义按钮想透明/自己定宽，必须把特异性抬到 ≥(0,1,1)（加容器前缀或 `button.类名`），hover 还要一并重声明，否则基础态反过来压住 hover。已修：建仓卡计划行、卡片图标按钮、建仓视图与表单按钮；**未修**：`.finance-tab` / `.finance-filter-btn` / `.finance-btn-small` / `.finance-btn`（全局各处的灰底与撑满宽度都来自这里）
+- **自定义 `button` 必须显式给 `height` + `min-height: 0`**：主题设了 `--input-height`，只写 padding 高度不受控。对齐问题还要 `align-items/justify-content: center` + 收紧 line-height
+- **卡片刷新按钮用 `.finance-refresh-btn`**（22×22 全端一档）。**不要用 `.finance-btn-small`** —— 那是表内行操作按钮的类
+- **金额精度**：写盘前一律 `utils.roundAmount(v, 2)`
+- TTM / ETF 的 `table-layout: fixed` 与 nth-child 列宽只给 mobile（桌面 ETF 有 5 列，提升为全局会压成 0 宽）
+- 持仓 Treemap tooltip mobile 下关闭；其他图表保留
+- 整页调试验证：esbuild 打包 + playwright 截图，**必须显式 `jsx:"automatic"`、`jsxImportSource:"preact"`、`nodePaths`**。脚本在 `/tmp/fd-preview/`（可能已失效）
+- 移动端回归用「旧版对照」：`git archive HEAD` 建旧副本，两边同宽截图逐像素比对
+- 番茄钟 2026-11-02 已整体移除，**不要再加回**（vault 里 `Finance/Pomodoro.md` 仍残留，插件不读写）
+
+## 分批建仓（Position Tracker，2026-11-05 落地第一批）
+- 第一个模块的整体规范见 `docs/ACCUMULATION.md`；数据落 `Finance/Investment/Accumulation/plans/{symbol}-{id}.md`，独立 `AccumulationStore`，不碰 `DataStore` 的 Finance/* 通道
+- 入口在工作台第一张卡 → 整块切视图栈（list / detail），**不新增页级 tab**
+- **金额一律整数分**（`Cents`），只在 toCents / 写盘取整；`utils.formatCurrency` 带千分位且被 29 处引用，**不许改**，本模块自带 `formatCents`
+- **阶段状态是派生态**：文件只存 `skippedAt / voidedAt / confirmedAt`，其余由成交+现价推导；右侧确认只认 `confirmedAt`，涨价永不触发
+- 触发价锚定 `referencePrice`；`Trigger` 列只读，读入时按 `Drop%`/`Target` 重算
+- `investedCents` = 净现金流（买入额+买入费−卖出额+卖出费），剩余预算/使用率都用它
+- 自触发抑制用**内容 hash**（`isSaving` 布尔是 DataStore 实例级的，跨 store 无效）；写盘用 `adapter.process` 原子替换，缺失时回落 `write`
+- 归档必须「rename + 写 archivedAt + 重绑 id→path」同一队列完成，否则 `vault.on("rename")` 会让计划从列表消失
+- **弹窗里的表单不在 LayoutProvider 内**，拿不到 `data-layout` → 表单网格用视口媒体查询；`[data-layout]` 只服务面板内模块
+- 表格手改多一列会整行串位 → 解析器对超列数发 `stage.extraColumns` / `trade.extraColumns` 告警
+- 序列化同时掐正文首尾空行，否则每次保存多一行空行、幂等性破掉
+- 测试：`npm test`（esbuild 打包 → `node --test`，45 例，含 8 例 store 集成）。预览：`/tmp/fd-preview/` 的 `preview-acc.tsx` + `acc.html`，固定 bundle 路径 `/tmp/fd-preview/acc-bundle.mjs`（别用 `tail -1` 取 tmpdir，会拿到旧包）
+- 第二批未做：历史复盘与策略统计（`src/accumulation/stats.ts` 只有占位）

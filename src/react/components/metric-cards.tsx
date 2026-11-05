@@ -1,6 +1,5 @@
 import { formatCurrencyCompact, formatChange, formatPercent } from "../../utils";
 import { t } from "../../i18n";
-import { useLayout } from "../responsive";
 import type { MetricCardsProps } from "../types";
 
 /** 把 "463.36万" 拆成数值与单位，供 hero 卡分级排版（单位降为小号后缀） */
@@ -10,32 +9,12 @@ function splitCompact(value: string): { num: string; unit: string } {
   return { num: m[1], unit: m[2] };
 }
 
-interface MetricCardProps {
-  label: string;
-  value: string;
-  suffix: string;
-  colorClass?: string;
-}
-
-function MetricCard({ label, value, suffix, colorClass }: MetricCardProps) {
-  return (
-    <div className="finance-metric-card">
-      <div className="finance-metric-label">{label}</div>
-      <div className={`finance-metric-value${colorClass ? " " + colorClass : ""}`}>
-        {value}
-      </div>
-      <div className="finance-metric-suffix">{suffix}</div>
-    </div>
-  );
-}
-
 /**
- * 移动端高密度排版（对齐设计稿 3:1）：
- * 六张等权卡降为一个视觉块——总资产独占主位、环比收进胶囊徽章，
+ * 指标区（全端统一）：总资产独占主位、环比收进胶囊徽章，
  * 收入/支出/结余/股息并成一条四列指标带，用 1px hairline 竖线分隔。
- * 桌面仍用 6 卡网格，此处只在 mobile 生效。
+ * 桌面在瀑布流里占两栏（data-span），[data-layout="full"] 下改为横向构图。
  */
-function MobileMetrics({ metrics, maskNumbers }: MetricCardsProps) {
+export function MetricCards({ metrics, maskNumbers }: MetricCardsProps) {
   const mask = (v: string) => (maskNumbers ? "***" : v);
   const up = metrics.momChange >= 0;
   const { num, unit } = splitCompact(formatCurrencyCompact(metrics.totalAssets));
@@ -62,7 +41,7 @@ function MobileMetrics({ metrics, maskNumbers }: MetricCardsProps) {
   ];
 
   return (
-    <div className="finance-hero">
+    <div className="finance-hero" data-span="2">
       <div className="finance-hero-top">
         <div className="finance-hero-main">
           <span className="finance-hero-label">{t("metrics.totalAssets")}</span>
@@ -95,51 +74,6 @@ function MobileMetrics({ metrics, maskNumbers }: MetricCardsProps) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-export function MetricCards({ metrics, maskNumbers }: MetricCardsProps) {
-  const { layout } = useLayout();
-  if (layout === "mobile") {
-    return <MobileMetrics metrics={metrics} maskNumbers={maskNumbers} />;
-  }
-
-  const mask = (v: string) => (maskNumbers ? "***" : v);
-  return (
-    <div className="finance-metrics-grid">
-      <MetricCard
-        label={t("metrics.totalAssets")}
-        value={mask(formatCurrencyCompact(metrics.totalAssets))}
-        suffix={t("metrics.unit")}
-      />
-      <MetricCard
-        label={t("metrics.momChange")}
-        value={mask(formatChange(metrics.momChange))}
-        suffix={mask(formatPercent(metrics.momPercent))}
-        colorClass={metrics.momChange >= 0 ? "positive" : "negative"}
-      />
-      <MetricCard
-        label={t("metrics.monthlyIncome")}
-        value={mask(formatCurrencyCompact(metrics.monthlyIncome))}
-        suffix={t("metrics.unit")}
-      />
-      <MetricCard
-        label={t("metrics.monthlyExpense")}
-        value={mask(formatCurrencyCompact(metrics.monthlyExpense))}
-        suffix={t("metrics.unit")}
-      />
-      <MetricCard
-        label={t("metrics.monthlySurplus")}
-        value={mask(formatCurrencyCompact(metrics.monthlySurplus))}
-        suffix={t("metrics.unit")}
-        colorClass={metrics.monthlySurplus >= 0 ? "positive" : "negative"}
-      />
-      <MetricCard
-        label={t("metrics.yearlyDividends")}
-        value={mask(formatCurrencyCompact(metrics.yearlyDividends))}
-        suffix={t("metrics.unit")}
-      />
     </div>
   );
 }

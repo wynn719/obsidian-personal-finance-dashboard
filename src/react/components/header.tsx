@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { Icon } from "../icon";
-import { useLayout } from "../responsive";
 import type { HeaderProps } from "../types";
 
 function YearSelector({
@@ -51,8 +50,7 @@ function ActionButton({
   label: string;
   onClick: () => void;
 }) {
-  // 消费顶层下发的布局模式：mobile 时仅显示图标，隐藏文字说明
-  const { layout } = useLayout();
+  // 纯图标按钮（全端一致）：文字由 CSS 在 .finance-header 内隐藏，a11y 靠 aria-label
   return (
     <button
       className="finance-btn"
@@ -61,7 +59,7 @@ function ActionButton({
       title={label}
     >
       <Icon name={icon} />
-      <span className="finance-btn-label">{layout !== "mobile" ? label : ""}</span>
+      <span className="finance-btn-label">{label}</span>
     </button>
   );
 }
@@ -78,7 +76,6 @@ export function Header({
   onEditHoldings,
   onRefresh,
 }: HeaderProps) {
-  const { layout } = useLayout();
   return (
     <div className="finance-header">
       <div className="finance-header-title-row">
@@ -97,7 +94,7 @@ export function Header({
         >
           <Icon name={maskNumbers ? "eye-off" : "eye"} />
           <span className="finance-btn-label">
-            {layout !== "mobile" ? t("dashboard.btn.maskNumbers") : ""}
+            {t("dashboard.btn.maskNumbers")}
           </span>
         </button>
         <ActionButton
